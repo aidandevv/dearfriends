@@ -3,7 +3,7 @@ import { ExportPanel } from '@/components/export-panel'
 export default function ExportPage() {
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Export & Send</h1>
+      <h1 className="font-serif text-3xl text-ink mb-6">Export &amp; Send</h1>
       <ExportPanel />
     </div>
   )

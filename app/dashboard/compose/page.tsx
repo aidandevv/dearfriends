@@ -6,7 +6,7 @@ export default async function ComposePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Compose</h1>
+      <h1 className="font-serif text-3xl text-ink mb-6">Compose</h1>
       <LetterComposer initialSubject={draft.subject} initialBody={draft.body} previewContact={contact} />
     </div>
   )
