@@ -9,9 +9,21 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ["var(--font-playfair)", "Georgia", "serif"],
+        sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        linen: "var(--linen)",
+        surface: "var(--surface)",
+        "surface-raised": "var(--surface-raised)",
+        terra: "var(--terra)",
+        "terra-dark": "var(--terra-dark)",
+        ink: "var(--ink)",
+        "ink-muted": "var(--ink-muted)",
+        border: "var(--border)",
+        sage: "var(--sage)",
+        sidebar: "var(--sidebar)",
       },
     },
   },

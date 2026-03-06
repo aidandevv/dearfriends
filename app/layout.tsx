@@ -1,8 +1,21 @@
 import type { Metadata } from "next";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["400", "700"],
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  weight: ["400", "500"],
+});
+
 export const metadata: Metadata = {
-  title: "NomadMail",
+  title: "Dear Friends",
   description: "Collect mailing addresses and send personalized letters",
 };
 
@@ -13,7 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
