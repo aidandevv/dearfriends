@@ -17,16 +17,16 @@ export function SendVerificationButton() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      {status && <p className="text-xs text-ink-muted">{status}</p>}
+    <div className="flex flex-col items-stretch gap-2 lg:items-end">
       <button
         onClick={handleClick}
         disabled={loading}
-        className="btn-outline flex items-center gap-1.5 text-sm px-4 py-2 w-auto rounded-full"
+        className="btn-outline inline-flex min-h-12 items-center justify-center gap-2 px-5 text-sm"
       >
-        <MailCheck size={14} />
-        {loading ? 'Sending...' : 'Send Verification'}
+        <MailCheck size={16} />
+        {loading ? 'Sending...' : 'Send verification emails'}
       </button>
+      {status && <p className="text-sm text-ink-muted lg:text-right">{status}</p>}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { resend, buildVerificationEmail } from '@/lib/resend'
 import { scheduleVerificationSchema, verifySchema } from '@/lib/schemas'
+import { getUserProfile } from '@/lib/user-profile'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
@@ -15,6 +16,8 @@ export async function sendVerificationToAll() {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
+
+  const senderProfile = getUserProfile(user)
 
   const { data: contacts, error } = await supabase
     .from('contacts')
@@ -42,6 +45,7 @@ export async function sendVerificationToAll() {
     const { subject, html } = buildVerificationEmail({
       firstName: contact.first_name,
       verifyUrl: `${SITE_URL}/verify/${token}`,
+      adminName: senderProfile.fullName,
     })
 
     const emailResult = await resend.emails.send({ from: FROM_EMAIL, to: contact.email, subject, html })

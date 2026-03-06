@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { saveDraft } from '@/lib/actions/letter'
 import { interpolate } from '@/lib/utils'
@@ -33,54 +33,74 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
   const previewBody = interpolate(body, previewContact)
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-end gap-3">
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="text-xs text-ink-muted font-medium">Subject</label>
-          <input
-            value={subject}
-            onChange={e => { setSubject(e.target.value); triggerSave(e.target.value, body) }}
-            placeholder="Subject line"
-            className="input"
-          />
-        </div>
-        <span className="text-xs text-ink-muted pb-2.5 min-w-[40px]">
-          {saving ? 'Saving...' : saveStatus ?? ''}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="flex flex-col gap-2">
-          <p className="text-xs text-ink-muted font-medium uppercase tracking-wide">Draft</p>
-          <textarea
-            value={body}
-            onChange={e => { setBody(e.target.value); triggerSave(subject, e.target.value) }}
-            placeholder={'Dear {{first_name}},\n\nYour letter here...'}
-            className="input h-96 resize-none font-mono text-xs leading-relaxed"
-          />
-          <p className="text-xs text-ink-muted">
-            Use{' '}
-            <code className="bg-linen px-1.5 py-0.5 rounded text-terra font-mono">{'{{first_name}}'}</code>
-            {' '}and{' '}
-            <code className="bg-linen px-1.5 py-0.5 rounded text-terra font-mono">{'{{last_name}}'}</code>
-            {' '}as variables.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <p className="text-xs text-ink-muted font-medium uppercase tracking-wide">
-            Preview — {previewContact.first_name} {previewContact.last_name}
-          </p>
-          <div className="bg-surface-raised border border-border rounded-xl shadow-sm p-6 h-96 overflow-y-auto">
-            <div className="border-b border-border pb-3 mb-4">
-              <p className="font-serif text-sm text-ink-muted italic">{subject || 'Subject line'}</p>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+      <section className="surface-panel px-5 py-5">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Draft</p>
+              <h2 className="mt-2 font-serif text-3xl text-ink">Write your letter</h2>
             </div>
-            <div className="prose prose-sm max-w-none font-serif text-ink">
-              <ReactMarkdown>{previewBody}</ReactMarkdown>
+            <span className="text-sm text-ink-muted">{saving ? 'Saving...' : saveStatus ?? 'Autosaves as you type'}</span>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Subject</label>
+              <input
+                value={subject}
+                onChange={e => {
+                  setSubject(e.target.value)
+                  triggerSave(e.target.value, body)
+                }}
+                placeholder="Subject line"
+                className="input min-h-12"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Body</label>
+              <textarea
+                value={body}
+                onChange={e => {
+                  setBody(e.target.value)
+                  triggerSave(subject, e.target.value)
+                }}
+                placeholder={'Dear {{first_name}},\n\nYour letter here...'}
+                className="input min-h-[420px] resize-none font-mono text-sm leading-7"
+              />
             </div>
           </div>
+
+          <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4 text-sm text-ink-muted">
+            Use <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-terra">{'{{first_name}}'}</code> and{' '}
+            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-terra">{'{{last_name}}'}</code> to personalize each note.
+          </div>
         </div>
-      </div>
+      </section>
+
+      <section className="surface-panel px-5 py-5">
+        <div className="flex items-end justify-between gap-3 border-b border-border/80 pb-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Preview</p>
+            <h2 className="mt-2 font-serif text-3xl text-ink">
+              For {previewContact.first_name} {previewContact.last_name}
+            </h2>
+          </div>
+          <div className="hidden rounded-full border border-border/80 bg-surface-raised px-3 py-2 text-xs font-medium text-ink-muted md:inline-flex">
+            Live preview
+          </div>
+        </div>
+
+        <div className="mt-4 min-h-[420px] rounded-[1.5rem] border border-border/80 bg-[linear-gradient(180deg,#ffffff_0%,#fdf9f3_100%)] px-6 py-6 shadow-sm">
+          <div className="border-b border-border/80 pb-3">
+            <p className="font-serif text-lg italic text-ink-muted">{subject || 'Subject line'}</p>
+          </div>
+          <div className="prose prose-sm mt-5 max-w-none font-serif text-ink">
+            <ReactMarkdown>{previewBody}</ReactMarkdown>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

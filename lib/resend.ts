@@ -19,12 +19,17 @@ export const resend = {
 export function buildVerificationEmail(opts: {
   firstName: string
   verifyUrl: string
+  adminName?: string | null
 }): { subject: string; html: string } {
+  const senderLine = opts.adminName
+    ? `<p>${opts.adminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
+    : '<p>Please confirm your mailing address (or update it / opt out) using the link below:</p>'
+
   return {
-    subject: 'Please verify your address',
+    subject: opts.adminName ? `${opts.adminName} asked you to verify your address` : 'Please verify your address',
     html: `
       <p>Hi ${opts.firstName},</p>
-      <p>Please confirm your mailing address (or update it / opt out) using the link below:</p>
+      ${senderLine}
       <p><a href="${opts.verifyUrl}">Verify / Update / Opt out</a></p>
       <p>This link is unique to you.</p>
     `,

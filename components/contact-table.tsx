@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { updateContact, deleteContact } from '@/lib/actions/contacts'
+import { deleteContact, updateContact } from '@/lib/actions/contacts'
 import { PillBadge } from '@/components/ui/pill-badge'
-import { CheckCircle, Circle, Ban, Trash2 } from 'lucide-react'
+import { Ban, CheckCircle, Circle, Trash2 } from 'lucide-react'
 
 type Contact = {
   id: string
@@ -17,6 +17,12 @@ type Contact = {
   verified_at: string | null
   tags: string[]
 }
+
+const deliveryOptions = [
+  { value: 'handwrite', label: 'Handwrite' },
+  { value: 'print', label: 'Print' },
+  { value: 'digital', label: 'Digital' },
+]
 
 export function ContactTable({ contacts }: { contacts: Contact[] }) {
   const [pending, setPending] = useState<string | null>(null)
@@ -36,59 +42,86 @@ export function ContactTable({ contacts }: { contacts: Contact[] }) {
 
   if (contacts.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="rounded-[1.25rem] border border-dashed border-border bg-surface px-6 py-12 text-center">
         <p className="font-serif text-2xl text-ink-muted">No contacts yet</p>
-        <p className="text-sm text-ink-muted mt-2">Share your link to start collecting addresses.</p>
+        <p className="mt-2 text-sm text-ink-muted">Share your link to start collecting addresses.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {contacts.map(c => (
-        <div
-          key={c.id}
-          className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-surface hover:bg-linen/40 transition-colors ${pending === c.id ? 'opacity-50' : ''}`}
-        >
-          <div className="flex-1 min-w-0">
-            <p className="font-serif text-base text-ink">{c.first_name} {c.last_name}</p>
-            <p className="text-xs text-ink-muted mt-0.5 truncate">{c.email} · {c.city}, {c.state}</p>
-          </div>
+    <div className="flex flex-col gap-3">
+      {contacts.map(contact => {
+        const status = contact.opted_out
+          ? { label: 'Opted out', icon: Ban, iconClass: 'text-red-400' }
+          : contact.verified_at
+            ? { label: 'Verified', icon: CheckCircle, iconClass: 'text-sage' }
+            : { label: 'Unverified', icon: Circle, iconClass: 'text-ink-muted' }
 
-          <PillBadge method={c.delivery_method} />
+        const StatusIcon = status.icon
 
-          <div className="flex items-center gap-1 text-ink-muted shrink-0">
-            {c.opted_out
-              ? <Ban size={14} className="text-red-400" />
-              : c.verified_at
-              ? <CheckCircle size={14} className="text-sage" />
-              : <Circle size={14} />
-            }
-            <span className="text-xs">
-              {c.opted_out ? 'Opted out' : c.verified_at ? 'Verified' : 'Unverified'}
-            </span>
-          </div>
-
-          <select
-            value={c.delivery_method}
-            disabled={pending === c.id}
-            onChange={e => handleDeliveryChange(c.id, e.target.value)}
-            className="border border-border rounded-lg px-2 py-1 text-xs bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-terra/40 shrink-0"
+        return (
+          <div
+            key={contact.id}
+            className={`rounded-[1.35rem] border border-border/80 bg-surface px-4 py-4 transition-colors hover:bg-linen/50 ${pending === contact.id ? 'opacity-60' : ''}`}
           >
-            <option value="handwrite">Handwrite</option>
-            <option value="print">Print</option>
-            <option value="digital">Digital</option>
-          </select>
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-serif text-2xl leading-none text-ink">
+                    {contact.first_name} {contact.last_name}
+                  </p>
+                  <PillBadge method={contact.delivery_method} />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-ink-muted">
+                  <span>{contact.email}</span>
+                  <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
+                  <span>
+                    {contact.city}, {contact.state}
+                  </span>
+                </div>
+              </div>
 
-          <button
-            onClick={() => handleDelete(c.id)}
-            disabled={pending === c.id}
-            className="text-ink-muted hover:text-red-500 transition-colors disabled:opacity-50 shrink-0"
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      ))}
+              <div className="flex flex-col gap-3 xl:min-w-[410px] xl:items-end">
+                <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-raised px-3 py-2 text-sm text-ink-muted">
+                    <StatusIcon size={16} className={status.iconClass} />
+                    <span>{status.label}</span>
+                  </div>
+
+                  <button
+                    onClick={() => handleDelete(contact.id)}
+                    disabled={pending === contact.id}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/80 bg-surface-raised text-ink-muted transition-colors hover:border-red-200 hover:text-red-500 disabled:opacity-50"
+                    aria-label={`Delete ${contact.first_name} ${contact.last_name}`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-3 xl:w-full">
+                  {deliveryOptions.map(option => {
+                    const selected = contact.delivery_method === option.value
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        disabled={pending === contact.id}
+                        onClick={() => handleDeliveryChange(contact.id, option.value)}
+                        className={selected
+                          ? 'rounded-full border border-terra bg-terra px-4 py-3 text-sm font-medium text-white shadow-sm'
+                          : 'rounded-full border border-border/80 bg-surface-raised px-4 py-3 text-sm font-medium text-ink transition-colors hover:border-terra/50 hover:bg-linen disabled:opacity-50'}
+                      >
+                        {option.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

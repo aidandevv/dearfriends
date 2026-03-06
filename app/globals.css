@@ -23,18 +23,94 @@ body {
 
 @layer components {
   .input {
-    @apply bg-surface border border-border rounded-lg px-3 py-2 text-sm text-ink w-full
-           focus:outline-none focus:ring-2 focus:ring-terra/40 focus:border-terra
-           placeholder:text-ink-muted/50 transition-colors;
+    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink
+           transition-colors placeholder:text-ink-muted/50
+           focus:border-terra focus:outline-none focus:ring-2 focus:ring-terra/40;
   }
 
   .btn-primary {
-    @apply bg-terra hover:bg-terra-dark text-white rounded-full px-6 py-2.5 text-sm font-medium
-           transition-colors disabled:opacity-50 cursor-pointer;
+    @apply cursor-pointer rounded-full bg-terra px-6 py-2.5 text-sm font-medium text-white
+           transition-colors hover:bg-terra-dark disabled:opacity-50;
   }
 
   .btn-outline {
-    @apply border border-border hover:bg-surface text-ink rounded-full px-6 py-2.5 text-sm font-medium
-           transition-colors disabled:opacity-50 cursor-pointer;
+    @apply cursor-pointer rounded-full border border-border px-6 py-2.5 text-sm font-medium text-ink
+           transition-colors hover:bg-surface disabled:opacity-50;
+  }
+
+  .section-card {
+    @apply rounded-[1.5rem] border border-border/80 bg-surface-raised shadow-sm;
+  }
+
+  .surface-panel {
+    @apply rounded-[1.25rem] border border-border/80 bg-surface;
+  }
+
+  .info-chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted;
+  }
+}
+
+@layer utilities {
+  .hover-lift {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(35, 18, 9, 0.08);
+  }
+
+  .hero-glow {
+    background:
+      radial-gradient(circle at top, rgba(192, 92, 46, 0.14), transparent 42%),
+      radial-gradient(circle at bottom right, rgba(122, 99, 82, 0.12), transparent 36%);
+  }
+
+  .animate-fade-up {
+    animation: fadeUp 700ms ease both;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 7s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: floatSlow 8.5s ease-in-out infinite;
+    animation-delay: 1.2s;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift,
+  .animate-fade-up,
+  .animate-float-slow,
+  .animate-float-delayed {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

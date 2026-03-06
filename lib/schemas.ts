@@ -35,3 +35,9 @@ export type VerifyInput = z.infer<typeof verifySchema>
 export const scheduleVerificationSchema = z.object({
   send_at: z.string().min(1),
 })
+
+export const onboardingSchema = z.object({
+  full_name: z.string().trim().min(1).max(80),
+})
+
+export type OnboardingInput = z.infer<typeof onboardingSchema>

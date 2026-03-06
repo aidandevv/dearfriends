@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { resend, buildVerificationEmail } from '@/lib/resend'
+import { getUserProfile } from '@/lib/user-profile'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
@@ -33,6 +34,9 @@ export async function GET(request: Request) {
 
     if (!contacts?.length) continue
 
+    const { data: adminData } = await supabase.auth.admin.getUserById(schedule.admin_id)
+    const senderProfile = getUserProfile(adminData.user)
+
     for (const contact of contacts) {
       const token = randomUUID()
 
@@ -44,6 +48,7 @@ export async function GET(request: Request) {
       const { subject, html } = buildVerificationEmail({
         firstName: contact.first_name,
         verifyUrl: `${SITE_URL}/verify/${token}`,
+        adminName: senderProfile.fullName,
       })
 
       await resend.emails.send({ from: FROM_EMAIL, to: contact.email, subject, html })

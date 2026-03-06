@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getUserProfile } from '@/lib/user-profile'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -26,15 +27,33 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  const { pathname } = request.nextUrl
+  const isDashboardRoute = pathname.startsWith('/dashboard')
+  const isOnboardingRoute = pathname.startsWith('/onboarding')
+
+  if (!user && (isDashboardRoute || isOnboardingRoute)) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (user) {
+    const profile = getUserProfile(user)
+
+    if (!profile.hasCompletedOnboarding && isDashboardRoute) {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
+
+    if (profile.hasCompletedOnboarding && isOnboardingRoute) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/onboarding'],
 }
