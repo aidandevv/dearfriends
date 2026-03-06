@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { updateContact, deleteContact } from '@/lib/actions/contacts'
+import { PillBadge } from '@/components/ui/pill-badge'
+import { CheckCircle, Circle, Ban, Trash2 } from 'lucide-react'
 
 type Contact = {
   id: string
@@ -33,56 +35,60 @@ export function ContactTable({ contacts }: { contacts: Contact[] }) {
   }
 
   if (contacts.length === 0) {
-    return <p className="text-sm text-gray-500">No contacts yet. Share your link to collect addresses.</p>
+    return (
+      <div className="text-center py-16">
+        <p className="font-serif text-2xl text-ink-muted">No contacts yet</p>
+        <p className="text-sm text-ink-muted mt-2">Share your link to start collecting addresses.</p>
+      </div>
+    )
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="border-b text-left text-gray-500">
-            <th className="pb-2 pr-4">Name</th>
-            <th className="pb-2 pr-4">Email</th>
-            <th className="pb-2 pr-4">Location</th>
-            <th className="pb-2 pr-4">Delivery</th>
-            <th className="pb-2 pr-4">Status</th>
-            <th className="pb-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {contacts.map(c => (
-            <tr key={c.id} className="border-b hover:bg-gray-50">
-              <td className="py-2 pr-4">{c.first_name} {c.last_name}</td>
-              <td className="py-2 pr-4 text-gray-600">{c.email}</td>
-              <td className="py-2 pr-4 text-gray-600">{c.city}, {c.state}</td>
-              <td className="py-2 pr-4">
-                <select
-                  value={c.delivery_method}
-                  disabled={pending === c.id}
-                  onChange={e => handleDeliveryChange(c.id, e.target.value)}
-                  className="border rounded px-2 py-1 text-xs"
-                >
-                  <option value="handwrite">Handwrite</option>
-                  <option value="print">Print</option>
-                  <option value="digital">Digital</option>
-                </select>
-              </td>
-              <td className="py-2 pr-4 text-xs text-gray-500">
-                {c.opted_out ? 'Opted out' : c.verified_at ? 'Verified' : 'Unverified'}
-              </td>
-              <td className="py-2">
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  disabled={pending === c.id}
-                  className="text-xs text-red-500 hover:underline disabled:opacity-50"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="flex flex-col gap-2">
+      {contacts.map(c => (
+        <div
+          key={c.id}
+          className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-surface hover:bg-linen/40 transition-colors ${pending === c.id ? 'opacity-50' : ''}`}
+        >
+          <div className="flex-1 min-w-0">
+            <p className="font-serif text-base text-ink">{c.first_name} {c.last_name}</p>
+            <p className="text-xs text-ink-muted mt-0.5 truncate">{c.email} · {c.city}, {c.state}</p>
+          </div>
+
+          <PillBadge method={c.delivery_method} />
+
+          <div className="flex items-center gap-1 text-ink-muted shrink-0">
+            {c.opted_out
+              ? <Ban size={14} className="text-red-400" />
+              : c.verified_at
+              ? <CheckCircle size={14} className="text-sage" />
+              : <Circle size={14} />
+            }
+            <span className="text-xs">
+              {c.opted_out ? 'Opted out' : c.verified_at ? 'Verified' : 'Unverified'}
+            </span>
+          </div>
+
+          <select
+            value={c.delivery_method}
+            disabled={pending === c.id}
+            onChange={e => handleDeliveryChange(c.id, e.target.value)}
+            className="border border-border rounded-lg px-2 py-1 text-xs bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-terra/40 shrink-0"
+          >
+            <option value="handwrite">Handwrite</option>
+            <option value="print">Print</option>
+            <option value="digital">Digital</option>
+          </select>
+
+          <button
+            onClick={() => handleDelete(c.id)}
+            disabled={pending === c.id}
+            className="text-ink-muted hover:text-red-500 transition-colors disabled:opacity-50 shrink-0"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      ))}
     </div>
   )
 }
