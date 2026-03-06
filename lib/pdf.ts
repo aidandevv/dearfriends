@@ -7,15 +7,24 @@ const styles = StyleSheet.create({
   body: { whiteSpace: 'pre-wrap' as const },
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AnyDocument = Document as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AnyPage = Page as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AnyView = View as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AnyText = Text as any
+
 function buildLetterDocument(pages: { name: string; body: string }[]) {
   return createElement(
-    Document,
+    AnyDocument,
     null,
     ...pages.map((page, i) =>
       createElement(
-        Page,
+        AnyPage,
         { key: i, size: 'A4', style: styles.page },
-        createElement(View, { style: styles.body }, createElement(Text, null, page.body)),
+        createElement(AnyView, { style: styles.body }, createElement(AnyText, null, page.body)),
       ),
     ),
   )
@@ -31,5 +40,6 @@ export async function generateLetterPdf(
   }))
 
   const doc = buildLetterDocument(pages)
-  return renderToBuffer(doc)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return renderToBuffer(doc as any)
 }
