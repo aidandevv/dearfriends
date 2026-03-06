@@ -3,19 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --linen: #F5EFE4;
+  --surface: #FAF7F1;
+  --surface-raised: #FFFFFF;
+  --terra: #C05C2E;
+  --terra-dark: #9E4A23;
+  --ink: #231209;
+  --ink-muted: #7A6352;
+  --border: #DDD0BC;
+  --sage: #5A7A5A;
+  --sidebar: #EDE6D6;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: var(--linen);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+@layer components {
+  .input {
+    @apply bg-surface border border-border rounded-lg px-3 py-2 text-sm text-ink w-full
+           focus:outline-none focus:ring-2 focus:ring-terra/40 focus:border-terra
+           placeholder:text-ink-muted/50 transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-terra hover:bg-terra-dark text-white rounded-full px-6 py-2.5 text-sm font-medium
+           transition-colors disabled:opacity-50 cursor-pointer;
+  }
+
+  .btn-outline {
+    @apply border border-border hover:bg-surface text-ink rounded-full px-6 py-2.5 text-sm font-medium
+           transition-colors disabled:opacity-50 cursor-pointer;
+  }
 }
