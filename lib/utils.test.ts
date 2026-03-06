@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { interpolate, formatCsvRow, toCsv } from './utils'
+import { interpolate, toCsv } from './utils'
 
 describe('interpolate', () => {
   it('replaces known variables', () => {
