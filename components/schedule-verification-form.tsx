@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { scheduleVerification } from '@/lib/actions/verification'
+import { CalendarClock } from 'lucide-react'
 
 export function ScheduleVerificationForm() {
   const [status, setStatus] = useState<string | null>(null)
@@ -14,15 +15,22 @@ export function ScheduleVerificationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-3">
-      <div>
-        <label className="text-xs text-gray-500 block mb-1">Send at</label>
-        <input type="datetime-local" name="send_at" required className="border rounded px-3 py-1.5 text-sm" />
+    <form onSubmit={handleSubmit} className="flex items-end gap-3 flex-wrap">
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-ink-muted font-medium flex items-center gap-1">
+          <CalendarClock size={12} /> Send at
+        </label>
+        <input
+          type="datetime-local"
+          name="send_at"
+          required
+          className="input w-auto"
+        />
       </div>
-      <button type="submit" className="border rounded px-3 py-1.5 text-sm hover:bg-gray-50">
+      <button type="submit" className="btn-outline text-sm px-4 py-2 w-auto rounded-full">
         Schedule
       </button>
-      {status && <p className="text-xs text-gray-600">{status}</p>}
+      {status && <p className="text-xs text-ink-muted self-center">{status}</p>}
     </form>
   )
 }

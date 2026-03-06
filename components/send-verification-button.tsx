@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { sendVerificationToAll } from '@/lib/actions/verification'
+import { MailCheck } from 'lucide-react'
 
 export function SendVerificationButton() {
   const [status, setStatus] = useState<string | null>(null)
@@ -9,7 +10,6 @@ export function SendVerificationButton() {
 
   async function handleClick() {
     if (!confirm('Send verification emails to all non-opted-out contacts?')) return
-
     setLoading(true)
     const result = await sendVerificationToAll()
     setStatus(result.error ? `Error: ${result.error}` : `Sent to ${(result as { count?: number }).count} contacts.`)
@@ -18,12 +18,13 @@ export function SendVerificationButton() {
 
   return (
     <div className="flex items-center gap-3">
-      {status && <p className="text-xs text-gray-600">{status}</p>}
+      {status && <p className="text-xs text-ink-muted">{status}</p>}
       <button
         onClick={handleClick}
         disabled={loading}
-        className="border rounded px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50"
+        className="btn-outline flex items-center gap-1.5 text-sm px-4 py-2 w-auto rounded-full"
       >
+        <MailCheck size={14} />
         {loading ? 'Sending...' : 'Send Verification'}
       </button>
     </div>
