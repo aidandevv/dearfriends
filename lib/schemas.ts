@@ -46,6 +46,7 @@ export const profileSchema = z.object({
   full_name: z.string().trim().min(1).max(80),
   bio: z.string().trim().max(160).optional(),
   sender_name: z.string().trim().max(80).optional(),
+  anniversary_reminders_enabled: z.boolean().optional(),
 })
 
 export type ProfileInput = z.infer<typeof profileSchema>

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateLetterPdf } from '@/lib/pdf'
+import { recordFirstSent } from '@/lib/actions/user'
 
 export async function GET() {
+  await recordFirstSent()
   const supabase = await createClient()
 
   const [{ data: draft }, { data: contacts }] = await Promise.all([

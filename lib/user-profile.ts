@@ -7,6 +7,8 @@ export type UserProfile = {
   senderName: string | null
   hasCompletedOnboarding: boolean
   hasSeenTour: boolean
+  anniversaryRemindersEnabled: boolean
+  birthdayRemindersEnabled: boolean
 }
 
 function readString(value: unknown): string | null {
@@ -31,5 +33,7 @@ export function getUserProfile(user: Pick<User, 'user_metadata'> | null | undefi
     senderName: readString(metadata.sender_name) ?? readString(metadata.full_name),
     hasCompletedOnboarding: Boolean(fullName),
     hasSeenTour: metadata.has_seen_tour === true,
+    anniversaryRemindersEnabled: metadata.anniversary_reminders_enabled !== false,
+    birthdayRemindersEnabled: metadata.birthday_reminders_enabled !== false,
   }
 }

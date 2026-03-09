@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { toCsv } from '@/lib/utils'
+import { recordFirstSent } from '@/lib/actions/user'
 
 export async function GET(request: Request) {
+  await recordFirstSent()
   const { searchParams } = new URL(request.url)
   const method = searchParams.get('method')
 

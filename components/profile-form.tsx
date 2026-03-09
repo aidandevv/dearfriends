@@ -10,6 +10,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   const [fullName, setFullName] = useState(profile.fullName ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [senderName, setSenderName] = useState(profile.senderName ?? '')
+  const [anniversaryReminders, setAnniversaryReminders] = useState(profile.anniversaryRemindersEnabled)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -24,6 +25,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       full_name: fullName,
       bio: bio || undefined,
       sender_name: senderName || undefined,
+      anniversary_reminders_enabled: anniversaryReminders,
     })
 
     if (result.error) {
@@ -68,6 +70,16 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           className="input min-h-11"
         />
       </div>
+
+      <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer">
+        <input
+          type="checkbox"
+          checked={anniversaryReminders}
+          onChange={e => setAnniversaryReminders(e.target.checked)}
+          className="h-4 w-4"
+        />
+        Send me annual reminders to write again
+      </label>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {saved && <p className="text-sm text-green-600">Profile saved.</p>}

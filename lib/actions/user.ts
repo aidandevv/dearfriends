@@ -51,6 +51,19 @@ export async function markTourSeen() {
   return { success: true }
 }
 
+export async function recordFirstSent() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  // Only set if not already set
+  if (user.user_metadata?.first_sent_at) return
+
+  await supabase.auth.updateUser({
+    data: { first_sent_at: new Date().toISOString() }
+  })
+}
+
 export async function updateProfile(data: unknown) {
   const parsed = profileSchema.safeParse(data)
   if (!parsed.success) return { error: 'Invalid profile data.' }

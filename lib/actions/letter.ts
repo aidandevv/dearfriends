@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { letterDraftSchema } from '@/lib/schemas'
 import { resend, buildLetterEmail } from '@/lib/resend'
 import { interpolate } from '@/lib/utils'
+import { recordFirstSent } from '@/lib/actions/user'
 
 export async function getDraft() {
   const supabase = await createClient()
@@ -61,6 +62,8 @@ export async function sendDigitalLetters(groupId: string | null = null) {
   }
 
   if (!contacts.length) return { error: 'No digital contacts.' }
+
+  await recordFirstSent()
 
   const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
