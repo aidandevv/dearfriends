@@ -83,11 +83,13 @@ export function buildAddressRefreshEmail(opts: {
   adminName: string | null
 }): { subject: string; html: string } {
   const from = opts.adminName ?? 'Someone'
+  const escapedFrom = escapeHtml(from)
+  const escapedFirstName = escapeHtml(opts.firstName)
   return {
     subject: `${from} wants to confirm your address`,
     html: `
-      <p>Hi ${opts.firstName},</p>
-      <p>${from} is updating their address book and wants to make sure they have your current address.</p>
+      <p>Hi ${escapedFirstName},</p>
+      <p>${escapedFrom} is updating their address book and wants to make sure they have your current address.</p>
       <p>Mind taking 30 seconds to confirm (or update) it?</p>
       <p><a href="${opts.refreshUrl}" style="background:#8B4513;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Confirm my address</a></p>
       <p style="font-size:12px;color:#999">This link is unique to you.</p>

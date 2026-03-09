@@ -26,6 +26,7 @@ const deliveryOptions = [
 
 export function ContactTable({ contacts }: { contacts: Contact[] }) {
   const [pending, setPending] = useState<string | null>(null)
+  const [nudgePending, setNudgePending] = useState<string | null>(null)
 
   async function handleDeliveryChange(id: string, value: string) {
     setPending(id)
@@ -91,12 +92,18 @@ export function ContactTable({ contacts }: { contacts: Contact[] }) {
 
                   <button
                     onClick={async () => {
-                      await sendAddressRefreshNudge(contact.id)
+                      setNudgePending(contact.id)
+                      const result = await sendAddressRefreshNudge(contact.id)
+                      setNudgePending(null)
+                      if (result?.error) {
+                        alert(`Failed to send nudge: ${result.error}`)
+                      }
                     }}
-                    className="text-xs text-ink-muted underline hover:text-ink"
+                    disabled={nudgePending === contact.id}
+                    className="text-xs text-ink-muted underline hover:text-ink disabled:opacity-50"
                     title="Send address refresh nudge"
                   >
-                    Nudge
+                    {nudgePending === contact.id ? 'Sending...' : 'Nudge'}
                   </button>
 
                   <button

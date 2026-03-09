@@ -7,6 +7,9 @@ import { getUserProfile } from '@/lib/user-profile'
 import { randomUUID } from 'crypto'
 import { getResend, buildNoteNotificationEmail, buildAddressRefreshEmail } from '@/lib/resend'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+
 export async function upsertContact(adminId: string, formData: unknown) {
   const parsed = contactSchema.safeParse(formData)
   if (!parsed.success) return { error: parsed.error.flatten() }
@@ -48,8 +51,6 @@ export async function notifyAdminOfNote(opts: {
     note: opts.note,
     adminName: profile.firstName,
   })
-
-  const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
   await getResend().emails.send({
     from: FROM_EMAIL,
@@ -99,6 +100,7 @@ export async function sendAddressRefreshNudge(contactId: string) {
     .from('contacts')
     .select('id, email, first_name')
     .eq('id', contactId)
+    .eq('opted_out', false)
     .single()
 
   if (contactError || !contact) return { error: 'Contact not found.' }
@@ -112,8 +114,6 @@ export async function sendAddressRefreshNudge(contactId: string) {
   if (tokenError) return { error: tokenError.message }
 
   const senderProfile = getUserProfile(user)
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
   const { subject, html } = buildAddressRefreshEmail({
     firstName: contact.first_name,
