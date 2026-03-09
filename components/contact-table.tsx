@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { deleteContact, updateContact } from '@/lib/actions/contacts'
+import { deleteContact, updateContact, sendAddressRefreshNudge } from '@/lib/actions/contacts'
 import { PillBadge } from '@/components/ui/pill-badge'
 import { Ban, CheckCircle, Circle, Trash2 } from 'lucide-react'
 
@@ -88,6 +88,16 @@ export function ContactTable({ contacts }: { contacts: Contact[] }) {
                     <StatusIcon size={16} className={status.iconClass} />
                     <span>{status.label}</span>
                   </div>
+
+                  <button
+                    onClick={async () => {
+                      await sendAddressRefreshNudge(contact.id)
+                    }}
+                    className="text-xs text-ink-muted underline hover:text-ink"
+                    title="Send address refresh nudge"
+                  >
+                    Nudge
+                  </button>
 
                   <button
                     onClick={() => handleDelete(contact.id)}

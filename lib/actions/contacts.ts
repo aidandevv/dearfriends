@@ -4,7 +4,8 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { contactSchema } from '@/lib/schemas'
 import { revalidatePath } from 'next/cache'
 import { getUserProfile } from '@/lib/user-profile'
-import { getResend, buildNoteNotificationEmail } from '@/lib/resend'
+import { randomUUID } from 'crypto'
+import { getResend, buildNoteNotificationEmail, buildAddressRefreshEmail } from '@/lib/resend'
 
 export async function upsertContact(adminId: string, formData: unknown) {
   const parsed = contactSchema.safeParse(formData)
@@ -85,4 +86,50 @@ export async function deleteContact(id: string) {
   const { error } = await supabase.from('contacts').delete().eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/dashboard')
+}
+
+export async function sendAddressRefreshNudge(contactId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: contact, error: contactError } = await supabase
+    .from('contacts')
+    .select('id, email, first_name')
+    .eq('id', contactId)
+    .single()
+
+  if (contactError || !contact) return { error: 'Contact not found.' }
+
+  const token = randomUUID()
+  const { error: tokenError } = await supabase
+    .from('contacts')
+    .update({ verification_token: token, verification_sent_at: new Date().toISOString() })
+    .eq('id', contactId)
+
+  if (tokenError) return { error: tokenError.message }
+
+  const senderProfile = getUserProfile(user)
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+
+  const { subject, html } = buildAddressRefreshEmail({
+    firstName: contact.first_name,
+    refreshUrl: `${SITE_URL}/verify/${token}`,
+    adminName: senderProfile.fullName,
+  })
+
+  const result = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: contact.email,
+    subject,
+    html,
+  })
+
+  if (result.error) return { error: result.error.message }
+
+  revalidatePath('/dashboard')
+  return { success: true }
 }
