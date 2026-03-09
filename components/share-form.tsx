@@ -47,10 +47,12 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
     e.preventDefault()
     if (!contactId || !note.trim()) return
     setNoteSubmitting(true)
-    await submitNote(contactId, note)
-    await notifyAdminOfNote({ adminId, recipientFirstName, note })
+    const result = await submitNote(contactId, note)
+    if (!result.error) {
+      await notifyAdminOfNote({ adminId, recipientFirstName, note })
+      setNoteSubmitted(true)
+    }
     setNoteSubmitting(false)
-    setNoteSubmitted(true)
   }
 
   if (submitted) {

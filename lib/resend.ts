@@ -1,5 +1,13 @@
 import { Resend } from 'resend'
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 let _resend: Resend | null = null
 
 export function getResend(): Resend {
@@ -62,9 +70,9 @@ export function buildNoteNotificationEmail(opts: {
   return {
     subject: `${opts.recipientFirstName} left you a note`,
     html: `
-      <p>Hi${opts.adminName ? ` ${opts.adminName}` : ''},</p>
-      <p><strong>${opts.recipientFirstName}</strong> left you a note after submitting their address:</p>
-      <blockquote style="border-left:3px solid #ccc;padding-left:1em;color:#555">${opts.note}</blockquote>
+      <p>Hi${opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''},</p>
+      <p><strong>${escapeHtml(opts.recipientFirstName)}</strong> left you a note after submitting their address:</p>
+      <blockquote style="border-left:3px solid #ccc;padding-left:1em;color:#555">${escapeHtml(opts.note)}</blockquote>
     `,
   }
 }
