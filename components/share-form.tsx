@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail } from 'lucide-react'
-import { upsertContact } from '@/lib/actions/contacts'
+import { upsertContact, submitNote, notifyAdminOfNote } from '@/lib/actions/contacts'
 import { contactSchema, type ContactInput } from '@/lib/schemas'
 import { Postmark } from '@/components/ui/postmark'
 
@@ -12,9 +12,14 @@ function firstName(name: string | null) {
   return name?.trim().split(/\s+/)[0] ?? null
 }
 
-export function ShareForm({ adminId, senderName }: { adminId: string; senderName: string | null }) {
+export function ShareForm({ adminId, senderName, senderBio }: { adminId: string; senderName: string | null; senderBio: string | null }) {
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [contactId, setContactId] = useState<string | null>(null)
+  const [recipientFirstName, setRecipientFirstName] = useState<string>('')
+  const [note, setNote] = useState('')
+  const [noteSubmitting, setNoteSubmitting] = useState(false)
+  const [noteSubmitted, setNoteSubmitted] = useState(false)
 
   const displayName = useMemo(() => firstName(senderName) ?? senderName, [senderName])
 
@@ -33,20 +38,67 @@ export function ShareForm({ adminId, senderName }: { adminId: string; senderName
       setServerError(typeof result.error === 'string' ? result.error : 'Something went wrong.')
       return
     }
-
+    setRecipientFirstName(data.first_name)
+    setContactId(result.contactId ?? null)
     setSubmitted(true)
+  }
+
+  async function handleNoteSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!contactId || !note.trim()) return
+    setNoteSubmitting(true)
+    await submitNote(contactId, note)
+    await notifyAdminOfNote({ adminId, recipientFirstName, note })
+    setNoteSubmitting(false)
+    setNoteSubmitted(true)
   }
 
   if (submitted) {
     return (
       <main className="min-h-screen bg-linen flex items-center justify-center p-6">
-        <div className="max-w-md w-full flex flex-col items-center text-center gap-3 animate-fade-up">
+        <div className="max-w-md w-full flex flex-col items-center text-center gap-4 animate-fade-up">
           <Postmark />
           <h1 className="font-serif text-3xl text-ink">Sealed &amp; sent.</h1>
+          {displayName && (
+            <div className="flex flex-col items-center gap-1">
+              <p className="font-medium text-ink">{displayName}</p>
+              {senderBio && <p className="text-sm text-ink-muted">{senderBio}</p>}
+            </div>
+          )}
           <p className="text-ink-muted text-sm leading-6">
-            Your address has been saved.
-            {displayName ? ` ${displayName} now has what they need to send something special.` : ' Expect something special in the mail.'}
+            {displayName
+              ? `Thanks, ${recipientFirstName}! Your address is saved. ${displayName} can't wait to send you something.`
+              : 'Your address has been saved. Expect something special in the mail.'}
           </p>
+
+          {contactId && !noteSubmitted && (
+            <form onSubmit={handleNoteSubmit} className="w-full surface-panel px-4 py-4 flex flex-col gap-3">
+              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted text-left">
+                Leave a note for {displayName ?? 'them'} (optional)
+              </label>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value.slice(0, 280))}
+                rows={3}
+                placeholder={`Leave a note for ${displayName ?? 'them'}...`}
+                className="input resize-none"
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-ink-muted">{note.length}/280</span>
+                <button
+                  type="submit"
+                  disabled={noteSubmitting || !note.trim()}
+                  className="btn-primary min-h-9 px-4 text-sm"
+                >
+                  {noteSubmitting ? 'Sending...' : 'Send note'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {noteSubmitted && (
+            <p className="text-sm text-ink-muted">Note sent ✓</p>
+          )}
         </div>
       </main>
     )

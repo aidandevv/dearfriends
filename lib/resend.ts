@@ -53,3 +53,18 @@ export function buildLetterEmail(opts: {
     html: `<p>${htmlBody}</p>`,
   }
 }
+
+export function buildNoteNotificationEmail(opts: {
+  recipientFirstName: string
+  note: string
+  adminName: string | null
+}): { subject: string; html: string } {
+  return {
+    subject: `${opts.recipientFirstName} left you a note`,
+    html: `
+      <p>Hi${opts.adminName ? ` ${opts.adminName}` : ''},</p>
+      <p><strong>${opts.recipientFirstName}</strong> left you a note after submitting their address:</p>
+      <blockquote style="border-left:3px solid #ccc;padding-left:1em;color:#555">${opts.note}</blockquote>
+    `,
+  }
+}

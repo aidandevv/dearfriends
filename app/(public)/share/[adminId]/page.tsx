@@ -9,5 +9,11 @@ export default async function SharePage({ params }: { params: Promise<{ adminId:
   const { data } = await supabase.auth.admin.getUserById(adminId)
   const senderProfile = getUserProfile(data.user)
 
-  return <ShareForm adminId={adminId} senderName={senderProfile.fullName} />
+  return (
+    <ShareForm
+      adminId={adminId}
+      senderName={senderProfile.fullName}
+      senderBio={senderProfile.bio}
+    />
+  )
 }
