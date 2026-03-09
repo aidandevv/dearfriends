@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Link2, PenLine, Send, Settings, Users } from 'lucide-react'
 import { FeatureTour } from '@/components/feature-tour'
+import { ShareLinkActions } from '@/components/share-link-actions'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
 
@@ -58,14 +59,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 <Link2 size={12} />
                 {profile.firstName ? `${profile.firstName}'s share link` : 'Share link'}
               </p>
-              <a
-                href={shareUrl}
-                className="mt-3 block break-all text-sm leading-6 text-terra transition-colors hover:text-terra-dark"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {shareUrl}
-              </a>
+              <p className="mt-2 break-all text-xs leading-5 text-ink-muted">{shareUrl}</p>
+              <ShareLinkActions url={shareUrl} />
             </div>
           </div>
         </nav>
