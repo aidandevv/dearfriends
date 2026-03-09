@@ -5,14 +5,16 @@ import { useState } from 'react'
 import { sendDigitalLetters } from '@/lib/actions/letter'
 import { FileDown, FileText, Send } from 'lucide-react'
 
-export function ExportPanel() {
+export function ExportPanel({ groupId }: { groupId?: string | null }) {
   const [digitalStatus, setDigitalStatus] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
+
+  const groupParam = groupId ? `&group=${groupId}` : ''
 
   async function handleDigitalSend() {
     if (!confirm('Send the composed letter to all digital contacts?')) return
     setSending(true)
-    const result = await sendDigitalLetters()
+    const result = await sendDigitalLetters(groupId ?? null)
     setDigitalStatus(result.error ? `Error: ${result.error}` : `Sent to ${(result as { count?: number }).count} contacts.`)
     setSending(false)
   }
@@ -25,13 +27,13 @@ export function ExportPanel() {
         description="Generate mailing data for labels and list cleanup."
       >
         <div className="grid gap-2">
-          <a href="/api/export/csv?method=handwrite" className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=handwrite${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
             Handwrite contacts
           </a>
-          <a href="/api/export/csv?method=print" className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=print${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
             Print contacts
           </a>
-          <a href="/api/export/csv?method=all" className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=all${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
             All contacts
           </a>
         </div>
@@ -42,7 +44,7 @@ export function ExportPanel() {
         title="PDF export"
         description="Build a ready-to-print packet with one personalized page per print contact."
       >
-        <a href="/api/export/pdf" className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+        <a href={`/api/export/pdf${groupId ? `?group=${groupId}` : ''}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
           Download print-ready PDF
         </a>
       </ExportCard>

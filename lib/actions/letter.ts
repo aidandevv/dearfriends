@@ -33,16 +33,34 @@ export async function saveDraft(formData: { subject: string; body: string }) {
   return { success: true }
 }
 
-export async function sendDigitalLetters() {
+type DigitalContact = { first_name: string; last_name: string; email: string }
+
+export async function sendDigitalLetters(groupId: string | null = null) {
   const supabase = await createClient()
 
-  const [{ data: draft }, { data: contacts }] = await Promise.all([
-    supabase.from('letter_drafts').select('*').maybeSingle(),
-    supabase.from('contacts').select('*').eq('delivery_method', 'digital').eq('opted_out', false),
-  ])
-
+  const { data: draft } = await supabase.from('letter_drafts').select('*').maybeSingle()
   if (!draft?.subject || !draft?.body) return { error: 'No draft saved.' }
-  if (!contacts?.length) return { error: 'No digital contacts.' }
+
+  let contacts: DigitalContact[]
+
+  if (groupId) {
+    const { data: cg } = await supabase
+      .from('contact_groups')
+      .select('contacts(first_name, last_name, email, delivery_method, opted_out)')
+      .eq('group_id', groupId)
+    contacts = (cg ?? [])
+      .flatMap(r => (r.contacts ? [r.contacts as unknown as { first_name: string; last_name: string; email: string; delivery_method: string; opted_out: boolean }] : []))
+      .filter(c => c.delivery_method === 'digital' && !c.opted_out)
+  } else {
+    const { data } = await supabase
+      .from('contacts')
+      .select('first_name, last_name, email')
+      .eq('delivery_method', 'digital')
+      .eq('opted_out', false)
+    contacts = data ?? []
+  }
+
+  if (!contacts.length) return { error: 'No digital contacts.' }
 
   const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
