@@ -38,15 +38,16 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   return (
     <form onSubmit={handleSubmit} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm max-w-lg">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Display name</label>
-        <input value={fullName} onChange={e => setFullName(e.target.value)} className="input min-h-11" required />
+        <label htmlFor="full-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Display name</label>
+        <input id="full-name" value={fullName} onChange={e => setFullName(e.target.value)} className="input min-h-11" required />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
+        <label htmlFor="bio" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
           Bio <span className="normal-case font-normal">(shown to recipients, 160 chars)</span>
         </label>
         <input
+          id="bio"
           value={bio}
           onChange={e => setBio(e.target.value)}
           maxLength={160}
@@ -56,10 +57,11 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
+        <label htmlFor="sender-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
           Sender name <span className="normal-case font-normal">(in email From: field)</span>
         </label>
         <input
+          id="sender-name"
           value={senderName}
           onChange={e => setSenderName(e.target.value)}
           placeholder={fullName || 'Your name'}
