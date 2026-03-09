@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   description: "Collect mailing addresses and send personalized letters",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
