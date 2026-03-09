@@ -17,6 +17,7 @@ export function TemplatePicker({
           className="flex-shrink-0 flex flex-col items-center gap-1.5 rounded-[1rem] border border-border/80 bg-surface-raised px-3 py-2.5 text-left hover:border-terra/40 transition-colors"
         >
           <span
+            aria-hidden="true"
             className="h-3 w-10 rounded-full"
             style={{ backgroundColor: template.accentColor }}
           />

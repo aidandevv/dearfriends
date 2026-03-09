@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { onboardingSchema } from '@/lib/schemas'
+import { onboardingSchema, profileSchema } from '@/lib/schemas'
 import { createClient } from '@/lib/supabase/server'
 
 export async function completeOnboarding(input: unknown) {
@@ -51,10 +51,17 @@ export async function markTourSeen() {
   return { success: true }
 }
 
-export async function updateProfile(data: { bio?: string; sender_name?: string; full_name?: string }) {
+export async function updateProfile(data: unknown) {
+  const parsed = profileSchema.safeParse(data)
+  if (!parsed.success) return { error: 'Invalid profile data.' }
+
   const supabase = await createClient()
-  const { error } = await supabase.auth.updateUser({ data })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { error } = await supabase.auth.updateUser({ data: parsed.data })
   if (error) return { error: error.message }
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard/settings')
   return { success: true }
 }
