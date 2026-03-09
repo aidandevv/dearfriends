@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { deleteContact, updateContact, sendAddressRefreshNudge } from '@/lib/actions/contacts'
+import { ContactGroupSelect } from '@/components/contact-group-select'
 import { PillBadge } from '@/components/ui/pill-badge'
 import { Ban, CheckCircle, Circle, Trash2 } from 'lucide-react'
 
@@ -24,7 +25,7 @@ const deliveryOptions = [
   { value: 'digital', label: 'Digital' },
 ]
 
-export function ContactTable({ contacts }: { contacts: Contact[] }) {
+export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]; allGroups?: { id: string; name: string }[] }) {
   const [pending, setPending] = useState<string | null>(null)
   const [nudgePending, setNudgePending] = useState<string | null>(null)
 
@@ -80,6 +81,8 @@ export function ContactTable({ contacts }: { contacts: Contact[] }) {
                   <span>
                     {contact.city}, {contact.state}
                   </span>
+                  <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
+                  <ContactGroupSelect contactId={contact.id} allGroups={allGroups} />
                 </div>
               </div>
 

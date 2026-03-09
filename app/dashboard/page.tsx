@@ -2,9 +2,10 @@ import { ContactTable } from '@/components/contact-table'
 import { ScheduleVerificationForm } from '@/components/schedule-verification-form'
 import { SendVerificationButton } from '@/components/send-verification-button'
 import { getContacts } from '@/lib/actions/contacts'
+import { getGroups } from '@/lib/actions/groups'
 
 export default async function DashboardPage() {
-  const contacts = await getContacts()
+  const [contacts, groups] = await Promise.all([getContacts(), getGroups()])
 
   const verifiedCount = contacts.filter(contact => Boolean(contact.verified_at) && !contact.opted_out).length
   const printCount = contacts.filter(contact => contact.delivery_method === 'print').length
@@ -48,7 +49,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-ink-muted">Delivery options are bigger here so it is easier to sort the list quickly.</p>
             </div>
           </div>
-          <ContactTable contacts={contacts} />
+          <ContactTable contacts={contacts} allGroups={groups} />
         </section>
       </div>
 
