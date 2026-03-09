@@ -4,6 +4,8 @@ import { useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { saveDraft } from '@/lib/actions/letter'
 import { interpolate } from '@/lib/utils'
+import { TemplatePicker } from '@/components/template-picker'
+import type { LetterTemplate } from '@/lib/letter-templates'
 
 type Props = {
   initialSubject: string
@@ -17,6 +19,16 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleTemplateSelect(template: LetterTemplate) {
+    const hasContent = body.trim().length > 0
+    if (hasContent) {
+      const confirmed = window.confirm('Replace your current draft with this template?')
+      if (!confirmed) return
+    }
+    setBody(template.defaultBody)
+    triggerSave(subject, template.defaultBody)
+  }
 
   function triggerSave(nextSubject: string, nextBody: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -56,6 +68,11 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
                 placeholder="Subject line"
                 className="input min-h-12"
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Templates</label>
+              <TemplatePicker onSelect={handleTemplateSelect} />
             </div>
 
             <div className="flex flex-col gap-1.5">

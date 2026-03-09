@@ -41,3 +41,11 @@ export const onboardingSchema = z.object({
 })
 
 export type OnboardingInput = z.infer<typeof onboardingSchema>
+
+export const profileSchema = z.object({
+  full_name: z.string().trim().min(1).max(80),
+  bio: z.string().trim().max(160).optional(),
+  sender_name: z.string().trim().max(80).optional(),
+})
+
+export type ProfileInput = z.infer<typeof profileSchema>

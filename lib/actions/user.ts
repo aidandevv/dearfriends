@@ -50,3 +50,11 @@ export async function markTourSeen() {
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+export async function updateProfile(data: { bio?: string; sender_name?: string; full_name?: string }) {
+  const supabase = await createClient()
+  const { error } = await supabase.auth.updateUser({ data })
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard')
+  return { success: true }
+}
