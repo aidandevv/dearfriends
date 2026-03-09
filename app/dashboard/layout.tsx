@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Link2, PenLine, Send, Users } from 'lucide-react'
+import { Link2, PenLine, Send, Settings, Users } from 'lucide-react'
 import { FeatureTour } from '@/components/feature-tour'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/dashboard', label: 'Contacts', icon: Users },
   { href: '/dashboard/compose', label: 'Compose', icon: PenLine },
   { href: '/dashboard/export', label: 'Export & Send', icon: Send },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
