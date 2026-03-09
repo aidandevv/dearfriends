@@ -20,9 +20,7 @@ export default async function SettingsPage() {
         </p>
       </section>
 
-      <section className="surface-panel px-5 py-5">
-        <ProfileForm profile={profile} />
-      </section>
+      <ProfileForm profile={profile} />
     </div>
   )
 }
