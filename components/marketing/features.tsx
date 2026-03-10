@@ -4,20 +4,20 @@ const features = [
   {
     number: '01',
     icon: Mailbox,
-    title: 'Collect addresses gracefully',
-    body: 'Send one simple link and let friends share the details you need without the usual spreadsheet shuffle. Works on any device, no account needed for recipients.',
+    title: 'One link, everyone's address',
+    body: 'Share a simple link and your friends fill in their own details. No awkward asking, no scattered texts, no spreadsheet chaos. They don\'t even need an account.',
   },
   {
     number: '02',
     icon: PenSquare,
-    title: 'Write once, personalize often',
-    body: 'Draft a single letter, drop in names with {{first_name}} merge tags, and keep every note feeling like it was written with care. Live preview as you type.',
+    title: 'Write it once, make it personal',
+    body: 'Draft your letter, drop in {{first_name}} where it feels right, and watch the live preview fill in real names. Every note lands like you wrote it just for them.',
   },
   {
     number: '03',
     icon: HeartHandshake,
-    title: 'Send the right way',
-    body: 'Export for print, handwriting, or digital delivery so every update fits the relationship. CSV for labels, PDF for your printer, email for the rest.',
+    title: 'Send however feels right',
+    body: 'Print it, hand-address it, or hit send — your call. Export a label CSV, download a print-ready PDF, or fire off personalized emails all from one place.',
   },
 ]
 
@@ -27,7 +27,7 @@ export function Features() {
       <div className="mb-12 max-w-xl">
         <p className="text-sm uppercase tracking-[0.3em] text-ink-muted">What it does</p>
         <h2 className="mt-4 font-serif text-4xl leading-tight text-ink sm:text-5xl">
-          Everything a mailing list should be.
+          Staying in touch shouldn&apos;t be this much work.
         </h2>
       </div>
 
