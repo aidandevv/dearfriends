@@ -1,31 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, HeartHandshake, Mailbox, PenSquare } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Hero } from '@/components/marketing/hero'
+import { Features } from '@/components/marketing/features'
 import { SiteShell } from '@/components/site-shell'
 
 export const metadata: Metadata = {
   title: 'Dear Friends',
   description: 'A warm, personal home for collecting mailing addresses and sending thoughtful updates.',
 }
-
-const highlights = [
-  {
-    title: 'Collect addresses gracefully',
-    body: 'Send one simple link and let friends share the details you need without the usual spreadsheet shuffle.',
-    icon: Mailbox,
-  },
-  {
-    title: 'Write once, personalize often',
-    body: 'Draft a single letter, drop in names, and keep every note feeling like it was written with care.',
-    icon: PenSquare,
-  },
-  {
-    title: 'Send the right way',
-    body: 'Export for print, handwriting, or digital delivery so every update fits the relationship.',
-    icon: HeartHandshake,
-  },
-]
 
 const steps = [
   'Create a private share link for your people.',
@@ -38,20 +21,7 @@ export default function HomePage() {
     <SiteShell>
       <main>
         <Hero />
-
-        <section className="mx-auto w-full max-w-6xl px-6 py-16">
-          <div className="grid gap-5 md:grid-cols-3">
-            {highlights.map(({ title, body, icon: Icon }) => (
-              <article key={title} className="section-card hover-lift animate-fade-up px-6 py-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-terra/10 text-terra">
-                  <Icon size={22} />
-                </div>
-                <h2 className="mt-5 font-serif text-2xl text-ink">{title}</h2>
-                <p className="mt-3 text-sm leading-7 text-ink-muted">{body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <Features />
 
         <section className="border-y border-border/70 bg-surface/70">
           <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
