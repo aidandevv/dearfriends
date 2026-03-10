@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const mockContacts = [
   { name: 'Maya Chen', mode: 'Print', place: 'Portland, OR' },
@@ -20,12 +20,7 @@ export function Hero() {
       <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-28">
         {/* Left: copy */}
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-linen/20 bg-white/5 px-4 py-1.5 text-xs font-medium text-linen/70">
-            <Sparkles size={13} className="text-terra" />
-            because a text just doesn&apos;t cut it
-          </div>
-
-          <h1 className="mt-6 font-serif text-5xl leading-[1.1] text-linen sm:text-6xl lg:text-7xl">
+          <h1 className="font-serif text-5xl leading-[1.1] text-linen sm:text-6xl lg:text-7xl">
             Your people deserve more than{' '}
             <em className="not-italic text-terra">a group text.</em>
           </h1>
@@ -56,13 +51,6 @@ export function Hero() {
         {/* Right: floating UI mockup */}
         <div className="relative z-10 lg:pl-4">
           <div className="relative rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_32px_80px_rgba(0,0,0,0.4)] backdrop-blur-sm">
-            {/* Floating badge */}
-            <div className="absolute -left-6 top-10 z-20 hidden w-40 rounded-[1.25rem] border border-white/10 bg-ink/80 p-3.5 shadow-xl backdrop-blur lg:block">
-              <p className="text-[10px] uppercase tracking-widest text-linen/50">Latest</p>
-              <p className="mt-1 font-serif text-lg text-linen">Holiday note</p>
-              <p className="mt-1 text-xs leading-5 text-linen/50">Names already filled in.</p>
-            </div>
-
             {/* Mock dashboard card */}
             <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-surface-raised">
               <div className="flex items-center justify-between border-b border-border/80 px-4 py-3">

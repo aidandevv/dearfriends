@@ -11,13 +11,13 @@ const features = [
     number: '02',
     icon: PenSquare,
     title: 'Write it once, make it personal',
-    body: 'Draft your letter, drop in {{first_name}} where it feels right, and watch the live preview fill in real names. Every note lands like you wrote it just for them.',
+    body: "Write your letter once and Dear Friends fills in each person's name for you. Every note feels personal — because it is.",
   },
   {
     number: '03',
     icon: HeartHandshake,
     title: 'Send however feels right',
-    body: 'Print it, hand-address it, or hit send — your call. Export a label CSV, download a print-ready PDF, or fire off personalized emails all from one place.',
+    body: 'Some people get a printed letter, some get a handwritten card, some get an email. You pick for each person and Dear Friends handles the rest.',
   },
 ]
 
