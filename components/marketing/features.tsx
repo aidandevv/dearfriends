@@ -4,7 +4,7 @@ const features = [
   {
     number: '01',
     icon: Mailbox,
-    title: 'One link, everyone's address',
+    title: "One link, everyone's address",
     body: 'Share a simple link and your friends fill in their own details. No awkward asking, no scattered texts, no spreadsheet chaos. They don\'t even need an account.',
   },
   {
