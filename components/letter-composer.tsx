@@ -6,6 +6,7 @@ import { saveDraft } from '@/lib/actions/letter'
 import { interpolate } from '@/lib/utils'
 import { TemplatePicker } from '@/components/template-picker'
 import type { LetterTemplate } from '@/lib/letter-templates'
+import { LETTER_TEMPLATES } from '@/lib/letter-templates'
 
 type Props = {
   initialSubject: string
@@ -18,7 +19,12 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
   const [body, setBody] = useState(initialBody)
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>(undefined)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const selectedTemplate = selectedTemplateId
+    ? LETTER_TEMPLATES.find(t => t.id === selectedTemplateId)
+    : null
 
   function handleTemplateSelect(template: LetterTemplate) {
     const hasContent = body.trim().length > 0
@@ -26,6 +32,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
       const confirmed = window.confirm('Replace your current draft with this template?')
       if (!confirmed) return
     }
+    setSelectedTemplateId(template.id)
     setBody(template.defaultBody)
     triggerSave(subject, template.defaultBody)
   }
@@ -48,17 +55,13 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
       <section className="surface-panel px-5 py-5">
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Draft</p>
-              <h2 className="mt-2 font-serif text-3xl text-ink">Write your letter</h2>
-            </div>
-            <span className="text-sm text-ink-muted">{saving ? 'Saving...' : saveStatus ?? 'Autosaves as you type'}</span>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-serif text-2xl text-ink">Write your letter</h2>
+            <span className="text-xs text-ink-muted">{saving ? 'Saving…' : saveStatus ?? ''}</span>
           </div>
 
           <div className="grid gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Subject</label>
               <input
                 value={subject}
                 onChange={e => {
@@ -71,12 +74,10 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Templates</label>
-              <TemplatePicker onSelect={handleTemplateSelect} />
+              <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Body</label>
               <textarea
                 value={body}
                 onChange={e => {
@@ -99,8 +100,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
       <section className="surface-panel px-5 py-5">
         <div className="flex items-end justify-between gap-3 border-b border-border/80 pb-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Preview</p>
-            <h2 className="mt-2 font-serif text-3xl text-ink">
+            <h2 className="font-serif text-3xl text-ink">
               For {previewContact.first_name} {previewContact.last_name}
             </h2>
           </div>
@@ -109,7 +109,17 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
           </div>
         </div>
 
-        <div className="mt-4 min-h-[420px] rounded-[1.5rem] border border-border/80 bg-[linear-gradient(180deg,#ffffff_0%,#fdf9f3_100%)] px-6 py-6 shadow-sm">
+        <div
+          className="mt-4 min-h-[420px] rounded-[1.5rem] border border-border/80 bg-[linear-gradient(180deg,#ffffff_0%,#fdf9f3_100%)] px-6 py-6 shadow-sm overflow-hidden relative"
+        >
+          {selectedTemplate && (
+            <div
+              className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[1.5rem]"
+              style={{
+                background: `linear-gradient(90deg, ${selectedTemplate.accentColor}, transparent)`,
+              }}
+            />
+          )}
           <div className="border-b border-border/80 pb-3">
             <p className="font-serif text-lg italic text-ink-muted">{subject || 'Subject line'}</p>
           </div>
