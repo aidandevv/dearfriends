@@ -3,13 +3,25 @@
 import { useState } from 'react'
 import { Copy, Check, ExternalLink } from 'lucide-react'
 
-export function ShareLinkActions({ url }: { url: string }) {
+export function ShareLinkActions({ url, compact = false }: { url: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleCopy}
+        title={copied ? 'Copied!' : 'Copy share link'}
+        className="flex h-5 w-5 items-center justify-center text-ink-muted transition-colors hover:text-terra"
+      >
+        {copied ? <Check size={12} /> : <Copy size={12} />}
+      </button>
+    )
   }
 
   return (
