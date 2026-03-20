@@ -104,7 +104,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
               For {previewContact.first_name} {previewContact.last_name}
             </h2>
           </div>
-          <div className="hidden rounded-full border border-border/80 bg-surface-raised px-3 py-2 text-xs font-medium text-ink-muted md:inline-flex">
+          <div className="hidden rounded-full bg-sage/10 px-3 py-2 text-xs font-medium text-sage md:inline-flex">
             Live preview
           </div>
         </div>

@@ -54,8 +54,8 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
     <div className="flex flex-col">
       {/* Column headers */}
       <div className="grid grid-cols-[1fr_100px_110px_100px_80px_60px] gap-3 items-center px-1 pb-2 border-b border-border/60">
-        {['Name', 'Location', 'Delivery', 'Group', 'Status', ''].map(h => (
-          <span key={h} className="text-[10px] uppercase tracking-[0.1em] text-ink-muted">{h}</span>
+        {['Name', 'Location', 'Delivery', 'Group', 'Status', ''].map((h, i) => (
+          <span key={i} className="text-[10px] uppercase tracking-[0.1em] text-ink-muted">{h}</span>
         ))}
       </div>
 
@@ -124,6 +124,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
                 }}
                 disabled={nudgePending === contact.id}
                 title="Send address refresh nudge"
+                aria-label="Send address refresh nudge"
                 className="hidden group-hover:flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:text-terra hover:bg-terra/10 disabled:opacity-50 text-xs transition-colors"
               >
                 ↩

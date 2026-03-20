@@ -191,9 +191,8 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary flex items-center justify-center gap-2 mt-1 min-h-12 w-full"
+            className="btn-primary flex items-center justify-center mt-1 min-h-12 w-full"
           >
-            <Mail size={16} />
             {isSubmitting ? 'Saving\u2026' : 'Send my address \u2192'}
           </button>
         </form>
