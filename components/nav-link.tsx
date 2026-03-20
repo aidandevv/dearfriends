@@ -2,16 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { ComponentType } from 'react'
+import type { ReactNode } from 'react'
 
 export function NavLink({
   href,
   label,
-  icon: Icon,
+  children,
 }: {
   href: string
   label: string
-  icon: ComponentType<{ size?: number | string }>
+  children: ReactNode
 }) {
   const pathname = usePathname()
   const isActive = pathname === href
@@ -26,7 +26,7 @@ export function NavLink({
           : 'text-ink-muted hover:bg-terra/10 hover:text-terra'
       }`}
     >
-      <Icon size={18} />
+      {children}
     </Link>
   )
 }

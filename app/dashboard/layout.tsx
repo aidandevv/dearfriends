@@ -38,8 +38,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               DF
             </span>
 
-            {navItems.map(({ href, label, icon }) => (
-              <NavLink key={href} href={href} label={label} icon={icon} />
+            {navItems.map(({ href, label, icon: Icon }) => (
+              <NavLink key={href} href={href} label={label}>
+                <Icon size={18} />
+              </NavLink>
             ))}
           </div>
 
