@@ -175,7 +175,7 @@ git commit -m "feat: add slugSchema with reserved-slug validation"
 
 ---
 
-## Task 2: Extend `getUserProfile` with `shareSlug`
+## Task 3: Extend `getUserProfile` with `shareSlug`
 
 **Files:**
 - Modify: `lib/user-profile.ts`
@@ -243,7 +243,7 @@ git commit -m "feat: expose shareSlug from getUserProfile"
 
 ---
 
-## Task 5: Add slug server actions
+## Task 4: Add slug server actions
 
 **Files:**
 - Modify: `lib/actions/user.ts`
