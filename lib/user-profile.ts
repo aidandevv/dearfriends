@@ -9,6 +9,7 @@ export type UserProfile = {
   hasSeenTour: boolean
   anniversaryRemindersEnabled: boolean
   birthdayRemindersEnabled: boolean
+  shareSlug: string | null
 }
 
 function readString(value: unknown): string | null {
@@ -35,5 +36,6 @@ export function getUserProfile(user: Pick<User, 'user_metadata'> | null | undefi
     hasSeenTour: metadata.has_seen_tour === true,
     anniversaryRemindersEnabled: metadata.anniversary_reminders_enabled !== false,
     birthdayRemindersEnabled: metadata.birthday_reminders_enabled !== false,
+    shareSlug: readString(metadata.share_slug),
   }
 }
