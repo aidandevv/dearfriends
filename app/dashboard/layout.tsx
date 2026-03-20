@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Layers, Link2, PenLine, Send, Settings, Users } from 'lucide-react'
+import { Layers, PenLine, Send, Settings, Users } from 'lucide-react'
 import { FeatureTour } from '@/components/feature-tour'
-import { ShareLinkActions } from '@/components/share-link-actions'
+import { NavLink } from '@/components/nav-link'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
 
@@ -26,50 +25,30 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const profile = getUserProfile(user)
   if (!profile.hasCompletedOnboarding) redirect('/onboarding')
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/share/${user.id}`
-
   return (
     <>
-      <div className="min-h-screen bg-linen lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
-        <nav className="border-b border-border/60 bg-sidebar/95 px-4 py-4 lg:min-h-screen lg:border-b-0 lg:border-r lg:px-5 lg:py-5">
-          <div className="lg:sticky lg:top-5 lg:flex lg:flex-col lg:gap-4">
-            <div className="mb-4 px-2 lg:mb-2">
-              <p className="font-serif text-2xl text-ink">Dear Friends</p>
-              <p className="mt-1 text-sm text-ink-muted">
-                {profile.firstName ? `Welcome back, ${profile.firstName}.` : 'A warmer way to keep your mailing list in order.'}
-              </p>
-            </div>
+      <div className="min-h-screen bg-linen grid grid-cols-[68px_minmax(0,1fr)]">
+        <nav className="flex w-[68px] flex-shrink-0 flex-col items-center border-r border-border/60 bg-sidebar py-5 min-h-screen">
+          <div className="flex flex-1 flex-col items-center gap-1 w-full">
+            {/* Wordmark */}
+            <span
+              className="mb-5 font-serif text-[10px] font-bold uppercase tracking-[0.18em] text-terra"
+              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            >
+              DF
+            </span>
 
-            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-              {navItems.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="surface-panel flex items-center gap-3 px-4 py-3 text-sm font-medium text-ink transition-colors hover:border-terra/50 hover:bg-linen"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-terra/10 text-terra">
-                    <Icon size={17} />
-                  </span>
-                  {label}
-                </Link>
-              ))}
-            </div>
-
-            <div className="surface-panel mt-4 p-4 lg:mt-auto">
-              <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
-                <Link2 size={12} />
-                {profile.firstName ? `${profile.firstName}'s share link` : 'Share link'}
-              </p>
-              <p className="mt-2 break-all text-xs leading-5 text-ink-muted">{shareUrl}</p>
-              <ShareLinkActions url={shareUrl} />
-            </div>
+            {navItems.map(({ href, label, icon }) => (
+              <NavLink key={href} href={href} label={label} icon={icon} />
+            ))}
           </div>
+
+          {/* Avatar */}
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-terra to-border" />
         </nav>
 
-        <main className="p-4 lg:p-5">
-          <div className="min-h-full rounded-[1.75rem] border border-border/70 bg-surface-raised p-4 shadow-sm lg:p-5">
-            {children}
-          </div>
+        <main className="min-h-screen overflow-auto p-5">
+          {children}
         </main>
       </div>
 
