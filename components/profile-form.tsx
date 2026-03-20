@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateProfile } from '@/lib/actions/user'
+import { updateProfile, updateShareSlug } from '@/lib/actions/user'
+import { slugSchema } from '@/lib/schemas'
 import type { UserProfile } from '@/lib/user-profile'
 
 export function ProfileForm({ profile }: { profile: UserProfile }) {
   const router = useRouter()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+  // --- Profile form state ---
   const [fullName, setFullName] = useState(profile.fullName ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [senderName, setSenderName] = useState(profile.senderName ?? '')
@@ -37,56 +41,139 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
     setLoading(false)
   }
 
+  // --- Slug form state ---
+  const [slug, setSlug] = useState(profile.shareSlug ?? '')
+  const [slugError, setSlugError] = useState<string | null>(null)
+  const [slugSaved, setSlugSaved] = useState(false)
+  const [slugLoading, setSlugLoading] = useState(false)
+
+  const slugUnchanged = slug.toLowerCase() === (profile.shareSlug ?? '')
+
+  function handleSlugChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value.toLowerCase()
+    setSlug(val)
+    setSlugError(null)
+    setSlugSaved(false)
+  }
+
+  function validateSlugLocally(val: string): string | null {
+    const result = slugSchema.safeParse(val)
+    return result.success ? null : (result.error.errors[0]?.message ?? 'Invalid slug')
+  }
+
+  async function handleSlugSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const localErr = validateSlugLocally(slug)
+    if (localErr) { setSlugError(localErr); return }
+
+    setSlugLoading(true)
+    setSlugError(null)
+    setSlugSaved(false)
+
+    const result = await updateShareSlug(slug)
+    if (result.error === 'slug_taken') {
+      setSlugError('That slug is already taken — try another')
+    } else if (result.error) {
+      setSlugError(result.error)
+    } else {
+      setSlugSaved(true)
+      router.refresh()
+    }
+    setSlugLoading(false)
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm max-w-lg">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="full-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Display name</label>
-        <input id="full-name" value={fullName} onChange={e => setFullName(e.target.value)} className="input min-h-11" required />
-      </div>
+    <div className="flex flex-col gap-5">
+      {/* Profile form */}
+      <form onSubmit={handleSubmit} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm max-w-lg">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="full-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Display name</label>
+          <input id="full-name" value={fullName} onChange={e => setFullName(e.target.value)} className="input min-h-11" required />
+        </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="bio" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
-          Bio <span className="normal-case font-normal">(shown to recipients, 160 chars)</span>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="bio" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
+            Bio <span className="normal-case font-normal">(shown to recipients, 160 chars)</span>
+          </label>
+          <input
+            id="bio"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            maxLength={160}
+            placeholder="e.g. Sending love from Portland, OR"
+            className="input min-h-11"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="sender-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
+            Sender name <span className="normal-case font-normal">(in email From: field)</span>
+          </label>
+          <input
+            id="sender-name"
+            value={senderName}
+            onChange={e => setSenderName(e.target.value)}
+            placeholder={fullName || 'Your name'}
+            className="input min-h-11"
+          />
+        </div>
+
+        <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer">
+          <input
+            type="checkbox"
+            checked={anniversaryReminders}
+            onChange={e => setAnniversaryReminders(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Send me annual reminders to write again
         </label>
-        <input
-          id="bio"
-          value={bio}
-          onChange={e => setBio(e.target.value)}
-          maxLength={160}
-          placeholder="e.g. Sending love from Portland, OR"
-          className="input min-h-11"
-        />
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="sender-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">
-          Sender name <span className="normal-case font-normal">(in email From: field)</span>
-        </label>
-        <input
-          id="sender-name"
-          value={senderName}
-          onChange={e => setSenderName(e.target.value)}
-          placeholder={fullName || 'Your name'}
-          className="input min-h-11"
-        />
-      </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {saved && <p className="text-sm text-green-600">Profile saved.</p>}
 
-      <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer">
-        <input
-          type="checkbox"
-          checked={anniversaryReminders}
-          onChange={e => setAnniversaryReminders(e.target.checked)}
-          className="h-4 w-4"
-        />
-        Send me annual reminders to write again
-      </label>
+        <button type="submit" disabled={loading} className="btn-primary min-h-11 max-w-[180px]">
+          {loading ? 'Saving...' : 'Save profile'}
+        </button>
+      </form>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {saved && <p className="text-sm text-green-600">Profile saved.</p>}
+      {/* Slug mini-form */}
+      <form onSubmit={handleSlugSubmit} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm max-w-lg">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Share link slug</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            This is the link you share with people. Changing it will break any previously shared links.
+          </p>
+        </div>
 
-      <button type="submit" disabled={loading} className="btn-primary min-h-11 max-w-[180px]">
-        {loading ? 'Saving...' : 'Save profile'}
-      </button>
-    </form>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center rounded-[0.875rem] border border-border/80 bg-surface-raised px-3 min-h-11 gap-0">
+            <span className="shrink-0 text-sm text-ink-muted select-none">{siteUrl}/share/</span>
+            <input
+              value={slug}
+              onChange={handleSlugChange}
+              onBlur={() => { if (slug) setSlugError(validateSlugLocally(slug)) }}
+              placeholder="your-slug"
+              className="flex-1 bg-transparent py-2 text-sm text-ink outline-none placeholder:text-ink-muted/50"
+              minLength={3}
+              maxLength={30}
+            />
+          </div>
+          {slugError && <p className="text-sm text-red-600">{slugError}</p>}
+          {slugSaved && (
+            <p className="text-sm text-green-600">
+              Saved! Your new link: {siteUrl}/share/{slug}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={slugLoading || slugUnchanged}
+          className="btn-primary min-h-11 max-w-[180px]"
+        >
+          {slugLoading ? 'Saving...' : 'Save slug'}
+        </button>
+      </form>
+    </div>
   )
 }
