@@ -4,26 +4,56 @@ import { LETTER_TEMPLATES, type LetterTemplate } from '@/lib/letter-templates'
 
 export function TemplatePicker({
   onSelect,
+  selectedId,
 }: {
   onSelect: (template: LetterTemplate) => void
+  selectedId?: string
 }) {
   return (
     <div className="flex gap-2 overflow-x-auto pb-1">
-      {LETTER_TEMPLATES.map(template => (
-        <button
-          key={template.id}
-          type="button"
-          onClick={() => onSelect(template)}
-          className="flex-shrink-0 flex flex-col items-center gap-1.5 rounded-[1rem] border border-border/80 bg-surface-raised px-3 py-2.5 text-left hover:border-terra/40 transition-colors"
-        >
-          <span
-            aria-hidden="true"
-            className="h-3 w-10 rounded-full"
-            style={{ backgroundColor: template.accentColor }}
-          />
-          <span className="text-xs font-medium text-ink">{template.name}</span>
-        </button>
-      ))}
+      {LETTER_TEMPLATES.map(template => {
+        const isSelected = template.id === selectedId
+        return (
+          <button
+            key={template.id}
+            type="button"
+            onClick={() => onSelect(template)}
+            className={`flex-shrink-0 w-[88px] rounded-xl border bg-white text-left transition-all overflow-hidden ${
+              isSelected
+                ? 'border-terra shadow-[0_0_0_2px_rgba(192,92,46,0.18)]'
+                : 'border-border/80 hover:border-terra/40'
+            }`}
+          >
+            {/* Mini letter preview */}
+            <div
+              className="h-12 p-2 flex flex-col gap-[5px]"
+              style={{ backgroundColor: `${template.accentColor}0f` }}
+            >
+              {/* Title line — colored */}
+              <div
+                className="h-[4px] rounded-full w-3/5"
+                style={{ backgroundColor: `${template.accentColor}66` }}
+              />
+              {/* Body lines — neutral */}
+              <div className="h-[3px] rounded-full w-4/5 bg-ink/10" />
+              <div className="h-[3px] rounded-full w-full bg-ink/10" />
+              <div className="h-[3px] rounded-full w-2/5 bg-ink/10" />
+            </div>
+            {/* Name */}
+            <div
+              className="py-1.5 text-center"
+              style={{
+                borderTop: '1px solid rgba(221,208,188,0.6)',
+                fontSize: '9px',
+                color: isSelected ? template.accentColor : '#7A6352',
+                fontWeight: isSelected ? '600' : '400',
+              }}
+            >
+              {template.name}
+            </div>
+          </button>
+        )
+      })}
     </div>
   )
 }
