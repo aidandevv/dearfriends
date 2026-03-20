@@ -50,3 +50,15 @@ export const profileSchema = z.object({
 })
 
 export type ProfileInput = z.infer<typeof profileSchema>
+
+const RESERVED_SLUGS = new Set([
+  'login', 'dashboard', 'share', 'verify', 'about',
+  'onboarding', 'api', 'settings', 's',
+])
+
+export const slugSchema = z
+  .string()
+  .regex(/^[a-z0-9_-]{3,30}$/, 'Slug must be 3–30 lowercase letters, numbers, hyphens, or underscores')
+  .refine(s => !RESERVED_SLUGS.has(s), { message: 'That slug is reserved' })
+
+export type SlugInput = z.infer<typeof slugSchema>

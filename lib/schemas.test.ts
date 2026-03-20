@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { contactSchema, letterDraftSchema } from './schemas'
+import { contactSchema, letterDraftSchema, slugSchema } from './schemas'
 
 describe('contactSchema', () => {
   const valid = {
@@ -28,5 +28,38 @@ describe('letterDraftSchema', () => {
 
   it('rejects empty subject', () => {
     expect(letterDraftSchema.safeParse({ subject: '', body: 'hi' }).success).toBe(false)
+  })
+})
+
+describe('slugSchema', () => {
+  it('accepts valid slug', () => {
+    expect(slugSchema.safeParse('hello-world').success).toBe(true)
+  })
+  it('accepts underscores', () => {
+    expect(slugSchema.safeParse('my_slug').success).toBe(true)
+  })
+  it('accepts digits', () => {
+    expect(slugSchema.safeParse('abc123').success).toBe(true)
+  })
+  it('rejects uppercase (lowercasing is caller responsibility)', () => {
+    expect(slugSchema.safeParse('Hello').success).toBe(false)
+  })
+  it('rejects too short', () => {
+    expect(slugSchema.safeParse('ab').success).toBe(false)
+  })
+  it('rejects too long', () => {
+    expect(slugSchema.safeParse('a'.repeat(31)).success).toBe(false)
+  })
+  it('rejects reserved slug: login', () => {
+    expect(slugSchema.safeParse('login').success).toBe(false)
+  })
+  it('rejects reserved slug: dashboard', () => {
+    expect(slugSchema.safeParse('dashboard').success).toBe(false)
+  })
+  it('rejects reserved slug: api', () => {
+    expect(slugSchema.safeParse('api').success).toBe(false)
+  })
+  it('rejects spaces', () => {
+    expect(slugSchema.safeParse('hello world').success).toBe(false)
   })
 })
