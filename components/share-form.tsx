@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail } from 'lucide-react'
 import { upsertContact, submitNote, notifyAdminOfNote } from '@/lib/actions/contacts'
 import { contactSchema, type ContactInput } from '@/lib/schemas'
-import { Postmark } from '@/components/ui/postmark'
 
 function firstName(name: string | null) {
   return name?.trim().split(/\s+/)[0] ?? null
@@ -59,7 +58,9 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
     return (
       <main className="min-h-screen bg-linen flex items-center justify-center p-6">
         <div className="max-w-md w-full flex flex-col items-center text-center gap-4 animate-fade-up">
-          <Postmark />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
+            <Mail size={22} strokeWidth={1.5} />
+          </div>
           <h1 className="font-serif text-3xl text-ink">Sealed &amp; sent.</h1>
           {displayName && (
             <div className="flex flex-col items-center gap-1">
@@ -110,16 +111,25 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
     <main className="min-h-screen bg-linen flex items-center justify-center p-6">
       <div className="max-w-md w-full animate-fade-up">
         <div className="flex flex-col items-center mb-8 text-center">
-          <Postmark />
-          <div className="info-chip">
-            <Mail size={14} className="text-terra" />
-            Address request
+          {/* Postmark circle */}
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
+            <Mail size={22} strokeWidth={1.5} />
           </div>
-          <h1 className="font-serif text-3xl text-ink mt-5">Share your address</h1>
-          <p className="text-ink-muted text-sm mt-3 leading-6 max-w-sm">
+
+          {displayName && (
+            <p className="text-[11px] uppercase tracking-[0.16em] text-ink-muted mb-1.5">
+              from {displayName}
+            </p>
+          )}
+
+          <h1 className="font-serif text-[1.75rem] leading-snug text-ink">
             {displayName
-              ? `${displayName} is putting together something special and would love to send it your way.`
-              : 'Something special is being put together, and they would love to send it your way.'}
+              ? <>{displayName} wants to<br />send you something</>
+              : <>Someone wants to<br />send you something</>}
+          </h1>
+
+          <p className="text-ink-muted text-sm mt-3 leading-6 max-w-[280px]">
+            {senderBio ?? 'Share your address and something special will find its way to you.'}
           </p>
         </div>
 
@@ -184,9 +194,13 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
             className="btn-primary flex items-center justify-center gap-2 mt-1 min-h-12 w-full"
           >
             <Mail size={16} />
-            {isSubmitting ? 'Saving\u2026' : 'Submit my address'}
+            {isSubmitting ? 'Saving\u2026' : 'Send my address \u2192'}
           </button>
         </form>
+
+        <p className="mt-5 text-center text-[11px] text-ink-muted/70">
+          Powered by Dear Friends · your address stays private
+        </p>
       </div>
     </main>
   )
