@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { saveDraft, saveTemplate, deleteTemplate } from '@/lib/actions/letter'
 import { interpolate } from '@/lib/utils'
@@ -51,6 +51,13 @@ export function LetterComposer({ initialSubject, initialBody, initialStyle, user
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const editorRef = useRef<ReactCodeMirrorRef | null>(null)
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
 
   const allTemplates: ComposerTemplate[] = [
     ...LETTER_TEMPLATES.map(normalizeTemplate),
