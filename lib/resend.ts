@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { type LetterStyle } from './letter-templates'
 
 function escapeHtml(str: string): string {
   return str
@@ -47,18 +48,33 @@ export function buildVerificationEmail(opts: {
 export function buildLetterEmail(opts: {
   subject: string
   body: string
+  style?: LetterStyle
 }): { subject: string; html: string } {
+  const accentColor = opts.style?.accentColor ?? '#C05C2E'
+  const fontFamily =
+    opts.style?.font === 'sans'
+      ? '"Helvetica Neue", Arial, sans-serif'
+      : 'Georgia, "Times New Roman", serif'
+  const fontSize = { small: '14px', medium: '16px', large: '18px' }[opts.style?.fontSize ?? 'medium']
+  const lineHeight = { compact: '1.5', normal: '1.75', relaxed: '2.0' }[opts.style?.lineSpacing ?? 'normal']
+
   const htmlBody = opts.body
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(
+      /^# (.+)$/gm,
+      `<h1 style="color:${accentColor};font-family:${fontFamily};margin:0 0 12px">$1</h1>`,
+    )
+    .replace(
+      /^## (.+)$/gm,
+      `<h2 style="color:${accentColor};font-family:${fontFamily};margin:0 0 8px">$1</h2>`,
+    )
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n\n/g, '</p><p style="margin:0 0 16px">')
     .replace(/\n/g, '<br/>')
 
   return {
     subject: opts.subject,
-    html: `<p>${htmlBody}</p>`,
+    html: `<div style="font-family:${fontFamily};font-size:${fontSize};line-height:${lineHeight};color:#231209;max-width:600px;margin:0 auto;padding:40px 24px"><p style="margin:0 0 16px">${htmlBody}</p></div>`,
   }
 }
 
