@@ -15,9 +15,19 @@ export const contactSchema = z.object({
 
 export type ContactInput = z.infer<typeof contactSchema>
 
+export const letterStyleSchema = z.object({
+  font: z.enum(['serif', 'sans']),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  lineSpacing: z.enum(['compact', 'normal', 'relaxed']),
+  fontSize: z.enum(['small', 'medium', 'large']),
+})
+
+export type LetterStyleInput = z.infer<typeof letterStyleSchema>
+
 export const letterDraftSchema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   body: z.string(),
+  style: letterStyleSchema.optional(),
 })
 
 export type LetterDraftInput = z.infer<typeof letterDraftSchema>

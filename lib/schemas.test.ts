@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { contactSchema, letterDraftSchema, slugSchema } from './schemas'
+import { contactSchema, letterDraftSchema, slugSchema, letterStyleSchema } from './schemas'
 
 describe('contactSchema', () => {
   const valid = {
@@ -61,5 +61,42 @@ describe('slugSchema', () => {
   })
   it('rejects spaces', () => {
     expect(slugSchema.safeParse('hello world').success).toBe(false)
+  })
+})
+
+describe('letterStyleSchema', () => {
+  const valid = {
+    font: 'serif',
+    accentColor: '#C05C2E',
+    lineSpacing: 'normal',
+    fontSize: 'medium',
+  }
+
+  it('accepts valid style', () => {
+    expect(letterStyleSchema.safeParse(valid).success).toBe(true)
+  })
+
+  it('accepts sans font', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, font: 'sans' }).success).toBe(true)
+  })
+
+  it('rejects unknown font', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, font: 'mono' }).success).toBe(false)
+  })
+
+  it('rejects malformed hex color (no #)', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, accentColor: 'C05C2E' }).success).toBe(false)
+  })
+
+  it('rejects 3-char hex', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, accentColor: '#C05' }).success).toBe(false)
+  })
+
+  it('rejects invalid lineSpacing', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, lineSpacing: 'wide' }).success).toBe(false)
+  })
+
+  it('rejects invalid fontSize', () => {
+    expect(letterStyleSchema.safeParse({ ...valid, fontSize: 'huge' }).success).toBe(false)
   })
 })
