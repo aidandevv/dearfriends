@@ -2,6 +2,7 @@
 
 import type { ReactCodeMirrorRef } from '@uiw/react-codemirror'
 import { EditorView } from '@codemirror/view'
+import { EditorSelection } from '@codemirror/state'
 
 type Props = {
   editorRef: React.RefObject<ReactCodeMirrorRef | null>
@@ -16,7 +17,11 @@ function wrapSelection(view: EditorView, before: string, after: string) {
     const text = state.sliceDoc(range.from, range.to)
     return { from: range.from, to: range.to, insert: before + text + after }
   })
-  view.dispatch({ changes })
+  // For empty selections, place cursor between the markers after insert
+  const newSelection = state.selection.ranges.every(r => r.empty)
+    ? EditorSelection.cursor(state.selection.main.from + before.length)
+    : undefined
+  view.dispatch({ changes, ...(newSelection ? { selection: newSelection } : {}) })
   view.focus()
 }
 
