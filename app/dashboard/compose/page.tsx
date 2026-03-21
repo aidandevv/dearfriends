@@ -1,22 +1,24 @@
 import { Suspense } from 'react'
 import { LetterComposer } from '@/components/letter-composer'
 import { GroupFilter } from '@/components/group-filter'
-import { getDraft, getRandomContact } from '@/lib/actions/letter'
+import { getDraft, getRandomContact, listTemplates } from '@/lib/actions/letter'
 import { getGroups, getContactsByGroup } from '@/lib/actions/groups'
 
 export default async function ComposePage({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
   const params = await searchParams
   const groupId = params.group ?? null
 
-  const [draft, groups, groupContacts] = await Promise.all([
+  const [draft, groups, groupContacts, userTemplates] = await Promise.all([
     getDraft(),
     getGroups(),
     getContactsByGroup(groupId),
+    listTemplates(),
   ])
 
-  const contact = groupContacts.length > 0
-    ? groupContacts[Math.floor(Math.random() * groupContacts.length)]
-    : await getRandomContact()
+  const contact =
+    groupContacts.length > 0
+      ? groupContacts[Math.floor(Math.random() * groupContacts.length)]
+      : await getRandomContact()
 
   return (
     <div className="space-y-5">
@@ -34,7 +36,13 @@ export default async function ComposePage({ searchParams }: { searchParams: Prom
         )}
       </section>
 
-      <LetterComposer initialSubject={draft.subject} initialBody={draft.body} previewContact={contact} />
+      <LetterComposer
+        initialSubject={draft.subject}
+        initialBody={draft.body}
+        initialStyle={draft.style}
+        userTemplates={userTemplates}
+        previewContact={contact}
+      />
     </div>
   )
 }
