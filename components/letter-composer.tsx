@@ -7,7 +7,7 @@ import { interpolate } from '@/lib/utils'
 import { TemplatePicker } from '@/components/template-picker'
 import { MarkdownEditor, type ReactCodeMirrorRef } from '@/components/editor/markdown-editor'
 import { EditorToolbar } from '@/components/editor/editor-toolbar'
-import { LETTER_TEMPLATES, normalizeTemplate, DEFAULT_STYLE, type LetterStyle, type ComposerTemplate } from '@/lib/letter-templates'
+import { LETTER_TEMPLATES, normalizeTemplate, type LetterStyle, type ComposerTemplate } from '@/lib/letter-templates'
 
 const ACCENT_PRESETS = [
   '#C05C2E', '#8B4513', '#9B59B6', '#2E8B57',
