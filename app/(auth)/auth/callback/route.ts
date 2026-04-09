@@ -5,6 +5,7 @@ import { getUserProfile } from '@/lib/user-profile'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const type = searchParams.get('type')
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login`)
@@ -15,6 +16,10 @@ export async function GET(request: Request) {
 
   if (error) {
     return NextResponse.redirect(`${origin}/login`)
+  }
+
+  if (type === 'recovery') {
+    return NextResponse.redirect(`${origin}/auth/reset-password`)
   }
 
   const {
