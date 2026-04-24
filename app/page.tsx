@@ -236,61 +236,6 @@ function ReminderCard({ icon, title, when, body, primary, secondary, rotate, bg 
   )
 }
 
-// ─── Price card ───────────────────────────────────────────────────────────────
-function PriceCard({ name, desc, price, per, features, cta, featured }: {
-  name: string; desc: string; price: string; per: string
-  features: string[]; cta: string; featured?: boolean
-}) {
-  return (
-    <div style={{
-      background: featured ? ink : paper,
-      color: featured ? paper : ink,
-      border: `1px solid ${featured ? ink : line}`,
-      borderRadius: 10, padding: '36px 32px',
-      textAlign: 'left', position: 'relative',
-    }}>
-      {featured && (
-        <span style={{
-          position: 'absolute', top: -12, right: 28,
-          background: cream, color: ink,
-          fontSize: 11, fontWeight: 600, letterSpacing: '0.1em',
-          textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999,
-        }}>
-          Most loved
-        </span>
-      )}
-      <h4 style={{ fontFamily: newsreader, fontWeight: 500, fontSize: 22, margin: '0 0 6px' }}>{name}</h4>
-      <p style={{ fontSize: 14, color: featured ? 'rgba(250,244,228,.65)' : muted, marginBottom: 22 }}>{desc}</p>
-      <div style={{
-        fontFamily: newsreader, fontSize: 56, fontWeight: 400,
-        lineHeight: 1, letterSpacing: '-0.02em',
-      }}>
-        {price}
-        <small style={{ fontSize: 18, color: featured ? 'rgba(250,244,228,.6)' : muted }}>{per}</small>
-      </div>
-      <ul style={{ listStyle: 'none', padding: 0, margin: '22px 0 28px', fontSize: 14.5 }}>
-        {features.map(f => (
-          <li key={f} style={{
-            padding: '6px 0', display: 'flex', gap: 10, alignItems: 'flex-start',
-            color: featured ? 'rgba(250,244,228,.85)' : inkSoft,
-          }}>
-            <span style={{ color: featured ? cream : blueInk, fontSize: 20, lineHeight: 1.2 }}>•</span>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <Link href="/login" style={{
-        ...btnPrimary,
-        ...(featured
-          ? { background: cream, color: ink, boxShadow: '0 2px 0 0 #8a7a3a', width: '100%', justifyContent: 'center' }
-          : { ...btnInk, width: '100%', justifyContent: 'center' }),
-      }}>
-        {cta}
-      </Link>
-    </div>
-  )
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function HomePage() {
   return (
@@ -897,53 +842,6 @@ export default function HomePage() {
               }}>J</span>
               <span><b style={{ color: ink, fontWeight: 500 }}>Jules, 29</b> · Brooklyn · used it for 4 months</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═════ PRICING ═════ */}
-      <section id="pricing" style={{ padding: '110px 0', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
-          <div style={{ maxWidth: 620, margin: '0 auto 48px' }}>
-            <Eyebrow center>Pricing</Eyebrow>
-            <SecTitle center><Italic>Small</Italic> and honest.</SecTitle>
-            <p style={{ fontSize: 18, color: inkSoft, lineHeight: 1.5, margin: '0 auto' }}>
-              dearfriends is built by one person. No VC, no dark patterns.
-              The free plan is real, forever.
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 24, maxWidth: 840, margin: '0 auto',
-          }} className="landing-price-grid">
-            <PriceCard
-              name="A little book"
-              desc="For keeping in touch with your closest circle."
-              price="$0"
-              per=" / forever"
-              features={[
-                'Up to 25 friends',
-                'Birthday & address book',
-                'Sunday morning nudges',
-                'Print your letters at home',
-              ]}
-              cta="Start free"
-            />
-            <PriceCard
-              name="A bigger book"
-              desc="For people with a lot of people."
-              price="$4"
-              per=" / month"
-              features={[
-                'Unlimited friends & notes',
-                'We mail cards for you ($3 each)',
-                'Handwritten option',
-                'Shared family book',
-              ]}
-              cta="Try it for a month"
-              featured
-            />
           </div>
         </div>
       </section>

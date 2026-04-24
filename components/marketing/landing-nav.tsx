@@ -59,7 +59,6 @@ export function LandingNav() {
             { href: '#how', label: 'How it works' },
             { href: '#friends', label: 'Your people' },
             { href: '#letters', label: 'Letters' },
-            { href: '#pricing', label: 'Pricing' },
           ].map(({ href, label }) => (
             <li key={href}>
               <a href={href} style={{ color: 'inherit', textDecoration: 'none' }}
