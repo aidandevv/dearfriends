@@ -762,29 +762,29 @@ export default function HomePage() {
       </section>
 
       {/* ═════ COMPOSER ═════ */}
-      <section id="letters" style={{ padding: '80px 0', position: 'relative', zIndex: 1 }}>
+      <section id="letters" style={{ padding: '120px 0', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: '1.4fr 1fr',
-            gap: 52, alignItems: 'center',
+            display: 'grid', gridTemplateColumns: '1.1fr 1fr',
+            gap: 70, alignItems: 'center',
           }} className="landing-grid-2col">
             {/* Letter mock */}
             <div style={{
               background: paper, border: `1px solid ${line}`, borderRadius: 8,
-              padding: '48px 56px',
-              fontFamily: newsreader, lineHeight: 1.6, color: ink,
+              padding: '36px 40px',
+              fontFamily: newsreader, lineHeight: 1.55, color: ink,
               position: 'relative',
               boxShadow: `0 30px 60px -20px rgba(45,35,10,.15), 0 8px 20px -6px rgba(45,35,10,.08)`,
-              backgroundImage: `repeating-linear-gradient(to bottom, transparent 0 36px, rgba(81,97,131,.12) 36px 37px)`,
-              backgroundPosition: '0 56px',
+              backgroundImage: `repeating-linear-gradient(to bottom, transparent 0 29px, rgba(81,97,131,.12) 29px 30px)`,
+              backgroundPosition: '0 48px',
             }}>
-              <div style={{ fontFamily: dmSans, fontSize: 13, color: muted, marginBottom: 16, textAlign: 'right' }}>
+              <div style={{ fontFamily: dmSans, fontSize: 13, color: muted, marginBottom: 12, textAlign: 'right' }}>
                 april 26, 2026
               </div>
-              <div style={{ fontSize: 34, fontStyle: 'italic', color: blueInk, marginBottom: 16 }}>
+              <div style={{ fontSize: 22, fontStyle: 'italic', color: blueInk, marginBottom: 8 }}>
                 Dear Mira,
               </div>
-              <div style={{ fontSize: 22, color: ink, marginBottom: 40, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 17, color: ink, marginBottom: 30 }}>
                 It&apos;s been a strange spring. I&apos;ve been thinking about{' '}
                 <span style={{
                   background: cream, padding: '0 3px',
@@ -805,7 +805,7 @@ export default function HomePage() {
                 </span>{' '}
                 — any chance?
               </div>
-              <div style={{ fontStyle: 'italic', color: blueInk, fontSize: 26 }}>
+              <div style={{ fontStyle: 'italic', color: blueInk, fontSize: 18 }}>
                 Yours, always —
               </div>
 
