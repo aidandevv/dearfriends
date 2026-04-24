@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Playfair_Display, DM_Sans, Newsreader, Caveat } from "next/font/google";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -11,7 +11,22 @@ const playfair = Playfair_Display({
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-caveat",
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}>
+      <body className={`${playfair.variable} ${dmSans.variable} ${newsreader.variable} ${caveat.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

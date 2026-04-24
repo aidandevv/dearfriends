@@ -114,3 +114,19 @@ body {
     transform: none !important;
   }
 }
+
+/* Landing page responsive overrides (inline styles need !important to be overridden by media queries) */
+@media (max-width: 1024px) {
+  .landing-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .landing-price-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
