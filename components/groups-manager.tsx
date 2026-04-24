@@ -52,7 +52,7 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
         {groups.map(group => (
           <div key={group.id} className="surface-panel flex items-center justify-between gap-4 px-4 py-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-terra/10 text-terra">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-ink/10 text-blue-ink">
                 <Users size={15} />
               </span>
               <span className="font-medium text-ink">{group.name}</span>

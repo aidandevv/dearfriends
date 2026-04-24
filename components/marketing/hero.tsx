@@ -22,7 +22,7 @@ export function Hero() {
         <div className="relative z-10 max-w-2xl">
           <h1 className="font-serif text-5xl leading-[1.1] text-linen sm:text-6xl lg:text-7xl">
             Your people deserve more than{' '}
-            <em className="not-italic text-terra">a group text.</em>
+            <em className="not-italic text-blue-ink">a group text.</em>
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-8 text-linen/70">
@@ -32,7 +32,7 @@ export function Hero() {
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-terra px-7 py-3.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-terra-dark"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-ink px-7 py-3.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-blue-mid"
             >
               Get started free
               <ArrowRight size={16} />
@@ -58,7 +58,7 @@ export function Hero() {
                   <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">Dashboard</p>
                   <p className="mt-0.5 font-serif text-xl text-ink">Spring update</p>
                 </div>
-                <div className="rounded-full bg-terra px-3 py-1 text-xs font-medium text-white">42 contacts</div>
+                <div className="rounded-full bg-blue-ink px-3 py-1 text-xs font-medium text-white">42 contacts</div>
               </div>
 
               <div className="space-y-2.5 p-4">

@@ -22,8 +22,8 @@ export function NavLink({
       title={label}
       className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
         isActive
-          ? 'bg-terra text-white'
-          : 'text-ink-muted hover:bg-terra/10 hover:text-terra'
+          ? 'bg-blue-ink text-white'
+          : 'text-ink-muted hover:bg-blue-ink/10 hover:text-blue-ink'
       }`}
     >
       {children}

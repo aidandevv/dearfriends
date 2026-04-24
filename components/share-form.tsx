@@ -58,7 +58,7 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
     return (
       <main className="min-h-screen bg-linen flex items-center justify-center p-6">
         <div className="max-w-md w-full flex flex-col items-center text-center gap-4 animate-fade-up">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-blue-ink text-blue-ink">
             <Mail size={22} strokeWidth={1.5} />
           </div>
           <h1 className="font-serif text-3xl text-ink">Sealed &amp; sent.</h1>
@@ -112,7 +112,7 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
       <div className="max-w-md w-full animate-fade-up">
         <div className="flex flex-col items-center mb-8 text-center">
           {/* Postmark circle */}
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-blue-ink text-blue-ink">
             <Mail size={22} strokeWidth={1.5} />
           </div>
 

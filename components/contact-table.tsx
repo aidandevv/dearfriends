@@ -68,7 +68,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
         return (
           <div
             key={contact.id}
-            className={`group grid grid-cols-[1fr_100px_110px_100px_80px_60px] gap-3 items-center py-2.5 px-1 border-b border-border/40 transition-colors hover:bg-terra/[0.025] ${pending === contact.id ? 'opacity-50' : ''}`}
+            className={`group grid grid-cols-[1fr_100px_110px_100px_80px_60px] gap-3 items-center py-2.5 px-1 border-b border-border/40 transition-colors hover:bg-blue-ink/[0.025] ${pending === contact.id ? 'opacity-50' : ''}`}
           >
             {/* Name + initials */}
             <div className="flex items-center gap-2.5 min-w-0">
@@ -86,7 +86,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
               value={contact.delivery_method}
               onChange={e => handleDeliveryChange(contact.id, e.target.value)}
               disabled={pending === contact.id}
-              className="text-xs rounded-full border px-2.5 py-1 bg-surface cursor-pointer focus:outline-none focus:ring-1 focus:ring-terra/40 disabled:opacity-50"
+              className="text-xs rounded-full border px-2.5 py-1 bg-surface cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-ink/40 disabled:opacity-50"
               style={{
                 borderColor: contact.delivery_method === 'print'
                   ? 'rgba(192,92,46,0.35)'
@@ -125,7 +125,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
                 disabled={nudgePending === contact.id}
                 title="Send address refresh nudge"
                 aria-label="Send address refresh nudge"
-                className="hidden group-hover:flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:text-terra hover:bg-terra/10 disabled:opacity-50 text-xs transition-colors"
+                className="hidden group-hover:flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:text-blue-ink hover:bg-blue-ink/10 disabled:opacity-50 text-xs transition-colors"
               >
                 ↩
               </button>

@@ -322,7 +322,7 @@ export default function HomePage() {
         style={{
           position: 'relative', zIndex: 1,
           maxWidth: 1280, margin: '0 auto',
-          padding: '40px 40px 100px',
+          padding: '120px 40px 100px',
           display: 'grid',
           gridTemplateColumns: '1.1fr 1fr',
           gap: 60, alignItems: 'center',
@@ -330,7 +330,6 @@ export default function HomePage() {
       >
         {/* Copy */}
         <div>
-          <Eyebrow>A very small app · for sending real mail</Eyebrow>
           <h1 style={{
             fontFamily: newsreader, fontWeight: 400,
             fontSize: 'clamp(54px, 7vw, 108px)',

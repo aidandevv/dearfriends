@@ -24,7 +24,7 @@ export function GroupFilter({ groups }: { groups: Group[] }) {
           onClick={() => select(g.id)}
           className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
             current === g.id
-              ? 'bg-terra text-white'
+              ? 'bg-blue-ink text-white'
               : 'border border-border/80 bg-surface-raised text-ink-muted hover:text-ink'
           }`}
         >

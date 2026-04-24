@@ -22,7 +22,7 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <ExportCard
-        icon={<FileText size={20} className="text-terra" />}
+        icon={<FileText size={20} className="text-blue-ink" />}
         title="CSV export"
         description="Generate mailing data for labels and list cleanup."
       >
@@ -40,7 +40,7 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
       </ExportCard>
 
       <ExportCard
-        icon={<FileDown size={20} className="text-terra" />}
+        icon={<FileDown size={20} className="text-blue-ink" />}
         title="PDF export"
         description="Build a ready-to-print packet with one personalized page per print contact."
       >
@@ -50,7 +50,7 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
       </ExportCard>
 
       <ExportCard
-        icon={<Send size={20} className="text-terra" />}
+        icon={<Send size={20} className="text-blue-ink" />}
         title="Digital send"
         description="Use your current letter draft to email everyone marked for digital delivery."
       >
@@ -82,7 +82,7 @@ function ExportCard({
 }) {
   return (
     <section className="surface-panel flex h-full flex-col gap-4 px-5 py-5">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-terra/10">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-ink/10">
         {icon}
       </div>
       <div>

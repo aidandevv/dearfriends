@@ -50,7 +50,7 @@ export default function AboutPage() {
           <div className="max-w-xl animate-fade-up">
             <Postmark />
             <p className="info-chip">
-              <Sparkles size={14} className="text-terra" />
+              <Sparkles size={14} className="text-blue-ink" />
               What Dear Friends is all about
             </p>
             <h1 className="mt-6 font-serif text-5xl leading-tight text-ink">A warmer home for mailing lists and meaningful updates.</h1>
@@ -78,7 +78,7 @@ export default function AboutPage() {
         <section className="mt-16 grid gap-5 md:grid-cols-3">
           {pillars.map(({ title, body, icon: Icon }) => (
             <article key={title} className="section-card hover-lift px-6 py-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-terra/10 text-terra">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-ink/10 text-blue-ink">
                 <Icon size={22} />
               </div>
               <h2 className="mt-5 font-serif text-2xl text-ink">{title}</h2>

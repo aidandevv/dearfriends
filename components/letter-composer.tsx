@@ -91,8 +91,8 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
           </div>
 
           <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4 text-sm text-ink-muted">
-            Use <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-terra">{'{{first_name}}'}</code> and{' '}
-            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-terra">{'{{last_name}}'}</code> to personalize each note.
+            Use <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{first_name}}'}</code> and{' '}
+            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{last_name}}'}</code> to personalize each note.
           </div>
         </div>
       </section>
