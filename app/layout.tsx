@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans, Newsreader, Caveat } from "next/font/google";
+import { DM_Sans, Caveat } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  weight: ["400", "700"],
+const ppWriter = localFont({
+  src: [
+    { path: '../public/fonts/PPWriter-Regular.otf', weight: '400', style: 'normal' },
+    { path: '../public/fonts/PPWriter-RegularItalic.otf', weight: '400', style: 'italic' },
+    { path: '../public/fonts/PPWriter-Book.otf', weight: '450', style: 'normal' },
+    { path: '../public/fonts/PPWriter-Bold.otf', weight: '700', style: 'normal' },
+    { path: '../public/fonts/PPWriter-BoldItalic.otf', weight: '700', style: 'italic' },
+  ],
+  variable: '--font-ppwriter',
+  display: 'swap',
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
   weight: ["400", "500", "600", "700"],
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
 });
 
 const caveat = Caveat({
@@ -46,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${dmSans.variable} ${newsreader.variable} ${caveat.variable} font-sans antialiased`}>
+      <body className={`${ppWriter.variable} ${dmSans.variable} ${caveat.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { AuthArtPanel } from '@/components/ui/auth-art-panel'
 import { KeyRound } from 'lucide-react'
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')

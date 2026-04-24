@@ -4,7 +4,7 @@ import { Postmark } from '@/components/ui/postmark'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export default async function OnboardingPage() {
   const supabase = await createClient()

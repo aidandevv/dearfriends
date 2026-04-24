@@ -8,7 +8,7 @@ import { Mail, LogIn, UserPlus, KeyRound } from 'lucide-react'
 
 type Mode = 'sign-in' | 'sign-up' | 'magic-link' | 'forgot-password'
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>('sign-in')

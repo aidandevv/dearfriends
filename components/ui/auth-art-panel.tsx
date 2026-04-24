@@ -1,4 +1,4 @@
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export function AuthArtPanel() {
   return (

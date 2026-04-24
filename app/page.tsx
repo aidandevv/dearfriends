@@ -19,7 +19,7 @@ const muted    = '#6b7290'
 const line     = '#d9cfb0'
 const stamp    = '#b8453b'
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 const caveat     = "var(--font-caveat), cursive"
 const dmSans     = "var(--font-dm-sans), system-ui, sans-serif"
 

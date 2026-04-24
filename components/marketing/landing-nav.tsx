@@ -7,7 +7,7 @@ const ink = '#1d2442'
 const paper = '#faf4e4'
 const blueInk = '#3358ba'
 const line = '#d9cfb0'
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export function LandingNav() {
   const [scrolled, setScrolled] = useState(false)

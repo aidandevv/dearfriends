@@ -11,7 +11,7 @@ function firstName(name: string | null) {
   return name?.trim().split(/\s+/)[0] ?? null
 }
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 const caveat = "var(--font-caveat), cursive"
 
 export function ShareForm({ adminId, senderName, senderBio }: {

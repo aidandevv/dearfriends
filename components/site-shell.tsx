@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { LandingNav } from '@/components/marketing/landing-nav'
 
-const newsreader = "var(--font-newsreader), Georgia, serif"
+const newsreader = "var(--font-ppwriter), Georgia, serif"
 
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
