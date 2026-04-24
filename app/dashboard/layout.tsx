@@ -32,10 +32,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <div className="flex flex-1 flex-col items-center gap-1 w-full">
             {/* Wordmark */}
             <span
-              className="mb-5 font-serif text-[10px] font-bold uppercase tracking-[0.18em] text-blue-ink"
+              className="mb-5 font-serif text-[13px] italic text-blue-ink"
               style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
             >
-              DF
+              df
             </span>
 
             {navItems.map(({ href, label, icon: Icon }) => (
@@ -46,7 +46,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
 
           {/* Avatar */}
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-ink to-border" />
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-ink to-blue-slate" />
         </nav>
 
         <main className="min-h-screen overflow-auto p-5">
