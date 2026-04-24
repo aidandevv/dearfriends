@@ -66,8 +66,8 @@ body {
 
   .hero-glow {
     background:
-      radial-gradient(circle at top, rgba(192, 92, 46, 0.14), transparent 42%),
-      radial-gradient(circle at bottom right, rgba(122, 99, 82, 0.12), transparent 36%);
+      radial-gradient(circle at top, rgba(51, 88, 186, 0.10), transparent 42%),
+      radial-gradient(circle at bottom right, rgba(81, 97, 131, 0.08), transparent 36%);
   }
 
   .animate-fade-up {
