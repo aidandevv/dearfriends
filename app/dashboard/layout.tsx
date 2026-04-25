@@ -25,31 +25,64 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const profile = getUserProfile(user)
   if (!profile.hasCompletedOnboarding) redirect('/onboarding')
 
+  const initials = profile.fullName
+    ? profile.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+
   return (
     <>
-      <div className="min-h-screen bg-linen grid grid-cols-[68px_minmax(0,1fr)]">
-        <nav className="flex w-[68px] flex-shrink-0 flex-col items-center border-r border-border/60 bg-sidebar py-5 min-h-screen">
-          <div className="flex flex-1 flex-col items-center gap-1 w-full">
-            {/* Wordmark */}
-            <span
-              className="mb-5 font-serif text-[13px] italic text-blue-ink"
-              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+      <div className="min-h-screen bg-linen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
+        <nav
+          className="flex flex-shrink-0 flex-col border-r border-border/50 min-h-screen py-6 px-4"
+          style={{ background: 'var(--sidebar)' }}
+        >
+          {/* Wordmark */}
+          <div className="mb-8 px-1">
+            <a
+              href="/dashboard"
+              style={{
+                fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                fontStyle: 'italic',
+                fontSize: 20,
+                fontWeight: 400,
+                color: 'var(--blue-ink)',
+                textDecoration: 'none',
+                letterSpacing: '-0.01em',
+              }}
             >
-              df
-            </span>
+              dearfriends
+            </a>
+            <div
+              style={{
+                marginTop: 2,
+                height: 1,
+                background: 'linear-gradient(90deg, var(--border) 0%, transparent 80%)',
+              }}
+            />
+          </div>
 
+          {/* Nav items */}
+          <div className="flex flex-1 flex-col gap-0.5">
             {navItems.map(({ href, label, icon: Icon }) => (
               <NavLink key={href} href={href} label={label}>
-                <Icon size={18} />
+                <Icon size={16} />
               </NavLink>
             ))}
           </div>
 
-          {/* Avatar */}
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-ink to-blue-slate" />
+          {/* User avatar */}
+          <div className="mt-6 flex items-center gap-3 rounded-xl px-3 py-2.5 border border-border/60 bg-linen/60">
+            <div
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+              style={{ background: 'linear-gradient(135deg, var(--blue-ink), var(--blue-slate))' }}
+            >
+              {initials}
+            </div>
+            <span className="text-xs font-medium text-ink truncate">{profile.fullName ?? 'You'}</span>
+          </div>
         </nav>
 
-        <main className="min-h-screen overflow-auto p-5">
+        <main className="min-h-screen overflow-auto p-6">
           {children}
         </main>
       </div>

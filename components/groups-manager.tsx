@@ -50,15 +50,30 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
           <p className="text-sm text-ink-muted">No groups yet. Create one above.</p>
         )}
         {groups.map(group => (
-          <div key={group.id} className="surface-panel flex items-center justify-between gap-4 px-4 py-3">
+          <div
+            key={group.id}
+            className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-linen/60 px-4 py-3 transition-colors hover:bg-linen"
+          >
             <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-ink/10 text-blue-ink">
-                <Users size={15} />
+              <span
+                className="flex h-8 w-8 items-center justify-center rounded-full text-white"
+                style={{ background: 'linear-gradient(135deg, var(--blue-ink), var(--blue-slate))' }}
+              >
+                <Users size={14} />
               </span>
-              <span className="font-medium text-ink">{group.name}</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                  fontSize: 15,
+                  fontWeight: 400,
+                  color: 'var(--ink)',
+                }}
+              >
+                {group.name}
+              </span>
             </div>
             <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={group.birthday_tracking}
@@ -69,9 +84,9 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
               </label>
               <button
                 onClick={() => handleDelete(group.id)}
-                className="text-ink-muted hover:text-red-500 transition-colors"
+                className="text-ink-muted hover:text-stamp transition-colors p-1 rounded"
               >
-                <Trash2 size={15} />
+                <Trash2 size={14} />
               </button>
             </div>
           </div>

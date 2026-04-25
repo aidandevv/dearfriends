@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AuthArtPanel } from '@/components/ui/auth-art-panel'
 import { Mail, LogIn, UserPlus, KeyRound } from 'lucide-react'
@@ -119,9 +120,9 @@ export default function LoginPage() {
             {sentMessages[mode] ?? 'We sent a link to'}{' '}
             <strong className="text-ink">{email}</strong>. Click it to continue.
           </p>
-          <a href="/" className="mt-2 text-sm text-blue-ink hover:underline underline-offset-2">
+          <Link href="/" className="mt-2 text-sm text-blue-ink hover:underline underline-offset-2">
             ← back to dearfriends
-          </a>
+          </Link>
         </div>
       </main>
     )

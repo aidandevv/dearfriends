@@ -20,6 +20,7 @@ const config: Config = {
         "blue-ink": "#3358ba",
         "blue-mid": "#3e5da0",
         ink: "#1d2442",
+        "ink-soft": "#3a4263",
         "ink-muted": "#6b7290",
         border: "#d9cfb0",
         sage: "#5A7A5A",

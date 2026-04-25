@@ -11,10 +11,28 @@ export function ShareLinkCard({ shareSlug }: ShareLinkCardProps) {
 
   return (
     <section className="surface-panel px-5 py-5">
-      <p className="text-xs uppercase tracking-[0.22em] text-ink-muted">Your share link</p>
+      <p className="eyebrow">Invite</p>
+      <p
+        style={{
+          fontFamily: 'var(--font-ppwriter), Georgia, serif',
+          fontSize: 20,
+          fontWeight: 400,
+          color: 'var(--ink)',
+          letterSpacing: '-0.015em',
+          marginBottom: 12,
+        }}
+      >
+        Your share link
+      </p>
+
       {url ? (
         <>
-          <p className="mt-3 break-all font-mono text-sm text-ink">{url}</p>
+          <div
+            className="rounded-xl border border-border/70 bg-linen/70 px-3 py-2.5"
+            style={{ wordBreak: 'break-all' }}
+          >
+            <span className="font-mono text-xs text-ink-muted">{url}</span>
+          </div>
           <ShareLinkActions url={url} />
           <Link
             href="/dashboard/settings"
@@ -24,7 +42,7 @@ export function ShareLinkCard({ shareSlug }: ShareLinkCardProps) {
           </Link>
         </>
       ) : (
-        <p className="mt-3 text-sm text-ink-muted">
+        <p className="text-sm text-ink-muted">
           Your link is being set up — refresh to try again.
         </p>
       )}

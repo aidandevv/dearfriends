@@ -38,34 +38,50 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="space-y-5">
         {/* Topbar */}
-        <section className="surface-panel px-5 py-5">
-          <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-4">
+        <section className="surface-panel px-6 py-5">
+          <div className="flex items-start justify-between gap-4 border-b border-border/50 pb-5">
             <div>
-              <h1 className="font-serif text-4xl text-ink">Your friends</h1>
-              <p className="mt-1 text-sm text-ink-muted">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</p>
+              <p className="eyebrow">Your book</p>
+              <h1 className="dash-title">Your friends</h1>
+              <p className="text-sm text-ink-muted mt-0.5">
+                {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+              </p>
             </div>
             <SendVerificationButton />
           </div>
 
           {/* Stats strip */}
-          <div className="flex items-center pt-4">
+          <div className="flex items-center pt-5 gap-0">
             {stats.map((stat, i) => (
               <div
                 key={stat.label}
-                className={`flex flex-col pr-6 ${i > 0 ? 'border-l border-border/60 pl-6' : ''}`}
+                className={`flex flex-col pr-7 ${i > 0 ? 'border-l border-border/50 pl-7' : ''}`}
               >
-                <span className="font-serif text-[26px] leading-none text-ink">{stat.value}</span>
-                <span className="mt-1 text-[10px] uppercase tracking-[0.1em] text-ink-muted">{stat.label}</span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                    fontSize: 28,
+                    fontWeight: 400,
+                    lineHeight: 1,
+                    color: 'var(--ink)',
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {stat.value}
+                </span>
+                <span className="mt-1.5 text-[10px] uppercase tracking-[0.14em] text-ink-muted font-medium">
+                  {stat.label}
+                </span>
               </div>
             ))}
           </div>
         </section>
 
         {/* Contact list */}
-        <section className="surface-panel px-4 py-4 lg:px-5">
+        <section className="surface-panel px-5 py-5">
           <ContactTable contacts={contacts} allGroups={groups} />
         </section>
       </div>

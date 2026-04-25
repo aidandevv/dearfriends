@@ -491,10 +491,6 @@ export default function HomePage() {
                 {' '}<Italic>one little book</Italic>.
               </SecTitle>
             </div>
-            <p style={{ fontSize: 18, color: inkSoft, maxWidth: 580, lineHeight: 1.5, margin: 0 }}>
-              Not another social feed. dearfriends is a calm place to remember who&apos;s
-              where, what they&apos;re up to, and the last time you reached out.
-            </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28 }} className="landing-steps-grid">
@@ -787,25 +783,8 @@ export default function HomePage() {
               <p style={{ fontSize: 18, color: inkSoft, lineHeight: 1.5, margin: '0 0 0' }}>
                 dearfriends remembers the small things you&apos;ve mentioned before —
                 a trip, a new kid, a hard season — so your letters don&apos;t start
-                with <em>&ldquo;sorry it&apos;s been so long.&rdquo;</em> Print at home, or we&apos;ll
-                mail it for $3.
+                with <em>&ldquo;sorry it&apos;s been so long.&rdquo;</em>
               </p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '28px 0 0', fontSize: 15.5, color: inkSoft }}>
-                {[
-                  { label: 'Print & mail yourself', price: 'free' },
-                  { label: 'We print + stamp + mail', price: '$3 / card' },
-                  { label: 'Handwritten, actually', price: '$8 / card' },
-                ].map(({ label, price }, i, arr) => (
-                  <li key={label} style={{
-                    padding: '8px 0',
-                    borderBottom: i < arr.length - 1 ? `1px dashed ${line}` : 'none',
-                    display: 'flex', justifyContent: 'space-between',
-                  }}>
-                    <b style={{ color: ink }}>{label}</b>
-                    <span style={{ color: muted }}>{price}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>

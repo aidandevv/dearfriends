@@ -9,6 +9,7 @@
   --blue-ink: #3358ba;
   --blue-mid: #3e5da0;
   --ink: #1d2442;
+  --ink-soft: #3a4263;
   --ink-muted: #6b7290;
   --border: #d9cfb0;
   --sage: #5A7A5A;
@@ -16,6 +17,7 @@
   --cream: #E4CE95;
   --blue-slate: #516183;
   --stamp: #b8453b;
+  --line: #d9cfb0;
 }
 
 body {
@@ -28,17 +30,29 @@ body {
   .input {
     @apply w-full rounded-lg border border-border bg-linen px-3 py-2 text-sm text-ink
            transition-colors placeholder:text-ink-muted/50
-           focus:border-blue-ink focus:outline-none focus:ring-2 focus:ring-blue-ink/40;
+           focus:border-blue-ink focus:outline-none focus:ring-2 focus:ring-blue-ink/20;
   }
 
   .btn-primary {
     @apply cursor-pointer rounded-full bg-blue-ink px-6 py-2.5 text-sm font-medium text-white
-           transition-colors hover:bg-blue-mid disabled:opacity-50;
+           transition-all hover:bg-blue-mid disabled:opacity-50;
+    box-shadow: 0 2px 0 0 #0e1230, 0 4px 14px -3px rgba(51, 88, 186, 0.35);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 0 #0e1230, 0 2px 8px -2px rgba(51, 88, 186, 0.25);
   }
 
   .btn-outline {
     @apply cursor-pointer rounded-full border border-border px-6 py-2.5 text-sm font-medium text-ink
-           transition-colors hover:bg-surface disabled:opacity-50;
+           transition-all hover:bg-surface hover:border-border disabled:opacity-50;
+    box-shadow: 0 1px 0 0 rgba(217,207,176,0.8), 0 2px 8px -3px rgba(29,36,66,.08);
+  }
+
+  .btn-outline:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 0px 0 0 rgba(217,207,176,0.8);
   }
 
   .section-card {
@@ -46,11 +60,49 @@ body {
   }
 
   .surface-panel {
-    @apply rounded-[1.25rem] border border-border/80 bg-surface;
+    @apply rounded-2xl border border-border/80 bg-surface;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 3px rgba(29,36,66,0.04);
   }
 
   .info-chip {
     @apply inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted;
+  }
+
+  /* Eyebrow label — matches landing page Eyebrow component */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-slate;
+    margin-bottom: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* Page-level heading */
+  .dash-title {
+    font-family: var(--font-ppwriter), Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.5vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+
+  /* Section heading (within a page) */
+  .section-title {
+    font-family: var(--font-ppwriter), Georgia, serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0 0 4px;
   }
 }
 
@@ -118,7 +170,7 @@ body {
   }
 }
 
-/* Landing page responsive overrides (inline styles need !important to be overridden by media queries) */
+/* Landing page responsive overrides */
 @media (max-width: 1024px) {
   .landing-grid-2col {
     grid-template-columns: 1fr !important;
