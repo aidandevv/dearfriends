@@ -5,7 +5,7 @@ export default async function GroupsPage() {
   const groups = await getGroups()
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
         <p className="eyebrow">Organisation</p>
         <h1 className="dash-title">Manage groups</h1>

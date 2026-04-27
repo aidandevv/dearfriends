@@ -19,16 +19,44 @@ export function NavLink({
   return (
     <Link
       href={href}
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-        isActive
-          ? 'bg-blue-ink text-white shadow-sm'
-          : 'text-ink-muted hover:bg-blue-ink/8 hover:text-ink'
-      }`}
-      style={isActive ? {
-        boxShadow: '0 2px 0 0 #0e1230, 0 3px 10px -2px rgba(51,88,186,.3)',
-      } : undefined}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 14px',
+        borderRadius: 10,
+        fontSize: 14.5,
+        fontWeight: 500,
+        textDecoration: 'none',
+        transition: 'background 0.15s ease, color 0.15s ease',
+        ...(isActive ? {
+          background: 'var(--blue-ink)',
+          color: 'var(--paper)',
+          boxShadow: '0 2px 0 0 var(--ink), 0 6px 16px -6px rgba(51,88,186,.4)',
+        } : {
+          color: 'var(--ink-soft)',
+        }),
+      }}
+      onMouseOver={e => {
+        if (!isActive) {
+          (e.currentTarget as HTMLAnchorElement).style.background = 'var(--paper-2)'
+          ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)'
+        }
+      }}
+      onMouseOut={e => {
+        if (!isActive) {
+          (e.currentTarget as HTMLAnchorElement).style.background = ''
+          ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-soft)'
+        }
+      }}
     >
-      <span className="flex-shrink-0">{children}</span>
+      <span style={{
+        flexShrink: 0,
+        color: isActive ? 'var(--cream)' : 'var(--blue-slate)',
+        display: 'flex',
+      }}>
+        {children}
+      </span>
       <span>{label}</span>
     </Link>
   )

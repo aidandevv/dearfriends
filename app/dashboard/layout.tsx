@@ -6,11 +6,14 @@ import { NavLink } from '@/components/nav-link'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
 
-const navItems = [
+const mainNavItems = [
   { href: '/dashboard', label: 'Contacts', icon: Users },
   { href: '/dashboard/groups', label: 'Groups', icon: Layers },
   { href: '/dashboard/compose', label: 'Compose', icon: PenLine },
   { href: '/dashboard/export', label: 'Export & Send', icon: Send },
+]
+
+const accountNavItems = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -31,58 +34,119 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <>
-      <div className="min-h-screen bg-linen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
-        <nav
-          className="flex flex-shrink-0 flex-col border-r border-border/50 min-h-screen py-6 px-4"
-          style={{ background: 'var(--sidebar)' }}
+      <div
+        className="min-h-screen"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '220px minmax(0,1fr)',
+          background: 'var(--paper)',
+        }}
+      >
+        {/* ── Sidebar ── */}
+        <aside
+          style={{
+            padding: '26px 18px 24px',
+            borderRight: '1px solid var(--line)',
+            background: 'var(--paper)',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            zIndex: 2,
+          }}
         >
-          {/* Wordmark */}
-          <div className="mb-8 px-1">
-            <a
-              href="/dashboard"
-              style={{
-                fontFamily: 'var(--font-ppwriter), Georgia, serif',
-                fontStyle: 'italic',
-                fontSize: 20,
-                fontWeight: 400,
-                color: 'var(--blue-ink)',
-                textDecoration: 'none',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              dearfriends
-            </a>
-            <div
-              style={{
-                marginTop: 2,
-                height: 1,
-                background: 'linear-gradient(90deg, var(--border) 0%, transparent 80%)',
-              }}
-            />
-          </div>
+          {/* Brand */}
+          <a
+            href="/dashboard"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              fontFamily: 'var(--font-ppwriter), Georgia, serif',
+              fontStyle: 'italic',
+              fontSize: 22,
+              letterSpacing: '-0.02em',
+              color: 'var(--blue-ink)',
+              padding: '4px 10px 16px',
+              marginBottom: 14,
+              textDecoration: 'none',
+            }}
+          >
+            dearfriends
+          </a>
 
-          {/* Nav items */}
-          <div className="flex flex-1 flex-col gap-0.5">
-            {navItems.map(({ href, label, icon: Icon }) => (
+          {/* Main nav */}
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {mainNavItems.map(({ href, label, icon: Icon }) => (
               <NavLink key={href} href={href} label={label}>
-                <Icon size={16} />
+                <Icon size={17} />
               </NavLink>
             ))}
-          </div>
 
-          {/* User avatar */}
-          <div className="mt-6 flex items-center gap-3 rounded-xl px-3 py-2.5 border border-border/60 bg-linen/60">
             <div
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, var(--blue-ink), var(--blue-slate))' }}
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                color: 'var(--muted)',
+                padding: '18px 14px 8px',
+              }}
             >
-              {initials}
+              Account
             </div>
-            <span className="text-xs font-medium text-ink truncate">{profile.fullName ?? 'You'}</span>
-          </div>
-        </nav>
 
-        <main className="min-h-screen overflow-auto p-6">
+            {accountNavItems.map(({ href, label, icon: Icon }) => (
+              <NavLink key={href} href={href} label={label}>
+                <Icon size={17} />
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Footer */}
+          <div style={{ marginTop: 'auto', paddingTop: 14 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '8px 10px',
+                borderRadius: 10,
+                cursor: 'pointer',
+              }}
+            >
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'var(--blue-ink)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--cream)',
+                  fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  flexShrink: 0,
+                }}
+              >
+                {initials}
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)' }}>
+                  {profile.fullName ?? 'You'}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* ── Main ── */}
+        <main style={{ minWidth: 0, position: 'relative' }}>
           {children}
         </main>
       </div>

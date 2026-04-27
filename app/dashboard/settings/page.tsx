@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const profile = getUserProfile(user)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
         <p className="eyebrow">Account</p>
         <h1 className="dash-title">Your profile</h1>

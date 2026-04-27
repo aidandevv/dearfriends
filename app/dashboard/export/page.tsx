@@ -9,7 +9,7 @@ export default async function ExportPage({ searchParams }: { searchParams: Promi
   const groups = await getGroups()
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
         <p className="eyebrow">Sending</p>
         <h1 className="dash-title">Export &amp; send</h1>

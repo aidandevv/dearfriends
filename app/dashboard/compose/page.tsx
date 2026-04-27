@@ -19,7 +19,7 @@ export default async function ComposePage({ searchParams }: { searchParams: Prom
     : await getRandomContact()
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
         <p className="eyebrow">Writing desk</p>
         <h1 className="dash-title">Compose your letter</h1>
