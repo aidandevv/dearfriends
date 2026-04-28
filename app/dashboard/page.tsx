@@ -7,6 +7,12 @@ import { getGroups } from '@/lib/actions/groups'
 import { generateShareSlug } from '@/lib/actions/user'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
+import dynamic from 'next/dynamic'
+
+const GlobePanel = dynamic(
+  () => import('@/components/globe-panel').then(m => m.GlobePanel),
+  { ssr: false },
+)
 
 const MONTH_LETTERS = ['J','F','M','A','M','J','J','A','S','O','N','D']
 const MONTH_NAMES   = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -383,69 +389,14 @@ export default async function DashboardPage({
                   {uniqueCities.length} {uniqueCities.length === 1 ? 'city' : 'cities'} · {contacts.length} {contacts.length === 1 ? 'friend' : 'friends'}
                 </div>
               </div>
-              <div style={{
-                position: 'relative',
-                border: '1px dashed var(--line)', borderRadius: 8, padding: 6,
-                background: 'linear-gradient(180deg, var(--paper-2), var(--paper))',
-                overflow: 'hidden',
-              }}>
-                <svg viewBox="0 0 480 220" style={{ width: '100%', height: 'auto', display: 'block' }} aria-hidden="true">
-                  <defs>
-                    <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
-                      <circle cx="1" cy="1" r="0.7" fill="#516183" opacity="0.35" />
-                    </pattern>
-                  </defs>
-                  <path d="M30 80 Q60 40 110 50 Q160 30 200 70 Q230 110 200 140 Q170 170 130 165 Q80 175 50 140 Q20 110 30 80 Z" fill="url(#dots)" stroke="#d9cfb0" strokeWidth="1" />
-                  <path d="M260 60 Q310 40 360 70 Q420 60 450 110 Q455 170 410 180 Q360 190 320 160 Q280 140 260 100 Z" fill="url(#dots)" stroke="#d9cfb0" strokeWidth="1" />
-                  <path d="M0 110 H480" stroke="#d9cfb0" strokeWidth="0.6" strokeDasharray="3 4" />
-                  <path d="M240 0 V220" stroke="#d9cfb0" strokeWidth="0.6" strokeDasharray="3 4" />
-                  {contacts.length > 0 && (
-                    <g transform="translate(112,118)">
-                      <circle r="14" fill="#3358ba" opacity="0.18" />
-                      <circle r="7" fill="#3358ba" opacity="0.35" />
-                      <circle r="3.5" fill="#3358ba" />
-                    </g>
-                  )}
-                </svg>
-                {uniqueCities.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    transform: 'translate(-50%, -50%)',
-                    left: '24%', top: '54%',
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'var(--paper)',
-                    border: '1px solid var(--line)',
-                    borderRadius: 999,
-                    padding: '4px 9px 4px 8px',
-                    fontSize: 11.5, color: 'var(--ink)',
-                    boxShadow: '0 4px 10px -4px rgba(45,35,10,.25)',
-                    whiteSpace: 'nowrap',
-                    marginTop: -22,
-                  }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--blue-ink)', flexShrink: 0, display: 'inline-block' }} />
-                    <span style={{ fontWeight: 500 }}>{uniqueCities[0]}</span>
-                    <span style={{
-                      fontFamily: 'var(--font-ppwriter), Georgia, serif',
-                      fontStyle: 'italic', fontSize: 12, color: 'var(--blue-slate)',
-                      borderLeft: '1px solid var(--line)',
-                      paddingLeft: 6, marginLeft: 2,
-                    }}>
-                      {contacts.length}
-                    </span>
-                  </div>
-                )}
-                {contacts.length === 0 && (
-                  <div style={{
-                    position: 'absolute', right: 18, bottom: 14,
-                    fontFamily: 'var(--font-caveat), cursive',
-                    fontSize: 18, color: 'var(--blue-slate)',
-                    lineHeight: 1.2, textAlign: 'right',
-                    transform: 'rotate(-3deg)', opacity: 0.85,
-                  }}>
-                    add a friend abroad —<br />the map gets prettier
-                  </div>
-                )}
-              </div>
+              <GlobePanel
+                contacts={contacts.map(c => ({
+                  lat: (c as { lat?: number | null }).lat ?? null,
+                  lng: (c as { lng?: number | null }).lng ?? null,
+                  city: c.city,
+                  state: c.state,
+                }))}
+              />
             </div>
 
             {/* Almanac */}
