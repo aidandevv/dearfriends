@@ -66,6 +66,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
   const lastPos = useRef({ x: 0, y: 0 })
   const rafId = useRef<number | null>(null)
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hovering = useRef(false)
 
   const [tooltip, setTooltip] = useState<{
     x: number
@@ -127,8 +128,9 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         )
       }
 
-      // Skip pin rebuild while interacting — rotation is paused so positions are unchanged
-      if (interacting.current) return
+      // Skip pin rebuild while hovering a pin — clearing innerHTML destroys the hover
+      // target and prevents mouseleave from firing, which would freeze interacting=true.
+      if (hovering.current) return
       // Rebuild pins each frame — only visible hemisphere pins
       pinsEl.innerHTML = ''
       for (const pin of pins) {
@@ -147,11 +149,13 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         hit.style.cursor = 'pointer'
         const p = pin
         hit.addEventListener('mouseenter', () => {
+          hovering.current = true
           interacting.current = true
           clearResume()
           setTooltip({ x, y, label: `${p.city}, ${p.state}`, count: p.count })
         })
         hit.addEventListener('mouseleave', () => {
+          hovering.current = false
           setTooltip(null)
           interacting.current = false
           scheduleResume()
