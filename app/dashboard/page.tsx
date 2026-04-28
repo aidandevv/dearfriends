@@ -577,7 +577,7 @@ export default async function DashboardPage({
               fontSize: 13.5, color: 'rgba(250,244,228,.78)',
               lineHeight: 1.5, margin: '0 0 16px', maxWidth: 250,
             }}>
-              Most books start with the people you&apos;d call at midnight. Keep going — three names is enough to feel real.
+              Most books start with the people you&apos;d call at midnight. Keep going - three names is enough to feel real.
             </p>
             <a
               href="/dashboard"

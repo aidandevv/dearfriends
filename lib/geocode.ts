@@ -1,5 +1,18 @@
 type GeocodeResult = { lat: number; lng: number } | null
 
+type ContactWithCoordinates = {
+  id: string
+  first_name: string
+  city: string | null
+  state: string | null
+  lat?: number | null
+  lng?: number | null
+}
+
+export type GeocodedContact = ContactWithCoordinates & {
+  coordinates: [number, number]
+}
+
 type GoogleGeocodeResponse = {
   status: string
   results: Array<{
@@ -29,4 +42,15 @@ export async function geocodeAddress(
   } catch {
     return null
   }
+}
+
+export async function geocodeContacts(contacts: ContactWithCoordinates[]): Promise<GeocodedContact[]> {
+  return contacts.flatMap(contact => {
+    if (contact.lat == null || contact.lng == null) return []
+
+    return [{
+      ...contact,
+      coordinates: [contact.lat, contact.lng],
+    }]
+  })
 }

@@ -19,13 +19,14 @@
   --line: #d9cfb0;
   --line-soft: #e4d9b8;
   --sage: #5A7A5A;
-  --sidebar: #faf4e4;
+  --sidebar: #EDE6D4;
   --cream: #E4CE95;
   --cream-soft: #f0e3b8;
   --blue-slate: #516183;
   --stamp: #b8453b;
   --stamp-soft: #d97757;
   --muted: #6b7290;
+  --font-caveat: var(--font-ppwriter), cursive;
 }
 
 body {

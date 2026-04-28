@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DM_Sans, Caveat } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -15,16 +14,12 @@ const ppWriter = localFont({
   display: 'swap',
 });
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
+const dmSans = localFont({
+  src: [
+    { path: '../public/fonts/DMSans-VariableFont_opsz,wght.ttf', weight: '100 1000', style: 'normal' },
+    { path: '../public/fonts/DMSans-Italic-VariableFont_opsz,wght.ttf', weight: '100 1000', style: 'italic' },
+  ],
   variable: "--font-dm-sans",
-  weight: ["400", "500", "600", "700"],
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  variable: "--font-caveat",
-  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -52,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ppWriter.variable} ${dmSans.variable} ${caveat.variable} font-sans antialiased`}>
+      <body className={`${ppWriter.variable} ${dmSans.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

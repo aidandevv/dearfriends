@@ -14,7 +14,7 @@ export function Hero() {
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/3 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full opacity-20"
-        style={{ background: 'radial-gradient(circle, #C05C2E 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #3358ba 0%, transparent 70%)' }}
       />
 
       <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-28">
@@ -91,7 +91,7 @@ export function Hero() {
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-24"
-        style={{ background: 'linear-gradient(to bottom, transparent, #F5EFE4)' }}
+        style={{ background: 'linear-gradient(to bottom, transparent, #F8F3EA)' }}
       />
     </section>
   )

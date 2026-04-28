@@ -139,9 +139,9 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         if (!xy) continue
         const [x, y] = xy
 
-        mkCircle(pinsEl, x, y, 13, '#b94a2c', '0.1')
-        mkCircle(pinsEl, x, y, 7, '#b94a2c', '0.24')
-        mkCircle(pinsEl, x, y, 3.5, '#b94a2c', '1')
+        mkCircle(pinsEl, x, y, 13, 'var(--blue-ink)', '0.12')
+        mkCircle(pinsEl, x, y, 7, 'var(--blue-ink)', '0.24')
+        mkCircle(pinsEl, x, y, 3.5, 'var(--blue-ink)', '1')
         mkCircle(pinsEl, x, y, 1.3, 'white', '0.9')
 
         // Transparent hit target for hover
@@ -261,7 +261,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         position: 'relative',
         borderRadius: 8,
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, #1a2a4a 0%, #0d1829 100%)',
+        background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
       }}
     >
       {/* Starfield */}
@@ -282,9 +282,9 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
       >
         <defs>
           <radialGradient id={`df-ocean-${uid}`} cx="38%" cy="32%">
-            <stop offset="0%" stopColor="#2a4a8a" />
-            <stop offset="60%" stopColor="#162d5e" />
-            <stop offset="100%" stopColor="#0a1628" />
+            <stop offset="0%" stopColor="var(--blue-ink)" />
+            <stop offset="60%" stopColor="var(--blue-slate)" />
+            <stop offset="100%" stopColor="var(--ink)" />
           </radialGradient>
           <clipPath id={`df-globe-clip-${uid}`}>
             <circle cx={W / 2} cy={H / 2} r={RADIUS} />
@@ -297,7 +297,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         {/* Atmosphere glow */}
         <circle
           cx={W / 2} cy={H / 2} r={RADIUS + 3}
-          fill="none" stroke="#4a7acc" strokeWidth={2} opacity={0.28}
+          fill="none" stroke="var(--blue-ink)" strokeWidth={2} opacity={0.28}
         />
 
         {/* Graticule — filled by D3 on each frame */}
@@ -305,7 +305,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
           className="g-grat"
           clipPath={`url(#df-globe-clip-${uid})`}
           fill="none"
-          stroke="#1e3d70"
+          stroke="rgba(255,255,255,0.16)"
           strokeWidth={0.6}
           opacity={0.65}
         />
@@ -314,8 +314,8 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         <path
           className="g-land"
           clipPath={`url(#df-globe-clip-${uid})`}
-          fill="#3a5c2a"
-          stroke="#4a7236"
+          fill="var(--sage)"
+          stroke="var(--cream-soft)"
           strokeWidth={0.7}
           opacity={0.85}
         />
@@ -356,7 +356,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
           <span
             style={{
               width: 7, height: 7, borderRadius: '50%',
-              background: '#b94a2c', flexShrink: 0, display: 'inline-block',
+              background: 'var(--blue-ink)', flexShrink: 0, display: 'inline-block',
             }}
           />
           <span style={{ fontWeight: 600 }}>{tooltip.label}</span>

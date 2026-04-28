@@ -10,6 +10,12 @@ import { Mail, LogIn, UserPlus, KeyRound } from 'lucide-react'
 type Mode = 'sign-in' | 'sign-up' | 'magic-link' | 'forgot-password'
 
 const newsreader = "var(--font-ppwriter), Georgia, serif"
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+
+function authRedirectUrl(path: string) {
+  const origin = siteUrl || (typeof window === 'undefined' ? 'http://localhost:3000' : window.location.origin)
+  return `${origin}${path}`
+}
 
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>('sign-in')
@@ -51,7 +57,7 @@ export default function LoginPage() {
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: `${location.origin}/auth/callback` },
+      options: { emailRedirectTo: authRedirectUrl('/auth/callback') },
     })
     if (error) { setError(error.message); setLoading(false); return }
     setSent(true)
@@ -65,7 +71,7 @@ export default function LoginPage() {
     const supabase = createClient()
     await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${location.origin}/auth/callback` },
+      options: { emailRedirectTo: authRedirectUrl('/auth/callback') },
     })
     setSent(true)
     setLoading(false)
@@ -77,7 +83,7 @@ export default function LoginPage() {
     setLoading(true)
     const supabase = createClient()
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/auth/reset-password`,
+      redirectTo: authRedirectUrl('/auth/callback'),
     })
     setSent(true)
     setLoading(false)

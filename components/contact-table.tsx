@@ -24,7 +24,7 @@ const deliveryOptions = [
   { value: 'digital', label: 'Digital' },
 ]
 
-const avatarColors = ['#516183', '#3358ba', '#5A7A5A', '#b8453b', '#C05C2E', '#3a4263']
+const avatarColors = ['#516183', '#3358ba', '#5A7A5A', '#b8453b', '#3e5da0', '#3a4263']
 
 function avatarColor(name: string) {
   let hash = 0
