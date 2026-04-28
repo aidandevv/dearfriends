@@ -3,16 +3,30 @@
 @tailwind utilities;
 
 :root {
-  --linen: #F5EFE4;
-  --surface: #FAF7F1;
+  --linen: #F8F3EA;
+  --surface: #faf4e4;
   --surface-raised: #FFFFFF;
-  --terra: #C05C2E;
-  --terra-dark: #9E4A23;
-  --ink: #231209;
-  --ink-muted: #7A6352;
-  --border: #DDD0BC;
+  --paper: #faf4e4;
+  --paper-2: #f5ecd3;
+  --paper-3: #efe5c6;
+  --paper-deep: #e8dcb6;
+  --blue-ink: #3358ba;
+  --blue-mid: #3e5da0;
+  --ink: #1d2442;
+  --ink-soft: #3a4263;
+  --ink-muted: #6b7290;
+  --border: #d9cfb0;
+  --line: #d9cfb0;
+  --line-soft: #e4d9b8;
   --sage: #5A7A5A;
-  --sidebar: #EDE6D6;
+  --sidebar: #EDE6D4;
+  --cream: #E4CE95;
+  --cream-soft: #f0e3b8;
+  --blue-slate: #516183;
+  --stamp: #b8453b;
+  --stamp-soft: #d97757;
+  --muted: #6b7290;
+  --font-caveat: var(--font-ppwriter), cursive;
 }
 
 body {
@@ -25,17 +39,29 @@ body {
   .input {
     @apply w-full rounded-lg border border-border bg-linen px-3 py-2 text-sm text-ink
            transition-colors placeholder:text-ink-muted/50
-           focus:border-terra focus:outline-none focus:ring-2 focus:ring-terra/40;
+           focus:border-blue-ink focus:outline-none focus:ring-2 focus:ring-blue-ink/20;
   }
 
   .btn-primary {
-    @apply cursor-pointer rounded-full bg-terra px-6 py-2.5 text-sm font-medium text-white
-           transition-colors hover:bg-terra-dark disabled:opacity-50;
+    @apply cursor-pointer rounded-full bg-blue-ink px-6 py-2.5 text-sm font-medium text-white
+           transition-all hover:bg-blue-mid disabled:opacity-50;
+    box-shadow: 0 2px 0 0 #0e1230, 0 4px 14px -3px rgba(51, 88, 186, 0.35);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 0 #0e1230, 0 2px 8px -2px rgba(51, 88, 186, 0.25);
   }
 
   .btn-outline {
     @apply cursor-pointer rounded-full border border-border px-6 py-2.5 text-sm font-medium text-ink
-           transition-colors hover:bg-surface disabled:opacity-50;
+           transition-all hover:bg-surface hover:border-border disabled:opacity-50;
+    box-shadow: 0 1px 0 0 rgba(217,207,176,0.8), 0 2px 8px -3px rgba(29,36,66,.08);
+  }
+
+  .btn-outline:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 0px 0 0 rgba(217,207,176,0.8);
   }
 
   .section-card {
@@ -43,11 +69,65 @@ body {
   }
 
   .surface-panel {
-    @apply rounded-[1.25rem] border border-border/80 bg-surface;
+    @apply rounded-2xl border border-border/80 bg-surface;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 3px rgba(29,36,66,0.04);
   }
 
   .info-chip {
     @apply inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted;
+  }
+
+  /* Eyebrow label — matches landing page Eyebrow component */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-slate;
+    margin-bottom: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* Page-level heading */
+  .dash-title {
+    font-family: var(--font-ppwriter), Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.5vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+
+  .edit-slug-link {
+    font-family: var(--font-ppwriter), Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--blue-slate);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 12px;
+    border-bottom: 1px dashed transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .edit-slug-link:hover {
+    color: var(--blue-ink);
+    border-bottom-color: var(--blue-ink);
+  }
+
+  /* Section heading (within a page) */
+  .section-title {
+    font-family: var(--font-ppwriter), Georgia, serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0 0 4px;
   }
 }
 
@@ -63,8 +143,8 @@ body {
 
   .hero-glow {
     background:
-      radial-gradient(circle at top, rgba(192, 92, 46, 0.14), transparent 42%),
-      radial-gradient(circle at bottom right, rgba(122, 99, 82, 0.12), transparent 36%);
+      radial-gradient(circle at top, rgba(51, 88, 186, 0.10), transparent 42%),
+      radial-gradient(circle at bottom right, rgba(81, 97, 131, 0.08), transparent 36%);
   }
 
   .animate-fade-up {
@@ -112,5 +192,21 @@ body {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+}
+
+/* Landing page responsive overrides */
+@media (max-width: 1024px) {
+  .landing-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .landing-price-grid {
+    grid-template-columns: 1fr !important;
   }
 }

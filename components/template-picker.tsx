@@ -20,8 +20,8 @@ export function TemplatePicker({
             onClick={() => onSelect(template)}
             className={`flex-shrink-0 w-[88px] rounded-xl border bg-white text-left transition-all overflow-hidden ${
               isSelected
-                ? 'border-terra shadow-[0_0_0_2px_rgba(192,92,46,0.18)]'
-                : 'border-border/80 hover:border-terra/40'
+                ? 'border-blue-ink shadow-[0_0_0_2px_rgba(51,88,186,0.18)]'
+                : 'border-border/80 hover:border-blue-ink/40'
             }`}
           >
             {/* Mini letter preview */}
@@ -45,7 +45,7 @@ export function TemplatePicker({
               style={{
                 borderTop: '1px solid rgba(221,208,188,0.6)',
                 fontSize: '9px',
-                color: isSelected ? template.accentColor : '#7A6352',
+                color: isSelected ? template.accentColor : 'var(--ink-muted)',
                 fontWeight: isSelected ? '600' : '400',
               }}
             >

@@ -19,14 +19,45 @@ export function NavLink({
   return (
     <Link
       href={href}
-      title={label}
-      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
-        isActive
-          ? 'bg-terra text-white'
-          : 'text-ink-muted hover:bg-terra/10 hover:text-terra'
-      }`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 14px',
+        borderRadius: 10,
+        fontSize: 14.5,
+        fontWeight: 500,
+        textDecoration: 'none',
+        transition: 'background 0.15s ease, color 0.15s ease',
+        ...(isActive ? {
+          background: 'var(--blue-ink)',
+          color: 'var(--paper)',
+          boxShadow: '0 2px 0 0 var(--ink), 0 6px 16px -6px rgba(51,88,186,.4)',
+        } : {
+          color: 'var(--ink-soft)',
+        }),
+      }}
+      onMouseOver={e => {
+        if (!isActive) {
+          (e.currentTarget as HTMLAnchorElement).style.background = 'var(--paper-2)'
+          ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)'
+        }
+      }}
+      onMouseOut={e => {
+        if (!isActive) {
+          (e.currentTarget as HTMLAnchorElement).style.background = ''
+          ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-soft)'
+        }
+      }}
     >
-      {children}
+      <span style={{
+        flexShrink: 0,
+        color: isActive ? 'var(--cream)' : 'var(--blue-slate)',
+        display: 'flex',
+      }}>
+        {children}
+      </span>
+      <span>{label}</span>
     </Link>
   )
 }

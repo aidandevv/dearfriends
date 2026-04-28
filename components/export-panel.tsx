@@ -22,35 +22,38 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <ExportCard
-        icon={<FileText size={20} className="text-terra" />}
+        eyebrow="Labels"
+        icon={<FileText size={18} strokeWidth={1.6} />}
         title="CSV export"
         description="Generate mailing data for labels and list cleanup."
       >
         <div className="grid gap-2">
-          <a href={`/api/export/csv?method=handwrite${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=handwrite${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
             Handwrite contacts
           </a>
-          <a href={`/api/export/csv?method=print${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=print${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
             Print contacts
           </a>
-          <a href={`/api/export/csv?method=all${groupParam}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+          <a href={`/api/export/csv?method=all${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
             All contacts
           </a>
         </div>
       </ExportCard>
 
       <ExportCard
-        icon={<FileDown size={20} className="text-terra" />}
+        eyebrow="Print"
+        icon={<FileDown size={18} strokeWidth={1.6} />}
         title="PDF export"
         description="Build a ready-to-print packet with one personalized page per print contact."
       >
-        <a href={`/api/export/pdf${groupId ? `?group=${groupId}` : ''}`} className="btn-outline inline-flex min-h-12 items-center justify-center px-4 text-sm">
+        <a href={`/api/export/pdf${groupId ? `?group=${groupId}` : ''}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
           Download print-ready PDF
         </a>
       </ExportCard>
 
       <ExportCard
-        icon={<Send size={20} className="text-terra" />}
+        eyebrow="Email"
+        icon={<Send size={18} strokeWidth={1.6} />}
         title="Digital send"
         description="Use your current letter draft to email everyone marked for digital delivery."
       >
@@ -58,7 +61,7 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
           <button
             onClick={handleDigitalSend}
             disabled={sending}
-            className="btn-primary min-h-12 px-4 text-sm"
+            className="btn-primary min-h-11 px-4 text-sm"
           >
             {sending ? 'Sending...' : 'Send to digital contacts'}
           </button>
@@ -70,11 +73,13 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
 }
 
 function ExportCard({
+  eyebrow,
   icon,
   title,
   description,
   children,
 }: {
+  eyebrow: string
   icon: ReactNode
   title: string
   description: string
@@ -82,12 +87,16 @@ function ExportCard({
 }) {
   return (
     <section className="surface-panel flex h-full flex-col gap-4 px-5 py-5">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-terra/10">
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70"
+        style={{ color: 'var(--blue-ink)', background: 'rgba(51,88,186,0.07)' }}
+      >
         {icon}
       </div>
       <div>
-        <h2 className="font-serif text-2xl text-ink">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-ink-muted">{description}</p>
+        <p className="eyebrow">{eyebrow}</p>
+        <p className="section-title">{title}</p>
+        <p className="mt-1.5 text-sm leading-5 text-ink-muted">{description}</p>
       </div>
       <div className="mt-auto">{children}</div>
     </section>

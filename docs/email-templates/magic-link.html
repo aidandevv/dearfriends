@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#FAF7F1;font-family:Georgia,'Times New Roman',serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F1;padding:40px 16px">
+    <tr><td align="center">
+      <table width="100%" style="max-width:560px;background:#FFFFFF;border:1px solid #DDD0BC;border-radius:12px;overflow:hidden">
+
+        <!-- Header -->
+        <tr>
+          <td style="padding:28px 36px 24px;border-bottom:1px solid #DDD0BC">
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400;color:#231209;letter-spacing:0.02em">
+              Dear Friends
+            </p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px 36px 28px;font-size:15px;line-height:1.7;color:#231209">
+            <p style="margin:0 0 12px">Hello,</p>
+            <p style="margin:0 0 20px">Here's your sign-in link for Dear Friends. Click the button below — it's good for 60 minutes.</p>
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 28px;background:#C05C2E;color:#ffffff;text-decoration:none;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;letter-spacing:0.01em">
+              Sign in to Dear Friends
+            </a>
+            <p style="margin:24px 0 0;font-size:13px;color:#7A6352">
+              If you didn't request this, you can safely ignore it. This link is single-use.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 36px 24px;border-top:1px solid #DDD0BC;font-size:12px;color:#7A6352;line-height:1.6">
+            Signing in as <strong>{{ .Email }}</strong> &nbsp;&middot;&nbsp; Dear Friends
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

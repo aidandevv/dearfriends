@@ -11,7 +11,14 @@ function firstName(name: string | null) {
   return name?.trim().split(/\s+/)[0] ?? null
 }
 
-export function ShareForm({ adminId, senderName, senderBio }: { adminId: string; senderName: string | null; senderBio: string | null }) {
+const newsreader = "var(--font-ppwriter), Georgia, serif"
+const caveat = "var(--font-caveat), cursive"
+
+export function ShareForm({ adminId, senderName, senderBio }: {
+  adminId: string
+  senderName: string | null
+  senderBio: string | null
+}) {
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [contactId, setContactId] = useState<string | null>(null)
@@ -54,17 +61,25 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
     setNoteSubmitting(false)
   }
 
+  // ── Success state ──────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <main className="min-h-screen bg-linen flex items-center justify-center p-6">
+      <main
+        className="min-h-screen flex items-center justify-center p-6"
+        style={{ background: '#faf4e4' }}
+      >
         <div className="max-w-md w-full flex flex-col items-center text-center gap-4 animate-fade-up">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-blue-ink text-blue-ink">
             <Mail size={22} strokeWidth={1.5} />
           </div>
-          <h1 className="font-serif text-3xl text-ink">Sealed &amp; sent.</h1>
+          <h1 style={{ fontFamily: newsreader, fontSize: 30, fontWeight: 400, color: '#1d2442' }}>
+            Sealed &amp; sent.
+          </h1>
           {displayName && (
             <div className="flex flex-col items-center gap-1">
-              <p className="font-medium text-ink">{displayName}</p>
+              <p style={{ fontFamily: newsreader, fontSize: 18, fontStyle: 'italic', color: '#3358ba' }}>
+                {displayName}
+              </p>
               {senderBio && <p className="text-sm text-ink-muted">{senderBio}</p>}
             </div>
           )}
@@ -75,7 +90,11 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
           </p>
 
           {contactId && !noteSubmitted && (
-            <form onSubmit={handleNoteSubmit} className="w-full surface-panel px-4 py-4 flex flex-col gap-3">
+            <form
+              onSubmit={handleNoteSubmit}
+              className="w-full flex flex-col gap-3"
+              style={{ background: 'white', border: '1px solid #d9cfb0', borderRadius: 10, padding: '16px 20px' }}
+            >
               <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted text-left">
                 Leave a note for {displayName ?? 'them'} (optional)
               </label>
@@ -83,7 +102,7 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
                 value={note}
                 onChange={e => setNote(e.target.value.slice(0, 280))}
                 rows={3}
-                placeholder={`Leave a note for ${displayName ?? 'them'}...`}
+                placeholder={`Leave a note for ${displayName ?? 'them'}…`}
                 className="input resize-none"
               />
               <div className="flex items-center justify-between">
@@ -99,108 +118,185 @@ export function ShareForm({ adminId, senderName, senderBio }: { adminId: string;
             </form>
           )}
 
-          {noteSubmitted && (
-            <p className="text-sm text-ink-muted">Note sent ✓</p>
-          )}
+          {noteSubmitted && <p className="text-sm text-ink-muted">Note sent ✓</p>}
         </div>
       </main>
     )
   }
 
+  // ── Form state — split layout ──────────────────────────────────────────────
   return (
-    <main className="min-h-screen bg-linen flex items-center justify-center p-6">
-      <div className="max-w-md w-full animate-fade-up">
-        <div className="flex flex-col items-center mb-8 text-center">
-          {/* Postmark circle */}
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-terra text-terra">
-            <Mail size={22} strokeWidth={1.5} />
+    <div className="flex min-h-screen">
+      {/* Left panel: sender identity */}
+      <div
+        className="hidden md:flex md:w-[38%] min-h-screen flex-col items-center justify-between py-12 px-8 relative overflow-hidden flex-shrink-0"
+        style={{ background: '#faf4e4', borderRight: '1px solid #d9cfb0' }}
+      >
+        {/* Grain texture */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(140,110,50,.07) 1px, transparent 1px)',
+            backgroundSize: '3px 3px',
+            opacity: 0.6,
+          }}
+        />
+
+        {/* Brand */}
+        <div style={{ fontFamily: newsreader, fontSize: 18, color: '#1d2442', position: 'relative', zIndex: 1 }}>
+          <em>dear</em>friends
+        </div>
+
+        {/* Sender block */}
+        <div className="flex flex-col items-center gap-5 relative z-10 text-center">
+          {/* Mini envelope */}
+          <div style={{
+            width: 120, height: 75,
+            background: '#f5ecd3',
+            border: '1px solid #d9cfb0',
+            borderRadius: 3,
+            transform: 'rotate(3deg)',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 12px 30px -10px rgba(45,35,10,.25)',
+          }}>
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 7,
+              background: 'repeating-linear-gradient(-45deg, #3358ba 0 5px, transparent 5px 10px, #b8453b 10px 15px, transparent 15px 20px)',
+              opacity: 0.8,
+            }} />
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: 7,
+              background: 'repeating-linear-gradient(-45deg, #3358ba 0 5px, transparent 5px 10px, #b8453b 10px 15px, transparent 15px 20px)',
+              opacity: 0.8,
+            }} />
+            <div style={{
+              position: 'absolute', top: 10, right: 10,
+              width: 26, height: 32, background: '#E4CE95',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <div style={{
+                width: 20, height: 26, background: '#3358ba',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: newsreader, fontSize: 8, fontStyle: 'italic', color: '#E4CE95',
+              }}>df</div>
+            </div>
           </div>
 
-          {displayName && (
-            <p className="text-[11px] uppercase tracking-[0.16em] text-ink-muted mb-1.5">
-              from {displayName}
+          <div>
+            <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: '#6b7290', marginBottom: 6 }}>
+              from
             </p>
-          )}
+            <p style={{ fontFamily: newsreader, fontStyle: 'italic', fontSize: 26, color: '#3358ba', lineHeight: 1.1 }}>
+              {displayName ?? 'a friend'}
+            </p>
+            {senderBio && (
+              <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: '#6b7290', marginTop: 6, lineHeight: 1.5, maxWidth: 200 }}>
+                {senderBio}
+              </p>
+            )}
+          </div>
 
-          <h1 className="font-serif text-[1.75rem] leading-snug text-ink">
-            {displayName
-              ? <>{displayName} wants to<br />send you something</>
-              : <>Someone wants to<br />send you something</>}
-          </h1>
-
-          <p className="text-ink-muted text-sm mt-3 leading-6 max-w-[280px]">
-            {senderBio ?? 'Share your address and something special will find its way to you.'}
+          <p style={{ fontFamily: caveat, fontSize: 17, color: '#3a4263', lineHeight: 1.5 }}>
+            Can&apos;t wait to send<br />you something ✉
           </p>
         </div>
 
-        {serverError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
-            {serverError}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">First name</label>
-              <input {...register('first_name')} className="input min-h-11" />
-              {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Last name</label>
-              <input {...register('last_name')} className="input min-h-11" />
-              {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Email</label>
-            <input {...register('email')} type="email" className="input min-h-11" />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Address</label>
-            <input {...register('address_line_1')} placeholder="Street address" className="input min-h-11" />
-            {errors.address_line_1 && <p className="text-xs text-red-500">{errors.address_line_1.message}</p>}
-            <input
-              {...register('address_line_2')}
-              placeholder="Apt, suite, etc. (optional)"
-              className="input min-h-11 mt-2"
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">City</label>
-              <input {...register('city')} className="input min-h-11" />
-              {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">State</label>
-              <input {...register('state')} className="input min-h-11" />
-              {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">ZIP</label>
-              <input {...register('zip')} className="input min-h-11" />
-              {errors.zip && <p className="text-xs text-red-500">{errors.zip.message}</p>}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary flex items-center justify-center mt-1 min-h-12 w-full"
-          >
-            {isSubmitting ? 'Saving\u2026' : 'Send my address \u2192'}
-          </button>
-        </form>
-
-        <p className="mt-5 text-center text-[11px] text-ink-muted/70">
-          Powered by Dear Friends · your address stays private
-        </p>
+        <div aria-hidden style={{ height: 18 }} />
       </div>
-    </main>
+
+      {/* Right panel: form */}
+      <div className="flex flex-1 items-center justify-center p-8" style={{ background: 'white' }}>
+        <div className="w-full max-w-[420px]">
+          {/* Mobile-only sender header */}
+          <div className="md:hidden flex flex-col items-center text-center mb-6">
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.16em', color: '#6b7290', marginBottom: 4 }}>
+              from
+            </p>
+            <p style={{ fontFamily: newsreader, fontStyle: 'italic', fontSize: 22, color: '#3358ba' }}>
+              {displayName ?? 'a friend'}
+            </p>
+          </div>
+
+          <h1 style={{ fontFamily: newsreader, fontSize: 26, fontWeight: 400, color: '#1d2442', marginBottom: 4 }}>
+            Share your address
+          </h1>
+          <p className="text-sm text-ink-muted mb-6">
+            {displayName
+              ? `${displayName} will use this to send you something in the mail.`
+              : 'Your address will be used to send you something special.'}
+          </p>
+
+          {serverError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+              {serverError}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">First name</label>
+                <input {...register('first_name')} className="input min-h-11" />
+                {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Last name</label>
+                <input {...register('last_name')} className="input min-h-11" />
+                {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Email</label>
+              <input {...register('email')} type="email" className="input min-h-11" />
+              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Address</label>
+              <input {...register('address_line_1')} placeholder="Street address" className="input min-h-11" />
+              {errors.address_line_1 && <p className="text-xs text-red-500">{errors.address_line_1.message}</p>}
+              <input
+                {...register('address_line_2')}
+                placeholder="Apt, suite, etc. (optional)"
+                className="input min-h-11 mt-2"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">City</label>
+                <input {...register('city')} className="input min-h-11" />
+                {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">State</label>
+                <input {...register('state')} className="input min-h-11" />
+                {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">ZIP</label>
+                <input {...register('zip')} className="input min-h-11" />
+                {errors.zip && <p className="text-xs text-red-500">{errors.zip.message}</p>}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary flex items-center justify-center mt-1 min-h-12 w-full"
+            >
+              {isSubmitting ? 'Saving…' : 'Send my address →'}
+            </button>
+          </form>
+
+          <p className="mt-5 text-center text-[11px] text-ink-muted/70">
+            Powered by dearfriends · your address stays private
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

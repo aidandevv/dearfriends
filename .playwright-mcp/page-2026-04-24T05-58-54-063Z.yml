@@ -1,0 +1,309 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - link "dear friends" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: dear
+        - generic [ref=e7]: friends
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "How it works" [ref=e11] [cursor=pointer]:
+            - /url: "#how"
+        - listitem [ref=e12]:
+          - link "Your people" [ref=e13] [cursor=pointer]:
+            - /url: "#friends"
+        - listitem [ref=e14]:
+          - link "Letters" [ref=e15] [cursor=pointer]:
+            - /url: "#letters"
+        - listitem [ref=e16]:
+          - link "Pricing" [ref=e17] [cursor=pointer]:
+            - /url: "#pricing"
+      - link "Start writing" [ref=e18] [cursor=pointer]:
+        - /url: /login
+        - text: Start writing
+        - img [ref=e19]
+  - generic [ref=e21]:
+    - generic [ref=e22]:
+      - heading "Keep up with the people you love, the slow way." [level=1] [ref=e23]:
+        - text: Keep up with
+        - emphasis [ref=e24]: the people
+        - text: you love, the
+        - generic [ref=e25]: slow way.
+      - paragraph [ref=e27]: dearfriends helps you collect your friends' addresses, remember birthdays, and actually send a card now and then. It's a little notebook for the people who matter — and gentle nudges to write to them.
+      - generic [ref=e28]:
+        - link "Write your first letter" [ref=e29] [cursor=pointer]:
+          - /url: /login
+          - text: Write your first letter
+          - img [ref=e30]
+        - link "See how it works →" [ref=e32] [cursor=pointer]:
+          - /url: "#how"
+      - generic [ref=e39]: Made by one person, for a few hundred friends.
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - generic [ref=e45]:
+          - generic [ref=e46]: df
+          - generic [ref=e47]: forever
+        - generic [ref=e48]:
+          - text: New York
+          - text: Apr · 26
+        - generic [ref=e51]:
+          - generic [ref=e52]: To
+          - text: Hana Okafor
+          - emphasis [ref=e54]: 214 Linden St., Apt 3
+          - emphasis [ref=e56]: Brooklyn, NY 11221
+      - generic [ref=e57]:
+        - generic [ref=e58]: Dear Sam,
+        - generic [ref=e60]:
+          - text: The lilacs are out already — I keep
+          - text: thinking of that afternoon we spent
+          - text: at your mom's. Let's not wait
+          - text: another year, okay?
+        - generic [ref=e64]: — M
+      - generic [ref=e65]:
+        - generic [ref=e67]: Sam Beaumont
+        - generic [ref=e68]: college roommate · writes back
+        - generic [ref=e69]:
+          - text: 1428 Perimeter Dr
+          - text: Portland, OR 97210
+        - generic [ref=e71]: birthday in 11 days
+  - generic [ref=e73]:
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: How it works
+        - heading "Three small rituals, one little book." [level=2] [ref=e78]:
+          - text: Three small rituals,
+          - emphasis [ref=e79]: one little book
+          - text: .
+      - paragraph [ref=e80]: Not another social feed. dearfriends is a calm place to remember who's where, what they're up to, and the last time you reached out.
+    - generic [ref=e81]:
+      - article [ref=e82]:
+        - generic [ref=e83]: i
+        - img [ref=e85]
+        - heading "Ask, gently." [level=3] [ref=e89]
+        - paragraph [ref=e90]: Send a friend a private link. They fill in their address — no account, no app, nothing weird. It shows up in your book.
+      - article [ref=e91]:
+        - generic [ref=e92]: ii
+        - img [ref=e94]
+        - heading "Remember the dates." [level=3] [ref=e99]
+        - paragraph [ref=e100]: Birthdays, move-in days, kid's first days of school. You'll get a nudge a week before — enough time to actually mail something.
+      - article [ref=e101]:
+        - generic [ref=e102]: iii
+        - img [ref=e104]
+        - heading "Write something." [level=3] [ref=e108]
+        - paragraph [ref=e109]: Draft a postcard or letter in the app. Print it at home, or we'll stamp and mail it for you. Your handwriting still works, promise.
+  - generic [ref=e112]:
+    - generic [ref=e113]:
+      - generic [ref=e114]: Your people
+      - heading "A little book of everyone you'd miss." [level=2] [ref=e116]:
+        - text: A little book
+        - text: of
+        - emphasis [ref=e117]: everyone
+        - text: you'd miss.
+      - paragraph [ref=e118]: Not a CRM. Not a contact list. Just the friends, the family, the ones you keep meaning to call — with the details you need to actually send something in the mail.
+      - link "Start your book" [ref=e119] [cursor=pointer]:
+        - /url: /login
+        - text: Start your book
+        - img [ref=e120]
+    - generic [ref=e122]:
+      - generic [ref=e123]:
+        - heading "My people" [level=4] [ref=e124]
+        - generic [ref=e125]: 34 friends · 12 this month
+      - generic [ref=e126]:
+        - generic [ref=e127]: All
+        - generic [ref=e128]: Family
+        - generic [ref=e129]: Close
+        - generic [ref=e130]: Abroad
+        - generic [ref=e131]: Out of touch
+      - generic [ref=e132]:
+        - generic [ref=e133]: H
+        - generic [ref=e134]:
+          - generic [ref=e135]: Hana Okafor
+          - generic [ref=e136]: Brooklyn, NY
+        - generic [ref=e137]: last letter 3 weeks ago
+        - generic [ref=e138]: birthday soon
+        - generic [ref=e139]: →
+      - generic [ref=e140]:
+        - generic [ref=e141]: S
+        - generic [ref=e142]:
+          - generic [ref=e143]: Sam Beaumont
+          - generic [ref=e144]: Portland, OR
+        - generic [ref=e145]: last letter 11 months ago
+        - generic [ref=e146]: write soon
+        - generic [ref=e147]: →
+      - generic [ref=e148]:
+        - generic [ref=e149]: M
+        - generic [ref=e150]:
+          - generic [ref=e151]: Mira Väänänen
+          - generic [ref=e152]: Helsinki, FI
+        - generic [ref=e153]: writes back always
+        - generic [ref=e154]: pen pal
+        - generic [ref=e155]: →
+      - generic [ref=e156]:
+        - generic [ref=e157]: D
+        - generic [ref=e158]:
+          - generic [ref=e159]: Dad
+          - generic [ref=e160]: Tucson, AZ
+        - generic [ref=e161]: last letter last Sunday
+        - generic [ref=e162]: family
+        - generic [ref=e163]: →
+      - generic [ref=e164]:
+        - generic [ref=e165]: T
+        - generic [ref=e166]:
+          - generic [ref=e167]: Theo & Liv
+          - generic [ref=e168]: Oaxaca, MX
+        - generic [ref=e169]: just moved 3 days ago
+        - generic [ref=e170]: new address
+        - generic [ref=e171]: →
+      - generic [ref=e172]:
+        - generic [ref=e173]: "?"
+        - generic [ref=e174]:
+          - generic [ref=e175]: + add someone
+          - generic [ref=e176]: or send a link
+  - generic [ref=e179]:
+    - generic [ref=e180]:
+      - generic [ref=e181]: Nudges, not notifications
+      - heading "We'll whisper when it's time to write." [level=2] [ref=e183]:
+        - text: We'll whisper
+        - text: when it's
+        - emphasis [ref=e184]: time to write
+        - text: .
+      - paragraph [ref=e185]: One small email on Sunday mornings. A heads-up before birthdays. That's it. You'll never get a red badge, a streak, or a push notification. This app wants you to close it and write.
+      - link "Turn on Sunday nudges" [ref=e186] [cursor=pointer]:
+        - /url: /login
+    - generic [ref=e187]:
+      - generic [ref=e188]:
+        - generic [ref=e189]:
+          - img [ref=e191]
+          - generic [ref=e194]:
+            - generic [ref=e195]: Hana's birthday — next Friday
+            - generic [ref=e196]: Sunday, April 26 · 8:02 am
+        - generic [ref=e197]: You sent a postcard last year from Lisbon. She wrote back with a drawing. If you mail something Tuesday, it'll land just in time.
+        - generic [ref=e198]:
+          - button "Start a card" [ref=e199] [cursor=pointer]
+          - button "Remind me tomorrow" [ref=e200] [cursor=pointer]
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - img [ref=e205]
+          - generic [ref=e207]:
+            - generic [ref=e208]: Sam hasn't heard from you in a while
+            - generic [ref=e209]: quietly, since last July
+        - generic [ref=e210]: No pressure — just a soft reminder. Seven minutes is about all it takes.
+        - generic [ref=e211]:
+          - button "Write to Sam" [ref=e212] [cursor=pointer]
+          - button "Not this week" [ref=e213] [cursor=pointer]
+  - generic [ref=e216]:
+    - generic [ref=e217]:
+      - generic [ref=e218]: april 26, 2026
+      - generic [ref=e219]: Dear Mira,
+      - generic [ref=e220]:
+        - text: It's been a strange spring. I've been thinking about that winter we spent in Helsinki — the little kitchen, the candles, the way you made coffee at 11pm and we somehow still slept.
+        - text: I hope the new apartment is warm. Tell me about it. I'll be in Copenhagen in June — any chance?
+      - generic [ref=e221]: Yours, always —
+      - generic [ref=e222]:
+        - button "Postcard" [ref=e223] [cursor=pointer]
+        - button "Letter" [ref=e224] [cursor=pointer]
+        - button "Long letter" [ref=e225] [cursor=pointer]
+        - button "Birthday card" [ref=e226] [cursor=pointer]
+    - generic [ref=e227]:
+      - generic [ref=e228]: The letters
+      - heading "Write it in your own words." [level=2] [ref=e230]:
+        - text: Write it
+        - emphasis [ref=e231]: in your own words
+        - text: .
+      - paragraph [ref=e232]:
+        - text: dearfriends remembers the small things you've mentioned before — a trip, a new kid, a hard season — so your letters don't start with
+        - emphasis [ref=e233]: “sorry it's been so long.”
+        - text: Print at home, or we'll mail it for $3.
+      - list [ref=e234]:
+        - listitem [ref=e235]:
+          - generic [ref=e236]: Print & mail yourself
+          - generic [ref=e237]: free
+        - listitem [ref=e238]:
+          - generic [ref=e239]: We print + stamp + mail
+          - generic [ref=e240]: $3 / card
+        - listitem [ref=e241]:
+          - generic [ref=e242]: Handwritten, actually
+          - generic [ref=e243]: $8 / card
+  - generic [ref=e246]:
+    - generic [ref=e247]: From an early user
+    - paragraph [ref=e249]: “I sent my grandmother a postcard for the first time in twelve years. She called me the day it arrived. I'd forgotten what that felt like.”
+    - generic [ref=e250]:
+      - generic [ref=e251]: J
+      - generic [ref=e252]: Jules, 29 · Brooklyn · used it for 4 months
+  - generic [ref=e254]:
+    - generic [ref=e255]:
+      - generic [ref=e256]: Pricing
+      - heading "Small and honest." [level=2] [ref=e258]:
+        - emphasis [ref=e259]: Small
+        - text: and honest.
+      - paragraph [ref=e260]: dearfriends is built by one person. No VC, no dark patterns. The free plan is real, forever.
+    - generic [ref=e261]:
+      - generic [ref=e262]:
+        - heading "A little book" [level=4] [ref=e263]
+        - paragraph [ref=e264]: For keeping in touch with your closest circle.
+        - generic [ref=e265]: $0 / forever
+        - list [ref=e266]:
+          - listitem [ref=e267]:
+            - generic [ref=e268]: •
+            - text: Up to 25 friends
+          - listitem [ref=e269]:
+            - generic [ref=e270]: •
+            - text: Birthday & address book
+          - listitem [ref=e271]:
+            - generic [ref=e272]: •
+            - text: Sunday morning nudges
+          - listitem [ref=e273]:
+            - generic [ref=e274]: •
+            - text: Print your letters at home
+        - link "Start free" [ref=e275] [cursor=pointer]:
+          - /url: /login
+      - generic [ref=e276]:
+        - generic [ref=e277]: Most loved
+        - heading "A bigger book" [level=4] [ref=e278]
+        - paragraph [ref=e279]: For people with a lot of people.
+        - generic [ref=e280]: $4 / month
+        - list [ref=e281]:
+          - listitem [ref=e282]:
+            - generic [ref=e283]: •
+            - text: Unlimited friends & notes
+          - listitem [ref=e284]:
+            - generic [ref=e285]: •
+            - text: We mail cards for you ($3 each)
+          - listitem [ref=e286]:
+            - generic [ref=e287]: •
+            - text: Handwritten option
+          - listitem [ref=e288]:
+            - generic [ref=e289]: •
+            - text: Shared family book
+        - link "Try it for a month" [ref=e290] [cursor=pointer]:
+          - /url: /login
+  - generic [ref=e291]:
+    - generic [ref=e292]: p.s. —
+    - heading "The people you love aren't going to know unless you tell them." [level=2] [ref=e293]:
+      - text: The people you love
+      - text: aren't going to know
+      - emphasis [ref=e294]: unless you tell them.
+    - paragraph [ref=e295]: Start your little book today. It takes about four minutes.
+    - link "Begin writing" [ref=e296] [cursor=pointer]:
+      - /url: /login
+      - text: Begin writing
+      - img [ref=e297]
+    - generic [ref=e299]:
+      - text: with love,
+      - generic [ref=e300]: the dearfriends team (it's just me)
+  - contentinfo [ref=e301]:
+    - generic [ref=e302]: dearfriends
+    - list [ref=e303]:
+      - listitem [ref=e304]:
+        - link "About" [ref=e305] [cursor=pointer]:
+          - /url: /about
+      - listitem [ref=e306]:
+        - link "Privacy" [ref=e307] [cursor=pointer]:
+          - /url: /privacy
+      - listitem [ref=e308]:
+        - link "Changelog" [ref=e309] [cursor=pointer]:
+          - /url: /changelog
+      - listitem [ref=e310]:
+        - link "hi@dearfriends.co" [ref=e311] [cursor=pointer]:
+          - /url: mailto:hi@dearfriends.co
+    - generic [ref=e312]: © 2026 · handmade
