@@ -376,18 +376,6 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
       )}
       </div> {/* end SVG wrapper */}
 
-      {/* Drag hint */}
-      <div
-        style={{
-          position: 'absolute', bottom: 12, left: 0, right: 0,
-          textAlign: 'center', fontSize: 10.5,
-          color: 'rgba(255,255,255,.28)', letterSpacing: '0.06em',
-          pointerEvents: 'none',
-        }}
-      >
-        drag to rotate
-      </div>
-
       {/* Graceful fallback note for pre-geocode contacts */}
       {contacts.length > 0 && geocodedCount < contacts.length && (
         <div

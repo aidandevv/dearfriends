@@ -7,12 +7,7 @@ import { getGroups } from '@/lib/actions/groups'
 import { generateShareSlug } from '@/lib/actions/user'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
-import dynamic from 'next/dynamic'
-
-const GlobePanel = dynamic(
-  () => import('@/components/globe-panel').then(m => m.GlobePanel),
-  { ssr: false },
-)
+import { GlobePanel } from '@/components/globe-panel'
 
 const MONTH_LETTERS = ['J','F','M','A','M','J','J','A','S','O','N','D']
 const MONTH_NAMES   = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -530,12 +525,12 @@ export default async function DashboardPage({
                   lineHeight: 1.15, margin: '0 0 8px',
                   transform: 'rotate(-2deg)',
                 }}>
-                  "the people you love<br />aren&apos;t going to know<br />unless you tell them."
+                  &ldquo;the people you love<br />aren&apos;t going to know<br />unless you tell them.&rdquo;
                 </p>
                 <span style={{
                   fontFamily: 'var(--font-dm-sans), sans-serif',
                   fontSize: 11.5, color: 'var(--muted)',
-                  textTransform: 'uppercase', letterSpacing: '0.16em',
+                  textTransform: 'uppercase', letterSpacing: 0,
                   display: 'block', marginLeft: 10,
                 }}>
                   — a postcard, somewhere
