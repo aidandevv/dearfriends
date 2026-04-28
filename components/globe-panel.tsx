@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useId } from 'react'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
 import { feature } from 'topojson-client'
 
@@ -29,13 +29,13 @@ const RADIUS = 118
 
 /** True if [lng, lat] is on the front hemisphere of the current rotation. */
 function isOnFront(lng: number, lat: number, rot: [number, number, number]): boolean {
-  const rLon = -rot[0] * (Math.PI / 180)
-  const rLat = -rot[1] * (Math.PI / 180)
+  const cLon = rot[0] * (Math.PI / 180)
+  const cLat = rot[1] * (Math.PI / 180)
   const pLon = lng * (Math.PI / 180)
   const pLat = lat * (Math.PI / 180)
   return (
-    Math.sin(rLat) * Math.sin(pLat) +
-    Math.cos(rLat) * Math.cos(pLat) * Math.cos(pLon - rLon) > 0
+    Math.sin(cLat) * Math.sin(pLat) +
+    Math.cos(cLat) * Math.cos(pLat) * Math.cos(pLon - cLon) > 0
   )
 }
 
@@ -91,6 +91,8 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
     [contacts],
   )
 
+  const uid = useId()
+
   useEffect(() => {
     const svg = svgRef.current
     if (!svg) return
@@ -110,11 +112,13 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         .rotate(rot.current)
     }
 
+    const graticuleGeom = geoGraticule()()
+
     function draw() {
       const proj = makeProjection()
       const pathFn = geoPath(proj)
 
-      gratEl.setAttribute('d', pathFn(geoGraticule()()) ?? '')
+      gratEl.setAttribute('d', pathFn(graticuleGeom) ?? '')
 
       if (topoCache) {
         landEl.setAttribute(
@@ -123,6 +127,8 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         )
       }
 
+      // Skip pin rebuild while interacting — rotation is paused so positions are unchanged
+      if (interacting.current) return
       // Rebuild pins each frame — only visible hemisphere pins
       pinsEl.innerHTML = ''
       for (const pin of pins) {
@@ -271,18 +277,18 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         aria-label="Globe showing where your contacts live"
       >
         <defs>
-          <radialGradient id="df-ocean" cx="38%" cy="32%">
+          <radialGradient id={`df-ocean-${uid}`} cx="38%" cy="32%">
             <stop offset="0%" stopColor="#2a4a8a" />
             <stop offset="60%" stopColor="#162d5e" />
             <stop offset="100%" stopColor="#0a1628" />
           </radialGradient>
-          <clipPath id="df-globe-clip">
+          <clipPath id={`df-globe-clip-${uid}`}>
             <circle cx={W / 2} cy={H / 2} r={RADIUS} />
           </clipPath>
         </defs>
 
         {/* Ocean sphere */}
-        <circle cx={W / 2} cy={H / 2} r={RADIUS} fill="url(#df-ocean)" />
+        <circle cx={W / 2} cy={H / 2} r={RADIUS} fill={`url(#df-ocean-${uid})`} />
 
         {/* Atmosphere glow */}
         <circle
@@ -293,7 +299,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         {/* Graticule — filled by D3 on each frame */}
         <path
           className="g-grat"
-          clipPath="url(#df-globe-clip)"
+          clipPath={`url(#df-globe-clip-${uid})`}
           fill="none"
           stroke="#1e3d70"
           strokeWidth={0.6}
@@ -303,7 +309,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         {/* Landmasses — filled by D3 on each frame */}
         <path
           className="g-land"
-          clipPath="url(#df-globe-clip)"
+          clipPath={`url(#df-globe-clip-${uid})`}
           fill="#3a5c2a"
           stroke="#4a7236"
           strokeWidth={0.7}
@@ -326,7 +332,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         <div
           style={{
             position: 'absolute',
-            left: tooltip.x > W / 2 ? tooltip.x - 148 : tooltip.x + 20,
+            left: tooltip.x > W / 2 ? Math.max(0, tooltip.x - 148) : tooltip.x + 20,
             top: tooltip.y - 14,
             background: 'var(--paper, #faf4e4)',
             border: '1px solid var(--line, #d9cfb0)',
