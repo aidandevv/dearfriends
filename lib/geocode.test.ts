@@ -59,5 +59,8 @@ describe('geocodeAddress', () => {
     expect(calledUrl).toContain('456%20Oak%20Ave')
     expect(calledUrl).toContain('Austin')
     expect(calledUrl).toContain('key=test-key')
+    expect(calledUrl).toContain('TX')
+    expect(calledUrl).toContain('78701')
+    expect(calledUrl).toContain('address=')
   })
 })
