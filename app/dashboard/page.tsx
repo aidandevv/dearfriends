@@ -389,6 +389,7 @@ export default async function DashboardPage({
                   {uniqueCities.length} {uniqueCities.length === 1 ? 'city' : 'cities'} · {contacts.length} {contacts.length === 1 ? 'friend' : 'friends'}
                 </div>
               </div>
+              {/* TODO: remove casts after running `npx supabase gen types` (migration 006 adds lat/lng) */}
               <GlobePanel
                 contacts={contacts.map(c => ({
                   lat: (c as { lat?: number | null }).lat ?? null,
