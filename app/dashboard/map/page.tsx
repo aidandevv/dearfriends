@@ -13,15 +13,16 @@ export default async function DashboardMapPage() {
   }))
 
   return (
-    <div className="space-y-5">
-      <section className="surface-panel px-5 py-5">
-        <h1 className="font-serif text-4xl text-ink">Friend map</h1>
+    <div className="dashboard-page-pad space-y-5 p-6">
+      <section className="surface-panel px-6 py-5">
+        <p className="eyebrow">Where your people live</p>
+        <h1 className="dash-title">Friend map</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-muted">
           A living view of the cities your letters are headed toward. Hover over a dot to see who&apos;s there.
         </p>
       </section>
 
-      <section className="surface-panel px-5 py-5">
+      <section className="surface-panel px-6 py-5">
         <FullMapPanel contacts={mappableContacts} />
       </section>
     </div>

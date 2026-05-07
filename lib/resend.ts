@@ -96,3 +96,30 @@ export function buildAddressRefreshEmail(opts: {
     `,
   }
 }
+
+export function buildCalendarReminderEmail(opts: {
+  adminName?: string | null
+  title: string
+  eventType: string
+  occurrenceDate: string
+  mailByDate: string
+  offsetLabel: string
+  offsetDays: number
+  contactName: string | null
+}): { subject: string; html: string } {
+  const escapedTitle = escapeHtml(opts.title)
+  const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
+  const escapedContact = opts.contactName ? escapeHtml(opts.contactName) : null
+
+  return {
+    subject: `Mail by ${opts.mailByDate}: ${opts.title}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
+        <p>Hi${escapedName},</p>
+        <p><strong>${escapedTitle}</strong>${escapedContact ? ` for ${escapedContact}` : ''} is coming up on <strong>${opts.occurrenceDate}</strong>.</p>
+        <p>Based on ${escapeHtml(opts.offsetLabel.toLowerCase())}, dearfriends estimates you should mail something by <strong>${opts.mailByDate}</strong>.</p>
+        <p style="font-size:13px;color:#6b7290">Delivery offset: ${opts.offsetDays} days · Event type: ${escapeHtml(opts.eventType)}</p>
+      </div>
+    `,
+  }
+}

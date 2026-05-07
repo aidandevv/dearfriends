@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-ink-muted font-medium">New password</label>
               <input
-                type="password" required minLength={8} value={password}
+                type="password" required value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 className="input"
@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-ink-muted font-medium">Confirm new password</label>
               <input
-                type="password" required minLength={8} value={confirmPassword}
+                type="password" required value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Repeat your password"
                 className="input"

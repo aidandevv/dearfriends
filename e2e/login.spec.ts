@@ -35,4 +35,20 @@ test.describe('login page', () => {
     await expect(page.getByRole('heading', { name: /reset password/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /send reset link/i })).toBeVisible()
   })
+
+  test('validates reset password form in-app', async ({ page }) => {
+    await page.goto('/auth/reset-password')
+
+    await expect(page.getByRole('heading', { name: /set new password/i })).toBeVisible()
+
+    await page.getByPlaceholder(/at least 8 characters/i).fill('short')
+    await page.getByPlaceholder(/repeat your password/i).fill('short')
+    await page.getByRole('button', { name: /update password/i }).click()
+    await expect(page.getByText(/password must be at least 8 characters/i)).toBeVisible()
+
+    await page.getByPlaceholder(/at least 8 characters/i).fill('longenough')
+    await page.getByPlaceholder(/repeat your password/i).fill('different1')
+    await page.getByRole('button', { name: /update password/i }).click()
+    await expect(page.getByText(/passwords do not match/i)).toBeVisible()
+  })
 })

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
-import { Layers, PenLine, Send, Settings, Users } from 'lucide-react'
+import { CalendarDays, Layers, PenLine, Send, Settings, Users } from 'lucide-react'
 import { FeatureTour } from '@/components/feature-tour'
 import { NavLink } from '@/components/nav-link'
 import { createClient } from '@/lib/supabase/server'
@@ -8,6 +8,7 @@ import { getUserProfile } from '@/lib/user-profile'
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Contacts', icon: Users },
+  { href: '/dashboard/calendar', label: 'Calendar', icon: CalendarDays },
   { href: '/dashboard/groups', label: 'Groups', icon: Layers },
   { href: '/dashboard/compose', label: 'Compose', icon: PenLine },
   { href: '/dashboard/export', label: 'Export & Send', icon: Send },
@@ -35,7 +36,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <>
       <div
-        className="min-h-screen"
+        className="dashboard-layout min-h-screen"
         style={{
           display: 'grid',
           gridTemplateColumns: '220px minmax(0,1fr)',
@@ -44,6 +45,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       >
         {/* ── Sidebar ── */}
         <aside
+          className="dashboard-sidebar"
           style={{
             padding: '26px 18px 24px',
             borderRight: '1px solid var(--line)',
@@ -92,6 +94,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 color: 'var(--muted)',
                 padding: '18px 14px 8px',
               }}
+              className="dashboard-sidebar-account-label"
             >
               Account
             </div>
@@ -106,6 +109,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           {/* Footer */}
           <div style={{ marginTop: 'auto', paddingTop: 14 }}>
             <div
+              className="dashboard-user-card"
               style={{
                 display: 'flex',
                 alignItems: 'center',

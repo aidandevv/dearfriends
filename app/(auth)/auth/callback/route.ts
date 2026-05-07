@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const type = searchParams.get('type')
+  const next = searchParams.get('next')
+  const safeNext = next?.startsWith('/') && !next.startsWith('//') ? next : null
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login`)
@@ -18,8 +20,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login`)
   }
 
-  if (type === 'recovery') {
-    return NextResponse.redirect(`${origin}/auth/reset-password`)
+  if (safeNext || type === 'recovery') {
+    return NextResponse.redirect(`${origin}${safeNext ?? '/auth/reset-password'}`)
   }
 
   const {

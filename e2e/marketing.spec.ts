@@ -5,19 +5,25 @@ test.describe('marketing pages', () => {
     await page.goto('/')
 
     await expect(
-      page.getByRole('heading', { name: /your people deserve more than/i }),
+      page.getByRole('heading', { name: /keep up with the people you love/i }),
     ).toBeVisible()
     await expect(
-      page.getByText(/No credit card. No fuss. Just your address book./i),
+      page.getByText(/collect your friends' addresses, remember birthdays/i),
     ).toBeVisible()
 
     await page.getByRole('link', { name: /see how it works/i }).click()
-    await expect(page).toHaveURL(/\/about$/)
+    await expect(page).toHaveURL(/#how$/)
+    await expect(
+      page.getByRole('heading', { name: /three small rituals/i }),
+    ).toBeVisible()
+
+    await page.goto('/about')
     await expect(
       page.getByRole('heading', { name: /a warmer home for mailing lists and meaningful updates/i }),
     ).toBeVisible()
 
-    await page.getByRole('link', { name: /go to dashboard/i }).first().click()
+    await page.goto('/')
+    await page.getByRole('link', { name: /start writing/i }).click()
     await expect(page).toHaveURL(/\/login$/)
     await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
   })
