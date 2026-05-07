@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
-import { feature } from 'topojson-client'
+import { feature, mesh } from 'topojson-client'
 
 type ContactGeo = {
   lat: number | null
   lng: number | null
   city: string
   state: string
+  country?: string | null
+  isInternational?: boolean | null
 }
 
 type Pin = {
@@ -16,17 +18,22 @@ type Pin = {
   lng: number
   city: string
   state: string
+  country?: string | null
+  isInternational?: boolean | null
   count: number
 }
 
 // Cached at module level — fetched once per page load across all renders
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let topoCache: any = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let usTopoCache: any = null
 
 const DIMENSIONS = {
   compact: { width: 260, height: 260, radius: 118 },
-  feature: { width: 620, height: 340, radius: 148 },
+  feature: { width: 760, height: 460, radius: 180 },
 }
+const US_ATLAS_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
 /** True if [lng, lat] is on the front hemisphere of the current rotation. */
 function isOnFront(lng: number, lat: number, rot: [number, number, number]): boolean {
@@ -80,6 +87,7 @@ export function GlobePanel({
   const coastRaf = useRef<number | null>(null)
   const [zoom, setZoom] = useState(1)
   const zoomRef = useRef(1)
+  const translate = useRef({ x: W / 2, y: H / 2 })
 
   const [tooltip, setTooltip] = useState<{
     x: number
@@ -95,7 +103,15 @@ export function GlobePanel({
       const key = `${c.lat.toFixed(4)},${c.lng.toFixed(4)}`
       const ex = map.get(key)
       if (ex) { ex.count++; continue }
-      map.set(key, { lat: c.lat, lng: c.lng, city: c.city, state: c.state, count: 1 })
+      map.set(key, {
+        lat: c.lat,
+        lng: c.lng,
+        city: c.city,
+        state: c.state,
+        country: c.country,
+        isInternational: c.isInternational,
+        count: 1,
+      })
     }
     return [...map.values()]
   }, [contacts])
@@ -107,14 +123,24 @@ export function GlobePanel({
 
   const uid = useId()
 
-  const setClampedZoom = useCallback((next: number | ((current: number) => number)) => {
+  const setClampedZoom = useCallback((
+    next: number | ((current: number) => number),
+    anchor?: { x: number; y: number },
+  ) => {
     setZoom(current => {
       const resolved = typeof next === 'function' ? next(current) : next
-      const clamped = Math.max(0.78, Math.min(1.55, resolved))
+      const clamped = Math.max(0.72, Math.min(4.4, resolved))
+      const currentTranslate = translate.current
+      const target = anchor ?? { x: W / 2, y: H / 2 }
+      const ratio = clamped / current
+      translate.current = {
+        x: target.x - (target.x - currentTranslate.x) * ratio,
+        y: target.y - (target.y - currentTranslate.y) * ratio,
+      }
       zoomRef.current = clamped
       return clamped
     })
-  }, [])
+  }, [H, W])
 
   useEffect(() => {
     zoomRef.current = zoom
@@ -129,13 +155,18 @@ export function GlobePanel({
 
     const gratEl = svg.querySelector<SVGPathElement>('.g-grat')!
     const landEl = svg.querySelector<SVGPathElement>('.g-land')!
+    const countriesEl = svg.querySelector<SVGPathElement>('.g-countries')!
+    const statesEl = svg.querySelector<SVGPathElement>('.g-states')!
     const pinsEl = svg.querySelector<SVGGElement>('.g-pins')!
+    const oceanEl = svg.querySelector<SVGCircleElement>('.g-ocean')!
+    const atmosphereEl = svg.querySelector<SVGCircleElement>('.g-atmosphere')!
+    const shineEl = svg.querySelector<SVGEllipseElement>('.g-shine')!
 
     function makeProjection() {
+      const scale = RADIUS * zoomRef.current
       return geoOrthographic()
-        .scale(RADIUS)
-        .scale(RADIUS * zoomRef.current)
-        .translate([W / 2, H / 2])
+        .scale(scale)
+        .translate([translate.current.x, translate.current.y])
         .clipAngle(90)
         .rotate(rot.current)
     }
@@ -145,6 +176,18 @@ export function GlobePanel({
     function draw() {
       const proj = makeProjection()
       const pathFn = geoPath(proj)
+      const currentRadius = RADIUS * zoomRef.current
+
+      oceanEl.setAttribute('cx', String(translate.current.x))
+      oceanEl.setAttribute('cy', String(translate.current.y))
+      oceanEl.setAttribute('r', String(currentRadius))
+      atmosphereEl.setAttribute('cx', String(translate.current.x))
+      atmosphereEl.setAttribute('cy', String(translate.current.y))
+      atmosphereEl.setAttribute('r', String(currentRadius + 3))
+      shineEl.setAttribute('cx', String(translate.current.x - currentRadius * 0.24))
+      shineEl.setAttribute('cy', String(translate.current.y - currentRadius * 0.32))
+      shineEl.setAttribute('rx', String(currentRadius * 0.18))
+      shineEl.setAttribute('ry', String(currentRadius * 0.12))
 
       gratEl.setAttribute('d', pathFn(graticuleGeom) ?? '')
 
@@ -152,6 +195,16 @@ export function GlobePanel({
         landEl.setAttribute(
           'd',
           pathFn(feature(topoCache, topoCache.objects.land)) ?? '',
+        )
+        countriesEl.setAttribute(
+          'd',
+          pathFn(mesh(topoCache, topoCache.objects.countries, (a, b) => a !== b)) ?? '',
+        )
+      }
+      if (usTopoCache) {
+        statesEl.setAttribute(
+          'd',
+          pathFn(mesh(usTopoCache, usTopoCache.objects.states, (a, b) => a !== b)) ?? '',
         )
       }
 
@@ -162,7 +215,7 @@ export function GlobePanel({
         const xy = proj([pin.lng, pin.lat])
         if (!xy) continue
         const [x, y] = xy
-        if (Math.hypot(x - W / 2, y - H / 2) > RADIUS - 2) continue
+        if (x < -20 || x > W + 20 || y < -20 || y > H + 20) continue
 
         mkCircle(pinsEl, x, y, 15, 'var(--stamp)', '0.18')
         mkCircle(pinsEl, x, y, 8, 'var(--cream)', '0.32')
@@ -174,7 +227,14 @@ export function GlobePanel({
         hit.style.cursor = 'pointer'
         const p = pin
         hit.addEventListener('mouseenter', () => {
-          setTooltip({ x, y, label: `${p.city}, ${p.state}`, count: p.count })
+          setTooltip({
+            x,
+            y,
+            label: p.isInternational
+              ? `${p.city}, ${p.country || 'International'}`
+              : `${p.city}, ${p.state}`,
+            count: p.count,
+          })
         })
         hit.addEventListener('mouseleave', () => {
           setTooltip(null)
@@ -280,7 +340,12 @@ export function GlobePanel({
       e.preventDefault()
       paused.current = true
       clearResume()
-      setClampedZoom(current => current + (e.deltaY > 0 ? -0.08 : 0.08))
+      const rect = globeSvg.getBoundingClientRect()
+      const anchor = {
+        x: ((e.clientX - rect.left) / rect.width) * W,
+        y: ((e.clientY - rect.top) / rect.height) * H,
+      }
+      setClampedZoom(current => current * (e.deltaY > 0 ? 0.88 : 1.14), anchor)
       scheduleResume()
     }
 
@@ -297,6 +362,12 @@ export function GlobePanel({
           const res = await fetch('/world-110m.json')
           topoCache = await res.json()
         } catch { /* globe renders without land on failure */ }
+      }
+      if (!usTopoCache) {
+        try {
+          const res = await fetch(US_ATLAS_URL)
+          usTopoCache = await res.json()
+        } catch { /* state borders are progressive enhancement */ }
       }
       if (!alive) return
       draw() // static frame before rotation starts
@@ -327,17 +398,17 @@ export function GlobePanel({
         borderRadius: 8,
         overflow: 'hidden',
         background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
-        minHeight: variant === 'feature' ? 340 : undefined,
+        minHeight: variant === 'feature' ? 460 : undefined,
       }}
     >
       {/* Starfield */}
       <Stars />
 
       {/*
-        Wrap SVG + tooltip in a W-wide div centered in the panel.
-        This makes tooltip absolute positioning match SVG coordinate space.
+        The feature globe intentionally uses the full panel width so zoomed
+        geography can crop naturally instead of feeling boxed in.
       */}
-      <div style={{ position: 'relative', width: '100%', maxWidth: W, margin: '0 auto' }}>
+      <div style={{ position: 'relative', width: '100%', margin: '0 auto' }}>
       <svg
         ref={svgRef}
         width="100%"
@@ -352,16 +423,14 @@ export function GlobePanel({
             <stop offset="60%" stopColor="var(--blue-slate)" />
             <stop offset="100%" stopColor="var(--ink)" />
           </radialGradient>
-          <clipPath id={`df-globe-clip-${uid}`}>
-            <circle cx={W / 2} cy={H / 2} r={RADIUS} />
-          </clipPath>
         </defs>
 
         {/* Ocean sphere */}
-        <circle cx={W / 2} cy={H / 2} r={RADIUS} fill={`url(#df-ocean-${uid})`} />
+        <circle className="g-ocean" cx={W / 2} cy={H / 2} r={RADIUS} fill={`url(#df-ocean-${uid})`} />
 
         {/* Atmosphere glow */}
         <circle
+          className="g-atmosphere"
           cx={W / 2} cy={H / 2} r={RADIUS + 3}
           fill="none" stroke="var(--blue-ink)" strokeWidth={2} opacity={0.28}
         />
@@ -369,7 +438,6 @@ export function GlobePanel({
         {/* Graticule — filled by D3 on each frame */}
         <path
           className="g-grat"
-          clipPath={`url(#df-globe-clip-${uid})`}
           fill="none"
           stroke="rgba(255,255,255,0.16)"
           strokeWidth={0.6}
@@ -379,15 +447,33 @@ export function GlobePanel({
         {/* Landmasses — filled by D3 on each frame */}
         <path
           className="g-land"
-          clipPath={`url(#df-globe-clip-${uid})`}
           fill="var(--sage)"
           stroke="var(--cream-soft)"
           strokeWidth={0.7}
           opacity={0.85}
         />
 
+        {/* Country borders — filled from the bundled world topology */}
+        <path
+          className="g-countries"
+          fill="none"
+          stroke="rgba(250,244,228,.42)"
+          strokeWidth={zoom > 2 ? 0.5 : 0.34}
+          opacity={zoom > 1.2 ? 0.72 : 0.48}
+        />
+
+        {/* US state borders — filled from us-atlas when available */}
+        <path
+          className="g-states"
+          fill="none"
+          stroke="rgba(250,244,228,.72)"
+          strokeWidth={zoom > 2 ? 0.58 : 0.38}
+          opacity={zoom > 1.35 ? 0.86 : 0.38}
+        />
+
         {/* Shine highlight */}
         <ellipse
+          className="g-shine"
           cx={W / 2 - 28} cy={H / 2 - 38}
           rx={22} ry={14}
           fill="white" opacity={0.06}
@@ -410,7 +496,7 @@ export function GlobePanel({
       >
         {[
           { label: 'Zoom out', text: '−', onClick: () => setClampedZoom(z => z - 0.14) },
-          { label: 'Zoom in', text: '+', onClick: () => setClampedZoom(z => z + 0.14) },
+          { label: 'Zoom in', text: '+', onClick: () => setClampedZoom(z => z * 1.22) },
         ].map(control => (
           <button
             key={control.label}

@@ -31,6 +31,7 @@ export async function upsertContact(adminId: string, formData: unknown) {
       parsed.data.city,
       parsed.data.state,
       parsed.data.zip,
+      parsed.data.is_international ? parsed.data.country : null,
     )
     if (coords) {
       await supabase

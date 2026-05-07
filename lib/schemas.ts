@@ -13,6 +13,14 @@ export const contactSchema = z.object({
   is_international: z.boolean().optional().default(false),
   country: z.string().trim().max(80).optional(),
   tags: z.array(z.string()).optional().default([]),
+}).superRefine((value, ctx) => {
+  if (value.is_international && !value.country?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['country'],
+      message: 'Country is required for international addresses',
+    })
+  }
 })
 
 export type ContactInput = z.infer<typeof contactSchema>

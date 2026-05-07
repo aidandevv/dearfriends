@@ -25,11 +25,14 @@ export async function geocodeAddress(
   city: string,
   state: string,
   zip: string,
+  country?: string | null,
 ): Promise<GeocodeResult> {
   const key = process.env.GOOGLE_GEOCODING_API_KEY
   if (!key) return null
 
-  const query = encodeURIComponent(`${address}, ${city}, ${state} ${zip}`)
+  const query = encodeURIComponent(
+    [address, city, state, zip, country].filter(Boolean).join(', '),
+  )
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${key}`
 
   try {
