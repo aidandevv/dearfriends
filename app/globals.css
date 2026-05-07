@@ -129,6 +129,11 @@ body {
     color: var(--ink);
     margin: 0 0 4px;
   }
+
+  .dashboard-page {
+    min-height: 100vh;
+    background: var(--paper);
+  }
 }
 
 @layer utilities {
@@ -208,5 +213,137 @@ body {
   }
   .landing-price-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-stat {
+    border-right: 0 !important;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .dashboard-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-atmosphere {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout {
+    display: block !important;
+  }
+
+  .dashboard-sidebar {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line);
+    padding: 18px !important;
+  }
+
+  .dashboard-sidebar nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+
+  .dashboard-sidebar-account-label {
+    width: 100%;
+    padding: 10px 8px 2px !important;
+  }
+
+  .dashboard-user-card {
+    margin-top: 12px;
+    max-width: 100%;
+  }
+
+  .dashboard-hero {
+    padding: 32px 24px 28px !important;
+  }
+
+  .dashboard-hero-rule,
+  .dashboard-postmark {
+    display: none !important;
+  }
+
+  .dashboard-hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    align-items: start !important;
+  }
+
+  .dashboard-hero-action {
+    text-align: left !important;
+  }
+
+  .dashboard-body {
+    padding: 28px 24px 56px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-stat {
+    padding: 18px 20px !important;
+  }
+
+  .dashboard-section-header,
+  .dashboard-add-cta,
+  .dashboard-add-copy {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .dashboard-add-cta {
+    padding: 24px 20px !important;
+  }
+
+  .contact-table-header {
+    display: none !important;
+  }
+
+  .contact-table-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 16px 18px !important;
+  }
+
+  .contact-table-row-actions {
+    justify-content: flex-start !important;
+    opacity: 1 !important;
+  }
+
+  .dashboard-mail-tray {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-hero {
+    padding: 28px 18px 24px !important;
+  }
+
+  .dashboard-body,
+  .dashboard-page-pad {
+    padding: 20px 16px 44px !important;
+  }
+
+  .dashboard-sidebar nav a {
+    width: 100%;
+  }
+
+  .dash-title {
+    font-size: 30px;
   }
 }

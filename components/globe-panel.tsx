@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo, useId } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
 import { feature } from 'topojson-client'
 
@@ -23,9 +23,10 @@ type Pin = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let topoCache: any = null
 
-const W = 260
-const H = 260
-const RADIUS = 118
+const DIMENSIONS = {
+  compact: { width: 260, height: 260, radius: 118 },
+  feature: { width: 620, height: 340, radius: 148 },
+}
 
 /** True if [lng, lat] is on the front hemisphere of the current rotation. */
 function isOnFront(lng: number, lat: number, rot: [number, number, number]): boolean {
@@ -57,16 +58,28 @@ function mkCircle(
   return el
 }
 
-export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
+export function GlobePanel({
+  contacts,
+  variant = 'compact',
+}: {
+  contacts: ContactGeo[]
+  variant?: 'compact' | 'feature'
+}) {
   const svgRef = useRef<SVGSVGElement>(null)
+  const { width: W, height: H, radius: RADIUS } = DIMENSIONS[variant]
 
   // Mutable rotation state — lives in a ref so the RAF loop reads current value
   const rot = useRef<[number, number, number]>([0, -20, 0])
-  const interacting = useRef(false)
+  const paused = useRef(false)
+  const dragging = useRef(false)
   const lastPos = useRef({ x: 0, y: 0 })
+  const lastMove = useRef({ x: 0, y: 0, t: 0 })
+  const velocity = useRef({ x: 0, y: 0 })
   const rafId = useRef<number | null>(null)
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hovering = useRef(false)
+  const coastRaf = useRef<number | null>(null)
+  const [zoom, setZoom] = useState(1)
+  const zoomRef = useRef(1)
 
   const [tooltip, setTooltip] = useState<{
     x: number
@@ -94,11 +107,24 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
 
   const uid = useId()
 
+  const setClampedZoom = useCallback((next: number | ((current: number) => number)) => {
+    setZoom(current => {
+      const resolved = typeof next === 'function' ? next(current) : next
+      const clamped = Math.max(0.78, Math.min(1.55, resolved))
+      zoomRef.current = clamped
+      return clamped
+    })
+  }, [])
+
+  useEffect(() => {
+    zoomRef.current = zoom
+  }, [zoom])
+
   useEffect(() => {
     const svg = svgRef.current
     if (!svg) return
+    const globeSvg = svg
     let alive = true
-    let coastRaf: number | null = null
     let startTimer: ReturnType<typeof setTimeout> | null = null
 
     const gratEl = svg.querySelector<SVGPathElement>('.g-grat')!
@@ -108,6 +134,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
     function makeProjection() {
       return geoOrthographic()
         .scale(RADIUS)
+        .scale(RADIUS * zoomRef.current)
         .translate([W / 2, H / 2])
         .clipAngle(90)
         .rotate(rot.current)
@@ -128,9 +155,6 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         )
       }
 
-      // Skip pin rebuild while hovering a pin — clearing innerHTML destroys the hover
-      // target and prevents mouseleave from firing, which would freeze interacting=true.
-      if (hovering.current) return
       // Rebuild pins each frame — only visible hemisphere pins
       pinsEl.innerHTML = ''
       for (const pin of pins) {
@@ -138,10 +162,11 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         const xy = proj([pin.lng, pin.lat])
         if (!xy) continue
         const [x, y] = xy
+        if (Math.hypot(x - W / 2, y - H / 2) > RADIUS - 2) continue
 
-        mkCircle(pinsEl, x, y, 13, 'var(--blue-ink)', '0.12')
-        mkCircle(pinsEl, x, y, 7, 'var(--blue-ink)', '0.24')
-        mkCircle(pinsEl, x, y, 3.5, 'var(--blue-ink)', '1')
+        mkCircle(pinsEl, x, y, 15, 'var(--stamp)', '0.18')
+        mkCircle(pinsEl, x, y, 8, 'var(--cream)', '0.32')
+        mkCircle(pinsEl, x, y, 4.2, 'var(--stamp)', '1')
         mkCircle(pinsEl, x, y, 1.3, 'white', '0.9')
 
         // Transparent hit target for hover
@@ -149,23 +174,17 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         hit.style.cursor = 'pointer'
         const p = pin
         hit.addEventListener('mouseenter', () => {
-          hovering.current = true
-          interacting.current = true
-          clearResume()
           setTooltip({ x, y, label: `${p.city}, ${p.state}`, count: p.count })
         })
         hit.addEventListener('mouseleave', () => {
-          hovering.current = false
           setTooltip(null)
-          interacting.current = false
-          scheduleResume()
         })
       }
     }
 
     function tick() {
       if (!alive) return
-      if (!interacting.current) {
+      if (!paused.current) {
         rot.current = [rot.current[0] + 0.03, rot.current[1], rot.current[2]]
       }
       draw()
@@ -181,51 +200,95 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
 
     function scheduleResume() {
       clearResume()
-      resumeTimer.current = setTimeout(() => { interacting.current = false }, 2000)
+      resumeTimer.current = setTimeout(() => { paused.current = false }, 1400)
     }
 
     function cancelCoast() {
-      if (coastRaf !== null) { cancelAnimationFrame(coastRaf); coastRaf = null }
+      if (coastRaf.current !== null) {
+        cancelAnimationFrame(coastRaf.current)
+        coastRaf.current = null
+      }
     }
 
     // ─── Drag ────────────────────────────────────────────────────────────────
-    let velX = 0
-
-    function onDown(e: MouseEvent) {
-      interacting.current = true
+    function onDown(e: PointerEvent) {
+      if (e.button !== 0 && e.pointerType === 'mouse') return
+      paused.current = true
+      dragging.current = true
       clearResume()
       cancelCoast()
-      velX = 0
+      velocity.current = { x: 0, y: 0 }
+      const now = performance.now()
       lastPos.current = { x: e.clientX, y: e.clientY }
+      lastMove.current = { x: e.clientX, y: e.clientY, t: now }
+      globeSvg.setPointerCapture?.(e.pointerId)
+      globeSvg.style.cursor = 'grabbing'
     }
 
-    function onMove(e: MouseEvent) {
-      if (!interacting.current) return
+    function onMove(e: PointerEvent) {
+      if (!dragging.current) return
       const dx = e.clientX - lastPos.current.x
       const dy = e.clientY - lastPos.current.y
-      velX = dx * 0.3
+      const now = performance.now()
+      const dt = Math.max(16, now - lastMove.current.t)
+      velocity.current = {
+        x: (e.clientX - lastMove.current.x) / dt,
+        y: (e.clientY - lastMove.current.y) / dt,
+      }
       rot.current = [
         rot.current[0] + dx * 0.3,
         Math.max(-80, Math.min(80, rot.current[1] - dy * 0.3)),
         rot.current[2],
       ]
       lastPos.current = { x: e.clientX, y: e.clientY }
+      lastMove.current = { x: e.clientX, y: e.clientY, t: now }
+      e.preventDefault()
     }
 
-    function onUp() {
-      let v = velX
-      function coast() {
-        v *= 0.92
-        if (Math.abs(v) < 0.006) { coastRaf = null; scheduleResume(); return }
-        rot.current = [rot.current[0] + v, rot.current[1], rot.current[2]]
-        coastRaf = requestAnimationFrame(coast)
+    function onUp(e: PointerEvent) {
+      if (!dragging.current) return
+      dragging.current = false
+      globeSvg.releasePointerCapture?.(e.pointerId)
+      globeSvg.style.cursor = 'grab'
+      let vx = velocity.current.x * 12
+      let vy = velocity.current.y * 12
+
+      if (Math.abs(vx) < 0.02 && Math.abs(vy) < 0.02) {
+        scheduleResume()
+        return
       }
-      coastRaf = requestAnimationFrame(coast)
+
+      function coast() {
+        vx *= 0.95
+        vy *= 0.95
+        if (Math.abs(vx) < 0.006 && Math.abs(vy) < 0.006) {
+          coastRaf.current = null
+          scheduleResume()
+          return
+        }
+        rot.current = [
+          rot.current[0] + vx,
+          Math.max(-80, Math.min(80, rot.current[1] - vy)),
+          rot.current[2],
+        ]
+        coastRaf.current = requestAnimationFrame(coast)
+      }
+      coastRaf.current = requestAnimationFrame(coast)
     }
 
-    svg.addEventListener('mousedown', onDown)
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
+    function onWheel(e: WheelEvent) {
+      e.preventDefault()
+      paused.current = true
+      clearResume()
+      setClampedZoom(current => current + (e.deltaY > 0 ? -0.08 : 0.08))
+      scheduleResume()
+    }
+
+    svg.addEventListener('pointerdown', onDown)
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+    svg.addEventListener('wheel', onWheel, { passive: false })
 
     // ─── Init ────────────────────────────────────────────────────────────────
     ;(async () => {
@@ -245,15 +308,17 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
 
     return () => {
       alive = false
-      svg.removeEventListener('mousedown', onDown)
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
+      svg.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      svg.removeEventListener('wheel', onWheel)
       if (rafId.current !== null) cancelAnimationFrame(rafId.current)
       if (startTimer !== null) clearTimeout(startTimer)
       clearResume()
       cancelCoast()
     }
-  }, [pins])
+  }, [H, RADIUS, W, pins, setClampedZoom])
 
   return (
     <div
@@ -262,6 +327,7 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         borderRadius: 8,
         overflow: 'hidden',
         background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
+        minHeight: variant === 'feature' ? 340 : undefined,
       }}
     >
       {/* Starfield */}
@@ -271,13 +337,13 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         Wrap SVG + tooltip in a W-wide div centered in the panel.
         This makes tooltip absolute positioning match SVG coordinate space.
       */}
-      <div style={{ position: 'relative', width: W, margin: '0 auto' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: W, margin: '0 auto' }}>
       <svg
         ref={svgRef}
-        width={W}
+        width="100%"
         height={H}
         viewBox={`0 0 ${W} ${H}`}
-        style={{ display: 'block', cursor: 'grab' }}
+        style={{ display: 'block', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}
         aria-label="Globe showing where your contacts live"
       >
         <defs>
@@ -330,6 +396,51 @@ export function GlobePanel({ contacts }: { contacts: ContactGeo[] }) {
         {/* Contact pins — rebuilt each frame by the RAF loop */}
         <g className="g-pins" />
       </svg>
+
+      <div
+        aria-label="Globe zoom controls"
+        style={{
+          position: 'absolute',
+          right: 14,
+          bottom: 14,
+          display: 'flex',
+          gap: 6,
+          zIndex: 12,
+        }}
+      >
+        {[
+          { label: 'Zoom out', text: '−', onClick: () => setClampedZoom(z => z - 0.14) },
+          { label: 'Zoom in', text: '+', onClick: () => setClampedZoom(z => z + 0.14) },
+        ].map(control => (
+          <button
+            key={control.label}
+            type="button"
+            aria-label={control.label}
+            title={control.label}
+            onClick={() => {
+              paused.current = true
+              clearTimeout(resumeTimer.current ?? undefined)
+              control.onClick()
+              resumeTimer.current = setTimeout(() => { paused.current = false }, 1400)
+            }}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              border: '1px solid rgba(250,244,228,.28)',
+              background: 'rgba(250,244,228,.12)',
+              color: 'white',
+              fontFamily: 'var(--font-dm-sans), sans-serif',
+              fontSize: 18,
+              lineHeight: 1,
+              cursor: 'pointer',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            {control.text}
+          </button>
+        ))}
+      </div>
 
       {/* Tooltip — positioned within the W×H SVG wrapper div */}
       {tooltip && (

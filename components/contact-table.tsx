@@ -71,7 +71,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
   return (
     <div>
       {/* Table header */}
-      <div style={{
+      <div className="contact-table-header" style={{
         display: 'grid',
         gridTemplateColumns: COL,
         gap: 14,
@@ -100,7 +100,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
         return (
           <div
             key={contact.id}
-            className="group"
+            className="contact-table-row group"
             style={{
               display: 'grid',
               gridTemplateColumns: COL,
@@ -181,7 +181,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="contact-table-row-actions flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={async () => {
                   setNudgePending(contact.id)

@@ -26,6 +26,7 @@ export function ShareForm({ adminId, senderName, senderBio }: {
   const [note, setNote] = useState('')
   const [noteSubmitting, setNoteSubmitting] = useState(false)
   const [noteSubmitted, setNoteSubmitted] = useState(false)
+  const [isInternational, setIsInternational] = useState(false)
 
   const displayName = useMemo(() => firstName(senderName) ?? senderName, [senderName])
 
@@ -39,6 +40,7 @@ export function ShareForm({ adminId, senderName, senderBio }: {
   })
 
   async function onSubmit(data: ContactInput) {
+    setServerError(null)
     const result = await upsertContact(adminId, data)
     if (result.error) {
       setServerError(typeof result.error === 'string' ? result.error : 'Something went wrong.')
@@ -46,6 +48,15 @@ export function ShareForm({ adminId, senderName, senderBio }: {
     }
     setRecipientFirstName(data.first_name)
     setContactId(result.contactId ?? null)
+
+    if (result.contactId && note.trim()) {
+      const noteResult = await submitNote(result.contactId, note)
+      if (!noteResult.error) {
+        await notifyAdminOfNote({ adminId, recipientFirstName: data.first_name, note })
+        setNoteSubmitted(true)
+      }
+    }
+
     setSubmitted(true)
   }
 
@@ -254,6 +265,37 @@ export function ShareForm({ adminId, senderName, senderBio }: {
               {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
 
+            <div
+              className="grid grid-cols-2 gap-2 rounded-full border border-border bg-linen p-1"
+              role="tablist"
+              aria-label="Address location"
+            >
+              {[
+                { value: false, label: 'U.S.' },
+                { value: true, label: 'International' },
+              ].map(tab => (
+                <button
+                  key={tab.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={isInternational === tab.value}
+                  onClick={() => setIsInternational(tab.value)}
+                  className="min-h-10 rounded-full text-sm font-medium transition-colors"
+                  style={{
+                    background: isInternational === tab.value ? 'var(--blue-ink)' : 'transparent',
+                    color: isInternational === tab.value ? 'white' : 'var(--ink-muted)',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="hidden"
+              {...register('is_international', { setValueAs: value => value === true || value === 'true' })}
+              value={isInternational ? 'true' : 'false'}
+            />
+
             <div className="flex flex-col gap-1">
               <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Address</label>
               <input {...register('address_line_1')} placeholder="Street address" className="input min-h-11" />
@@ -272,15 +314,49 @@ export function ShareForm({ adminId, senderName, senderBio }: {
                 {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">State</label>
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Region' : 'State'}</label>
                 <input {...register('state')} className="input min-h-11" />
                 {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">ZIP</label>
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Postal' : 'ZIP'}</label>
                 <input {...register('zip')} className="input min-h-11" />
                 {errors.zip && <p className="text-xs text-red-500">{errors.zip.message}</p>}
               </div>
+            </div>
+
+            {isInternational && (
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Country</label>
+                <input {...register('country')} className="input min-h-11" placeholder="Country" />
+              </div>
+            )}
+
+            <div
+              className="flex flex-col gap-2"
+              style={{
+                background: '#faf4e4',
+                border: '1px solid #d9cfb0',
+                borderRadius: 10,
+                padding: '14px 16px',
+              }}
+            >
+              <div>
+                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">
+                  Note for {displayName ?? 'your friend'} (optional)
+                </label>
+                <p className="mt-1 text-xs leading-5 text-ink-muted">
+                  Say hello, share a tiny life update, or leave a mailing note.
+                </p>
+              </div>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value.slice(0, 280))}
+                rows={3}
+                placeholder={displayName ? `Hi ${displayName}, I wanted to say…` : 'A quick note…'}
+                className="input resize-none bg-white"
+              />
+              <div className="flex justify-end text-xs text-ink-muted">{note.length}/280</div>
             </div>
 
             <button

@@ -8,6 +8,8 @@ import { generateShareSlug } from '@/lib/actions/user'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
 import { GlobePanel } from '@/components/globe-panel'
+import { CalendarWidget } from '@/components/calendar-widget'
+import { getCalendarWidget } from '@/lib/actions/calendar'
 
 const MONTH_LETTERS = ['J','F','M','A','M','J','J','A','S','O','N','D']
 const MONTH_NAMES   = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -27,7 +29,7 @@ export default async function DashboardPage({
     try { shareSlug = await generateShareSlug(user.id) } catch { /* non-fatal */ }
   }
 
-  const [contacts, groups] = await Promise.all([getContacts(), getGroups()])
+  const [contacts, groups, calendarWidget] = await Promise.all([getContacts(), getGroups(), getCalendarWidget()])
   const { filter = 'all' } = await searchParams
 
   const verifiedCount   = contacts.filter(c => Boolean(c.verified_at) && !c.opted_out).length
@@ -74,7 +76,7 @@ export default async function DashboardPage({
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--paper)' }}>
+    <div className="dashboard-page">
 
       {/* ── Postal stripe ── */}
       <div style={{
@@ -90,9 +92,9 @@ export default async function DashboardPage({
         background: 'linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%)',
         borderBottom: '1px solid var(--line)',
         overflow: 'hidden',
-      }}>
+      }} className="dashboard-hero">
         {/* Dotted reading rule */}
-        <div style={{
+        <div className="dashboard-hero-rule" style={{
           position: 'absolute', left: 48, right: 48, top: 70,
           height: 1,
           backgroundImage: 'linear-gradient(to right, var(--line) 50%, transparent 50%)',
@@ -102,7 +104,7 @@ export default async function DashboardPage({
         }} />
 
         {/* Decorative postmark */}
-        <div style={{
+        <div className="dashboard-postmark" style={{
           position: 'absolute', top: 24, right: 0,
           width: 110, height: 110,
           border: '2px solid var(--stamp)',
@@ -129,7 +131,7 @@ export default async function DashboardPage({
           }}>est. 2026</span>
         </div>
 
-        <div style={{
+        <div className="dashboard-hero-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
           gap: 48,
@@ -179,7 +181,7 @@ export default async function DashboardPage({
             </p>
           </div>
 
-          <div style={{ textAlign: 'right', paddingBottom: 6 }}>
+          <div className="dashboard-hero-action" style={{ textAlign: 'right', paddingBottom: 6 }}>
             <div style={{
               fontFamily: 'var(--font-ppwriter), Georgia, serif',
               fontStyle: 'italic', fontSize: 16,
@@ -198,9 +200,9 @@ export default async function DashboardPage({
         gridTemplateColumns: 'repeat(5, 1fr)',
         background: 'var(--paper)',
         borderBottom: '1px solid var(--line)',
-      }}>
+      }} className="dashboard-stats">
         {stats.map((stat, i) => (
-          <div key={stat.label} style={{
+          <div key={stat.label} className="dashboard-stat" style={{
             padding: '24px 28px',
             borderRight: i < stats.length - 1 ? '1px dashed var(--line)' : 'none',
             display: 'flex', alignItems: 'center', gap: 16,
@@ -250,14 +252,14 @@ export default async function DashboardPage({
         gridTemplateColumns: 'minmax(0, 1fr) 320px',
         gap: 32,
         alignItems: 'start',
-      }}>
+      }} className="dashboard-body">
 
         {/* ── Left column ── */}
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 28 }}>
 
           {/* Contacts section */}
           <section>
-            <div style={{
+            <div className="dashboard-section-header" style={{
               display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
               marginBottom: 14, gap: 16,
             }}>
@@ -269,7 +271,7 @@ export default async function DashboardPage({
                 The{' '}
                 <em style={{ fontStyle: 'italic', color: 'var(--blue-ink)' }}>contacts</em>
               </h2>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {filterChips.map(chip => (
                   <Link
                     key={chip.key}
@@ -308,13 +310,13 @@ export default async function DashboardPage({
               <ContactTable contacts={filteredContacts} allGroups={groups} />
 
               {/* Always-present add CTA */}
-              <div style={{
+              <div className="dashboard-add-cta" style={{
                 padding: '32px 24px',
                 borderTop: filteredContacts.length > 0 ? '1px dashed var(--line)' : undefined,
                 background: 'var(--paper)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24,
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                <div className="dashboard-add-copy" style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: '50%',
                     border: '1.5px dashed var(--line)',
@@ -363,38 +365,8 @@ export default async function DashboardPage({
 
           {/* ── Atmospheric strip ── */}
           <section style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)',
-            gap: 22,
-          }}>
-            {/* Map */}
-            <div style={{
-              background: 'var(--paper)',
-              border: '1px solid var(--line)',
-              borderRadius: 10,
-              padding: '22px 24px 20px',
-              boxShadow: '0 12px 28px -20px rgba(45,35,10,.15)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div className="eyebrow" style={{ marginBottom: 0 }}>Where your people live</div>
-                <div style={{
-                  fontFamily: 'var(--font-ppwriter), Georgia, serif',
-                  fontStyle: 'italic', fontSize: 13.5, color: 'var(--blue-slate)',
-                }}>
-                  {uniqueCities.length} {uniqueCities.length === 1 ? 'city' : 'cities'} · {contacts.length} {contacts.length === 1 ? 'friend' : 'friends'}
-                </div>
-              </div>
-              {/* TODO: remove casts after running `npx supabase gen types` (migration 006 adds lat/lng) */}
-              <GlobePanel
-                contacts={contacts.map(c => ({
-                  lat: (c as { lat?: number | null }).lat ?? null,
-                  lng: (c as { lng?: number | null }).lng ?? null,
-                  city: c.city,
-                  state: c.state,
-                }))}
-              />
-            </div>
-
+            display: 'block',
+          }} className="dashboard-atmosphere">
             {/* Almanac */}
             <div style={{
               background: 'var(--paper)',
@@ -492,14 +464,22 @@ export default async function DashboardPage({
             padding: '22px 26px 30px',
             position: 'relative',
             overflow: 'hidden',
-          }}>
+          }} className="dashboard-mail-tray">
             <div style={{
               position: 'absolute', inset: 8,
               border: '1px dashed var(--line)', borderRadius: 6,
               pointerEvents: 'none',
             }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, position: 'relative' }}>
-              <div className="eyebrow" style={{ marginBottom: 0 }}>Drafts &amp; outbox</div>
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>Drafts &amp; outbox</div>
+                <div style={{
+                  fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                  fontStyle: 'italic', fontSize: 14, color: 'var(--blue-slate)',
+                }}>
+                  {uniqueCities.length} {uniqueCities.length === 1 ? 'city' : 'cities'} · {contacts.length} {contacts.length === 1 ? 'friend' : 'friends'} on the globe
+                </div>
+              </div>
               <span style={{
                 fontFamily: 'var(--font-caveat), cursive',
                 fontWeight: 500, fontSize: 18, color: 'var(--blue-slate)',
@@ -508,32 +488,37 @@ export default async function DashboardPage({
                 a quiet pile, for now
               </span>
             </div>
-            <div style={{ position: 'relative', height: 220 }}>
-              {/* Envelope 1 */}
-              <Envelope style={{ top: 18, left: '6%', transform: 'rotate(-5deg)' }} bg="var(--paper)" />
-              {/* Envelope 2 */}
-              <Envelope style={{ top: 30, left: '30%', transform: 'rotate(2deg)', zIndex: 2 }} bg="var(--paper-2)" />
-              {/* Envelope 3 */}
-              <Envelope style={{ top: 8, left: '54%', transform: 'rotate(-2deg)' }} bg="var(--paper)" />
-              {/* Quote */}
+            <div style={{ position: 'relative' }}>
+              {/* TODO: remove casts after running `npx supabase gen types` (migration 006 adds lat/lng) */}
+              <GlobePanel
+                variant="feature"
+                contacts={contacts.map(c => ({
+                  lat: (c as { lat?: number | null }).lat ?? null,
+                  lng: (c as { lng?: number | null }).lng ?? null,
+                  city: c.city,
+                  state: c.state,
+                }))}
+              />
               <div style={{
-                position: 'absolute', top: 24, right: '4%', width: 240, textAlign: 'left', zIndex: 3,
+                position: 'absolute', top: 22, right: 24, width: 210, textAlign: 'left', zIndex: 3,
+                pointerEvents: 'none',
               }}>
                 <p style={{
                   fontFamily: 'var(--font-caveat), cursive',
-                  fontWeight: 500, fontSize: 22, color: 'var(--blue-ink)',
+                  fontWeight: 500, fontSize: 20, color: 'rgba(250,244,228,.9)',
                   lineHeight: 1.15, margin: '0 0 8px',
                   transform: 'rotate(-2deg)',
+                  textShadow: '0 2px 8px rgba(0,0,0,.28)',
                 }}>
-                  &ldquo;the people you love<br />aren&apos;t going to know<br />unless you tell them.&rdquo;
+                  &ldquo;your letters have<br />somewhere to go.&rdquo;
                 </p>
                 <span style={{
                   fontFamily: 'var(--font-dm-sans), sans-serif',
-                  fontSize: 11.5, color: 'var(--muted)',
+                  fontSize: 11.5, color: 'rgba(250,244,228,.55)',
                   textTransform: 'uppercase', letterSpacing: 0,
                   display: 'block', marginLeft: 10,
                 }}>
-                  — a postcard, somewhere
+                  drag to spin · scroll to zoom
                 </span>
               </div>
             </div>
@@ -545,6 +530,8 @@ export default async function DashboardPage({
         <aside style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 22 }}>
 
           <ShareLinkCard shareSlug={shareSlug} />
+
+          <CalendarWidget events={calendarWidget.events} />
 
           {/* Nudge card */}
           <section style={{
@@ -601,65 +588,6 @@ export default async function DashboardPage({
           </section>
 
         </aside>
-      </div>
-    </div>
-  )
-}
-
-function Envelope({ style, bg }: { style: React.CSSProperties; bg: string }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      width: 260, height: 160,
-      background: bg,
-      border: '1px solid var(--line)',
-      borderRadius: 4,
-      boxShadow: '0 1px 0 rgba(255,255,255,.6) inset, 0 18px 36px -18px rgba(45,35,10,.25), 0 4px 10px -2px rgba(45,35,10,.1)',
-      padding: '14px 16px',
-      overflow: 'hidden',
-      ...style,
-    }}>
-      {/* Stripes top */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 6,
-        background: 'repeating-linear-gradient(-45deg, var(--blue-ink) 0 8px, transparent 8px 16px, var(--stamp) 16px 24px, transparent 24px 32px)',
-        opacity: 0.8,
-      }} />
-      {/* Stripes bottom */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 6,
-        background: 'repeating-linear-gradient(-45deg, var(--blue-ink) 0 8px, transparent 8px 16px, var(--stamp) 16px 24px, transparent 24px 32px)',
-        opacity: 0.8,
-      }} />
-      {/* Stamp */}
-      <div style={{
-        position: 'absolute', top: 14, right: 14,
-        width: 32, height: 38,
-        background: 'var(--cream)',
-        border: '1.5px dashed var(--paper)',
-        outline: '1px solid var(--line)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--font-ppwriter), Georgia, serif',
-        fontStyle: 'italic', fontSize: 13,
-        color: 'var(--blue-ink)',
-        transform: 'rotate(4deg)',
-      }}>
-        df
-      </div>
-      {/* Address lines */}
-      <div style={{
-        position: 'absolute', bottom: 18, left: 16, right: 60,
-        display: 'flex', flexDirection: 'column', gap: 6,
-      }}>
-        <span style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--muted)' }}>To</span>
-        <span style={{
-          fontFamily: 'var(--font-ppwriter), Georgia, serif',
-          fontStyle: 'italic', fontSize: 14, color: 'var(--blue-slate)',
-        }}>
-          — a draft, not yet —
-        </span>
-        <div style={{ height: 1, background: 'var(--line)', width: '100%' }} />
-        <div style={{ height: 1, background: 'var(--line)', width: '60%' }} />
       </div>
     </div>
   )
