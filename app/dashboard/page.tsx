@@ -497,6 +497,8 @@ export default async function DashboardPage({
                   lng: (c as { lng?: number | null }).lng ?? null,
                   city: c.city,
                   state: c.state,
+                  country: (c as { country?: string | null }).country ?? null,
+                  isInternational: (c as { is_international?: boolean | null }).is_international ?? false,
                 }))}
               />
               <div style={{

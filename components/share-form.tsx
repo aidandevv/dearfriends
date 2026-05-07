@@ -329,6 +329,7 @@ export function ShareForm({ adminId, senderName, senderBio }: {
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Country</label>
                 <input {...register('country')} className="input min-h-11" placeholder="Country" />
+                {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
               </div>
             )}
 
