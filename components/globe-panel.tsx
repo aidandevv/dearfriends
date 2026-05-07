@@ -31,7 +31,7 @@ let usTopoCache: any = null
 
 const DIMENSIONS = {
   compact: { width: 260, height: 260, radius: 118 },
-  feature: { width: 620, height: 340, radius: 148 },
+  feature: { width: 760, height: 460, radius: 180 },
 }
 const US_ATLAS_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
@@ -155,6 +155,7 @@ export function GlobePanel({
 
     const gratEl = svg.querySelector<SVGPathElement>('.g-grat')!
     const landEl = svg.querySelector<SVGPathElement>('.g-land')!
+    const countriesEl = svg.querySelector<SVGPathElement>('.g-countries')!
     const statesEl = svg.querySelector<SVGPathElement>('.g-states')!
     const pinsEl = svg.querySelector<SVGGElement>('.g-pins')!
     const oceanEl = svg.querySelector<SVGCircleElement>('.g-ocean')!
@@ -194,6 +195,10 @@ export function GlobePanel({
         landEl.setAttribute(
           'd',
           pathFn(feature(topoCache, topoCache.objects.land)) ?? '',
+        )
+        countriesEl.setAttribute(
+          'd',
+          pathFn(mesh(topoCache, topoCache.objects.countries, (a, b) => a !== b)) ?? '',
         )
       }
       if (usTopoCache) {
@@ -393,17 +398,17 @@ export function GlobePanel({
         borderRadius: 8,
         overflow: 'hidden',
         background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
-        minHeight: variant === 'feature' ? 340 : undefined,
+        minHeight: variant === 'feature' ? 460 : undefined,
       }}
     >
       {/* Starfield */}
       <Stars />
 
       {/*
-        Wrap SVG + tooltip in a W-wide div centered in the panel.
-        This makes tooltip absolute positioning match SVG coordinate space.
+        The feature globe intentionally uses the full panel width so zoomed
+        geography can crop naturally instead of feeling boxed in.
       */}
-      <div style={{ position: 'relative', width: '100%', maxWidth: W, margin: '0 auto' }}>
+      <div style={{ position: 'relative', width: '100%', margin: '0 auto' }}>
       <svg
         ref={svgRef}
         width="100%"
@@ -446,6 +451,15 @@ export function GlobePanel({
           stroke="var(--cream-soft)"
           strokeWidth={0.7}
           opacity={0.85}
+        />
+
+        {/* Country borders — filled from the bundled world topology */}
+        <path
+          className="g-countries"
+          fill="none"
+          stroke="rgba(250,244,228,.42)"
+          strokeWidth={zoom > 2 ? 0.5 : 0.34}
+          opacity={zoom > 1.2 ? 0.72 : 0.48}
         />
 
         {/* US state borders — filled from us-atlas when available */}
