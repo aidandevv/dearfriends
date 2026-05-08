@@ -8,6 +8,84 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function safeHref(url: string) {
+  const trimmed = url.trim()
+  return /^(https?:|mailto:)/i.test(trimmed) ? escapeHtml(trimmed) : '#'
+}
+
+function renderInlineMarkdown(text: string) {
+  return escapeHtml(text)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => `<a href="${safeHref(href)}">${label}</a>`)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*(?!\s)(.+?)(?<!\s)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[^_])_(?!\s)(.+?)(?<!\s)_/g, '$1<em>$2</em>')
+}
+
+function renderLetterMarkdown(markdown: string) {
+  const lines = markdown.replace(/\r\n/g, '\n').split('\n')
+  const html: string[] = []
+  let paragraph: string[] = []
+  let listItems: string[] = []
+  let orderedList = false
+
+  function flushParagraph() {
+    if (!paragraph.length) return
+    html.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br/>')}</p>`)
+    paragraph = []
+  }
+
+  function flushList() {
+    if (!listItems.length) return
+    html.push(`<${orderedList ? 'ol' : 'ul'}>${listItems.join('')}</${orderedList ? 'ol' : 'ul'}>`)
+    listItems = []
+  }
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      flushParagraph()
+      flushList()
+      continue
+    }
+
+    const heading = line.match(/^(#{1,3})\s+(.+)$/)
+    if (heading) {
+      flushParagraph()
+      flushList()
+      const level = heading[1].length
+      html.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`)
+      continue
+    }
+
+    const unordered = line.match(/^\s*[-*]\s+(.+)$/)
+    const ordered = line.match(/^\s*\d+\.\s+(.+)$/)
+    if (unordered || ordered) {
+      flushParagraph()
+      const isOrdered = Boolean(ordered)
+      if (listItems.length && orderedList !== isOrdered) flushList()
+      orderedList = isOrdered
+      listItems.push(`<li>${renderInlineMarkdown((ordered ?? unordered)?.[1] ?? '')}</li>`)
+      continue
+    }
+
+    const quote = line.match(/^>\s?(.+)$/)
+    if (quote) {
+      flushParagraph()
+      flushList()
+      html.push(`<blockquote>${renderInlineMarkdown(quote[1])}</blockquote>`)
+      continue
+    }
+
+    flushList()
+    paragraph.push(line)
+  }
+
+  flushParagraph()
+  flushList()
+
+  return html.join('\n')
+}
+
 let _resend: Resend | null = null
 
 export function getResend(): Resend {
@@ -48,17 +126,9 @@ export function buildLetterEmail(opts: {
   subject: string
   body: string
 }): { subject: string; html: string } {
-  const htmlBody = opts.body
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br/>')
-
   return {
     subject: opts.subject,
-    html: `<p>${htmlBody}</p>`,
+    html: renderLetterMarkdown(opts.body),
   }
 }
 

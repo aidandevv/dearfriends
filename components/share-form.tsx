@@ -14,10 +14,11 @@ function firstName(name: string | null) {
 const newsreader = "var(--font-ppwriter), Georgia, serif"
 const caveat = "var(--font-caveat), cursive"
 
-export function ShareForm({ adminId, senderName, senderBio }: {
+export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
   adminId: string
   senderName: string | null
   senderBio: string | null
+  autoGroupId?: string | null
 }) {
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -41,7 +42,7 @@ export function ShareForm({ adminId, senderName, senderBio }: {
 
   async function onSubmit(data: ContactInput) {
     setServerError(null)
-    const result = await upsertContact(adminId, data)
+    const result = await upsertContact(adminId, data, autoGroupId)
     if (result.error) {
       setServerError(typeof result.error === 'string' ? result.error : 'Something went wrong.')
       return

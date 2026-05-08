@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react'
+import { useRouter } from 'next/navigation'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
 import { feature, mesh } from 'topojson-client'
 
@@ -68,11 +69,14 @@ function mkCircle(
 export function GlobePanel({
   contacts,
   variant = 'compact',
+  autoRefresh = false,
 }: {
   contacts: ContactGeo[]
   variant?: 'compact' | 'feature'
+  autoRefresh?: boolean
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
+  const router = useRouter()
   const { width: W, height: H, radius: RADIUS } = DIMENSIONS[variant]
 
   // Mutable rotation state — lives in a ref so the RAF loop reads current value
@@ -147,6 +151,22 @@ export function GlobePanel({
   }, [zoom])
 
   useEffect(() => {
+    if (!autoRefresh) return
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === 'visible') router.refresh()
+    }
+
+    const intervalId = window.setInterval(refreshWhenVisible, 15000)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+
+    return () => {
+      window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+    }
+  }, [autoRefresh, router])
+
+  useEffect(() => {
     const svg = svgRef.current
     if (!svg) return
     const globeSvg = svg
@@ -160,7 +180,6 @@ export function GlobePanel({
     const pinsEl = svg.querySelector<SVGGElement>('.g-pins')!
     const oceanEl = svg.querySelector<SVGCircleElement>('.g-ocean')!
     const atmosphereEl = svg.querySelector<SVGCircleElement>('.g-atmosphere')!
-    const shineEl = svg.querySelector<SVGEllipseElement>('.g-shine')!
 
     function makeProjection() {
       const scale = RADIUS * zoomRef.current
@@ -184,10 +203,6 @@ export function GlobePanel({
       atmosphereEl.setAttribute('cx', String(translate.current.x))
       atmosphereEl.setAttribute('cy', String(translate.current.y))
       atmosphereEl.setAttribute('r', String(currentRadius + 3))
-      shineEl.setAttribute('cx', String(translate.current.x - currentRadius * 0.24))
-      shineEl.setAttribute('cy', String(translate.current.y - currentRadius * 0.32))
-      shineEl.setAttribute('rx', String(currentRadius * 0.18))
-      shineEl.setAttribute('ry', String(currentRadius * 0.12))
 
       gratEl.setAttribute('d', pathFn(graticuleGeom) ?? '')
 
@@ -469,14 +484,6 @@ export function GlobePanel({
           stroke="rgba(250,244,228,.72)"
           strokeWidth={zoom > 2 ? 0.58 : 0.38}
           opacity={zoom > 1.35 ? 0.86 : 0.38}
-        />
-
-        {/* Shine highlight */}
-        <ellipse
-          className="g-shine"
-          cx={W / 2 - 28} cy={H / 2 - 38}
-          rx={22} ry={14}
-          fill="white" opacity={0.06}
         />
 
         {/* Contact pins — rebuilt each frame by the RAF loop */}

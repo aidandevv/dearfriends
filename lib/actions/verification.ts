@@ -6,9 +6,15 @@ import { createClient } from '@/lib/supabase/server'
 import { resend, buildVerificationEmail } from '@/lib/resend'
 import { scheduleVerificationSchema, verifySchema } from '@/lib/schemas'
 import { getUserProfile } from '@/lib/user-profile'
+import { geocodeAddress } from '@/lib/geocode'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+
+function revalidateContactSurfaces() {
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
+}
 
 export async function sendVerificationToAll() {
   const supabase = await createClient()
@@ -83,7 +89,7 @@ export async function scheduleVerification(formData: FormData) {
 
   if (error) return { error: error.message }
 
-  revalidatePath('/dashboard')
+  revalidateContactSurfaces()
   return { success: true }
 }
 
@@ -108,7 +114,9 @@ export async function handleVerifyToken(
       .update({ opted_out: true, verification_token: null })
       .eq('id', tokenContact.id)
 
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   if (action === 'confirm') {
@@ -117,19 +125,35 @@ export async function handleVerifyToken(
       .update({ verified_at: new Date().toISOString(), verification_token: null })
       .eq('id', tokenContact.id)
 
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   if (action === 'update' && updates) {
     const parsed = verifySchema.safeParse(updates)
     if (!parsed.success) return { error: 'Invalid address.' }
 
+    const coords = await geocodeAddress(
+      parsed.data.address_line_1,
+      parsed.data.city,
+      parsed.data.state,
+      parsed.data.zip,
+    )
+
     const { error } = await supabase
       .from('contacts')
-      .update({ ...parsed.data, verified_at: new Date().toISOString(), verification_token: null })
+      .update({
+        ...parsed.data,
+        ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
+        verified_at: new Date().toISOString(),
+        verification_token: null,
+      })
       .eq('id', tokenContact.id)
 
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   return { error: 'Unknown action.' }

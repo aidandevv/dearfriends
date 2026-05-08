@@ -11,7 +11,7 @@ import { geocodeAddress } from '@/lib/geocode'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
-export async function upsertContact(adminId: string, formData: unknown) {
+export async function upsertContact(adminId: string, formData: unknown, autoGroupId?: string | null) {
   const parsed = contactSchema.safeParse(formData)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -23,6 +23,25 @@ export async function upsertContact(adminId: string, formData: unknown) {
     .single()
 
   if (error) return { error: error.message }
+
+  if (autoGroupId) {
+    const { data: group } = await supabase
+      .from('groups')
+      .select('id')
+      .eq('id', autoGroupId)
+      .eq('admin_id', adminId)
+      .maybeSingle()
+
+    if (group) {
+      const { error: groupInsertError } = await supabase
+        .from('contact_groups')
+        .upsert(
+          { contact_id: data.id, group_id: group.id },
+          { onConflict: 'contact_id,group_id' },
+        )
+      if (groupInsertError) return { error: groupInsertError.message }
+    }
+  }
 
   // Fire-and-forget geocoding: silently skip on failure, never blocks the user
   try {
@@ -40,6 +59,10 @@ export async function upsertContact(adminId: string, formData: unknown) {
         .eq('id', data.id)
     }
   } catch { /* non-fatal */ }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
+  if (autoGroupId) revalidatePath('/dashboard/groups')
 
   return { success: true, contactId: data.id }
 }
@@ -99,6 +122,7 @@ export async function updateContact(id: string, updates: Partial<{
   const { error } = await supabase.from('contacts').update(updates).eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
 }
 
 export async function deleteContact(id: string) {
@@ -106,6 +130,7 @@ export async function deleteContact(id: string) {
   const { error } = await supabase.from('contacts').delete().eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
 }
 
 export async function sendAddressRefreshNudge(contactId: string) {
@@ -150,5 +175,6 @@ export async function sendAddressRefreshNudge(contactId: string) {
   if (result.error) return { error: result.error.message }
 
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
   return { success: true }
 }

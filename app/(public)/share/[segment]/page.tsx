@@ -2,18 +2,18 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ShareForm } from '@/components/share-form'
 import { createAdminClient } from '@/lib/supabase/server'
-import { resolveSlugToAdminId } from '@/lib/actions/user'
+import { resolveShareSlug, type ShareSlugResolution } from '@/lib/actions/user'
 import { getUserProfile } from '@/lib/user-profile'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-async function resolveAdminId(segment: string): Promise<string | null> {
+async function resolveShareTarget(segment: string): Promise<ShareSlugResolution | null> {
   if (UUID_RE.test(segment)) {
     const admin = createAdminClient()
     const { data } = await admin.auth.admin.getUserById(segment)
-    return data.user?.id ?? null
+    return data.user ? { adminId: data.user.id, groupId: null } : null
   }
-  return resolveSlugToAdminId(segment)
+  return resolveShareSlug(segment)
 }
 
 export async function generateMetadata({
@@ -22,11 +22,11 @@ export async function generateMetadata({
   params: Promise<{ segment: string }>
 }): Promise<Metadata> {
   const { segment } = await params
-  const adminId = await resolveAdminId(segment)
-  if (!adminId) return { title: 'Not found' }
+  const target = await resolveShareTarget(segment)
+  if (!target) return { title: 'Not found' }
 
   const admin = createAdminClient()
-  const { data } = await admin.auth.admin.getUserById(adminId)
+  const { data } = await admin.auth.admin.getUserById(target.adminId)
   const profile = getUserProfile(data.user)
 
   const name = profile.firstName ?? profile.fullName ?? 'Someone'
@@ -39,7 +39,7 @@ export async function generateMetadata({
   const isSlug = !UUID_RE.test(segment)
   const canonicalUrl = isSlug
     ? `${siteUrl}/share/${segment}`
-    : `${siteUrl}/share/${adminId}`
+    : `${siteUrl}/share/${target.adminId}`
 
   return {
     title,
@@ -66,16 +66,17 @@ export default async function SharePage({
   params: Promise<{ segment: string }>
 }) {
   const { segment } = await params
-  const adminId = await resolveAdminId(segment)
-  if (!adminId) notFound()
+  const target = await resolveShareTarget(segment)
+  if (!target) notFound()
 
   const admin = createAdminClient()
-  const { data } = await admin.auth.admin.getUserById(adminId)
+  const { data } = await admin.auth.admin.getUserById(target.adminId)
   const senderProfile = getUserProfile(data.user)
 
   return (
     <ShareForm
-      adminId={adminId}
+      adminId={target.adminId}
+      autoGroupId={target.groupId}
       senderName={senderProfile.fullName}
       senderBio={senderProfile.bio}
     />

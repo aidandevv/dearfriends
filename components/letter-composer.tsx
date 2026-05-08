@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { Bold, Heading2, Italic, Link, List, ListOrdered, Quote } from 'lucide-react'
 import { saveDraft } from '@/lib/actions/letter'
 import { interpolate } from '@/lib/utils'
 import { TemplatePicker } from '@/components/template-picker'
@@ -21,6 +22,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>(undefined)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const bodyRef = useRef<HTMLTextAreaElement | null>(null)
 
   const selectedTemplate = selectedTemplateId
     ? LETTER_TEMPLATES.find(t => t.id === selectedTemplateId)
@@ -49,6 +51,92 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
     }, 1000)
   }
 
+  function updateBody(nextBody: string) {
+    setBody(nextBody)
+    triggerSave(subject, nextBody)
+  }
+
+  function replaceSelection(formatter: (selection: string) => { text: string; cursorOffset?: number }) {
+    const textarea = bodyRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selected = body.slice(start, end)
+    const { text, cursorOffset } = formatter(selected)
+    const nextBody = `${body.slice(0, start)}${text}${body.slice(end)}`
+
+    updateBody(nextBody)
+
+    requestAnimationFrame(() => {
+      textarea.focus()
+      const nextCursor = start + (cursorOffset ?? text.length)
+      textarea.setSelectionRange(nextCursor, nextCursor)
+    })
+  }
+
+  function formatLines(prefix: string) {
+    replaceSelection(selection => {
+      const text = selection || 'Text'
+      const lines = text.split('\n')
+      return { text: lines.map(line => line ? `${prefix}${line}` : prefix.trim()).join('\n') }
+    })
+  }
+
+  const formattingButtons = [
+    {
+      label: 'Bold',
+      icon: Bold,
+      action: () => replaceSelection(selection => {
+        const text = selection || 'bold text'
+        return { text: `**${text}**`, cursorOffset: selection ? undefined : 2 + text.length }
+      }),
+    },
+    {
+      label: 'Italic',
+      icon: Italic,
+      action: () => replaceSelection(selection => {
+        const text = selection || 'italic text'
+        return { text: `_${text}_`, cursorOffset: selection ? undefined : 1 + text.length }
+      }),
+    },
+    {
+      label: 'Heading',
+      icon: Heading2,
+      action: () => formatLines('## '),
+    },
+    {
+      label: 'Bulleted list',
+      icon: List,
+      action: () => formatLines('- '),
+    },
+    {
+      label: 'Numbered list',
+      icon: ListOrdered,
+      action: () => {
+        replaceSelection(selection => {
+          const text = selection || 'First item'
+          const lines = text.split('\n')
+          return { text: lines.map((line, index) => `${index + 1}. ${line || 'Item'}`).join('\n') }
+        })
+      },
+    },
+    {
+      label: 'Quote',
+      icon: Quote,
+      action: () => formatLines('> '),
+    },
+    {
+      label: 'Link',
+      icon: Link,
+      action: () => replaceSelection(selection => {
+        const text = selection || 'link text'
+        return { text: `[${text}](https://example.com)`, cursorOffset: selection ? text.length + 3 : text.length + 3 }
+      }),
+    },
+  ]
+
+  const previewSubject = interpolate(subject, previewContact)
   const previewBody = interpolate(body, previewContact)
 
   return (
@@ -68,7 +156,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
                   setSubject(e.target.value)
                   triggerSave(e.target.value, body)
                 }}
-                placeholder="Subject line"
+                placeholder="Subject line, e.g. A note for {{first_name}}"
                 className="input min-h-12"
               />
             </div>
@@ -78,11 +166,28 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/80 bg-surface-raised p-1">
+                {formattingButtons.map(button => {
+                  const Icon = button.icon
+                  return (
+                    <button
+                      key={button.label}
+                      type="button"
+                      onClick={button.action}
+                      aria-label={button.label}
+                      title={button.label}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-linen hover:text-blue-ink"
+                    >
+                      <Icon size={16} />
+                    </button>
+                  )
+                })}
+              </div>
               <textarea
+                ref={bodyRef}
                 value={body}
                 onChange={e => {
-                  setBody(e.target.value)
-                  triggerSave(subject, e.target.value)
+                  updateBody(e.target.value)
                 }}
                 placeholder={'Dear {{first_name}},\n\nYour letter here...'}
                 className="input min-h-[420px] resize-none font-mono text-sm leading-7"
@@ -92,7 +197,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
 
           <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4 text-sm text-ink-muted">
             Use <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{first_name}}'}</code> and{' '}
-            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{last_name}}'}</code> to personalize each note.
+            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{last_name}}'}</code> to personalize the subject and body.
           </div>
         </div>
       </section>
@@ -121,7 +226,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
             />
           )}
           <div className="border-b border-border/80 pb-3">
-            <p className="font-serif text-lg italic text-ink-muted">{subject || 'Subject line'}</p>
+            <p className="font-serif text-lg italic text-ink-muted">{previewSubject || 'Subject line'}</p>
           </div>
           <div className="prose prose-sm mt-5 max-w-none font-serif text-ink">
             <ReactMarkdown>{previewBody}</ReactMarkdown>

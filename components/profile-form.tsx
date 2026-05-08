@@ -71,6 +71,8 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
     const result = await updateShareSlug(slug)
     if (result.error === 'slug_taken') {
       setSlugError('That slug is already taken — try another')
+    } else if (result.error === 'slug_limit') {
+      setSlugError('You can have up to 10 share slugs.')
     } else if (result.error) {
       setSlugError(result.error)
     } else {

@@ -103,34 +103,6 @@ export default async function DashboardPage({
           pointerEvents: 'none',
         }} />
 
-        {/* Decorative postmark */}
-        <div className="dashboard-postmark" style={{
-          position: 'absolute', top: 24, right: 0,
-          width: 110, height: 110,
-          border: '2px solid var(--stamp)',
-          borderRadius: '50%',
-          color: 'var(--stamp)',
-          opacity: 0.42,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-dm-sans), sans-serif',
-          fontSize: 9, fontWeight: 600,
-          textTransform: 'uppercase', letterSpacing: '0.14em',
-          transform: 'rotate(-8deg)',
-          textAlign: 'center', lineHeight: 1.2,
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            position: 'absolute', inset: 8,
-            border: '1px dashed currentColor', borderRadius: '50%',
-          }} />
-          dearfriends<br />· {monthName.slice(0,3)} {now.getDate()} ·
-          <span style={{
-            fontFamily: 'var(--font-ppwriter), Georgia, serif',
-            fontStyle: 'italic', fontSize: 14, letterSpacing: 0,
-            textTransform: 'none', display: 'block', marginTop: 2,
-          }}>est. 2026</span>
-        </div>
-
         <div className="dashboard-hero-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
@@ -492,6 +464,7 @@ export default async function DashboardPage({
               {/* TODO: remove casts after running `npx supabase gen types` (migration 006 adds lat/lng) */}
               <GlobePanel
                 variant="feature"
+                autoRefresh
                 contacts={contacts.map(c => ({
                   lat: (c as { lat?: number | null }).lat ?? null,
                   lng: (c as { lng?: number | null }).lng ?? null,

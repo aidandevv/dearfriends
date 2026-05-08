@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { CalendarPlus, Link as LinkIcon, MapPin, Send } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, ChevronRight, Link as LinkIcon, MapPin, Send } from 'lucide-react'
 import {
   createCalendarEvent,
   importCalendarSubscription,
@@ -28,6 +28,48 @@ function formatDate(date: string) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(`${date}T00:00:00`))
 }
 
+function formatMonth(date: Date) {
+  return new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(date)
+}
+
+function dateKey(date: Date) {
+  return date.toISOString().slice(0, 10)
+}
+
+function parseDateOnly(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
+function startOfMonth(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
+}
+
+function addMonths(date: Date, months: number) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1))
+}
+
+function buildCalendarDays(month: Date) {
+  const first = startOfMonth(month)
+  const gridStart = new Date(first)
+  gridStart.setUTCDate(1 - first.getUTCDay())
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const day = new Date(gridStart)
+    day.setUTCDate(gridStart.getUTCDate() + index)
+    return day
+  })
+}
+
+type DisplayEvent = {
+  id: string
+  date: string
+  title: string
+  meta: string
+  kind: 'occasion' | 'reminder'
+  eventType: CalendarEventView['event_type']
+}
+
 export function CalendarManager({
   events,
   contacts,
@@ -41,6 +83,34 @@ export function CalendarManager({
 }) {
   const [status, setStatus] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const initialMonth = events[0]?.mailByDate
+    ? startOfMonth(parseDateOnly(events[0].mailByDate))
+    : startOfMonth(new Date())
+  const [visibleMonth, setVisibleMonth] = useState(initialMonth)
+
+  const calendarDays = buildCalendarDays(visibleMonth)
+  const displayEvents = events.flatMap<DisplayEvent>(event => [
+    {
+      id: `${event.id}-mail`,
+      date: event.mailByDate,
+      title: `Mail ${event.title}`,
+      meta: `${event.offsetLabel} · ${formatDate(event.occurrenceDate)}`,
+      kind: 'reminder',
+      eventType: event.event_type,
+    },
+    {
+      id: `${event.id}-event`,
+      date: event.occurrenceDate,
+      title: event.title,
+      meta: event.contactName ?? event.event_type,
+      kind: 'occasion',
+      eventType: event.event_type,
+    },
+  ])
+  const eventsByDate = displayEvents.reduce<Record<string, DisplayEvent[]>>((acc, event) => {
+    acc[event.date] = [...(acc[event.date] ?? []), event]
+    return acc
+  }, {})
 
   function run(action: (formData: FormData) => Promise<{ error?: string; success?: boolean; count?: number }>) {
     return (formData: FormData) => {
@@ -57,17 +127,87 @@ export function CalendarManager({
       <section className="surface-panel px-5 py-5">
         <div className="flex items-center justify-between gap-4 border-b border-border/80 pb-4">
           <div>
-            <p className="eyebrow">Upcoming mail dates</p>
+            <p className="eyebrow">Mailing rhythm</p>
             <h2 className="section-title">Calendar</h2>
           </div>
-          <div className="info-chip">{events.length} dates</div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setVisibleMonth(month => addMonths(month, -1))}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
+              aria-label="Previous month"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <div className="min-w-[150px] text-center font-serif text-lg text-ink">{formatMonth(visibleMonth)}</div>
+            <button
+              type="button"
+              onClick={() => setVisibleMonth(month => addMonths(month, 1))}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
+              aria-label="Next month"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 overflow-hidden rounded-xl border border-border/80 bg-surface-raised">
+          <div className="grid grid-cols-7 border-b border-border/80 bg-linen/70">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {calendarDays.map(day => {
+              const key = dateKey(day)
+              const dayEvents = eventsByDate[key] ?? []
+              const isCurrentMonth = day.getUTCMonth() === visibleMonth.getUTCMonth()
+
+              return (
+                <div
+                  key={key}
+                  className={`min-h-[132px] border-b border-r border-border/60 p-2 ${isCurrentMonth ? 'bg-white' : 'bg-linen/30 text-ink-muted/60'}`}
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm ${isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
+                      {day.getUTCDate()}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {dayEvents.slice(0, 3).map(event => (
+                      <div
+                        key={event.id}
+                        className={`rounded-md px-2 py-1 text-xs leading-4 ${
+                          event.kind === 'reminder'
+                            ? 'border border-stamp/20 bg-stamp/10 text-stamp'
+                            : 'border border-blue-ink/15 bg-blue-ink/10 text-blue-ink'
+                        }`}
+                        title={`${event.title} · ${event.meta}`}
+                      >
+                        <div className="flex items-start gap-1.5">
+                          {event.kind === 'reminder' && <Send size={11} className="mt-0.5 shrink-0" />}
+                          <span className="min-w-0 truncate font-medium">{event.title}</span>
+                        </div>
+                        <div className="truncate opacity-80">{event.meta}</div>
+                      </div>
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <div className="px-2 text-xs text-ink-muted">+{dayEvents.length - 3} more</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className="mt-4 grid gap-3">
           {events.length === 0 && (
             <p className="text-sm text-ink-muted">No dates yet. Add one manually or import a calendar subscription.</p>
           )}
-          {events.map(event => (
+          {events.slice(0, 6).map(event => (
             <article
               key={event.id}
               className="grid gap-3 rounded-lg border border-border/70 bg-linen/70 px-4 py-4 md:grid-cols-[96px_minmax(0,1fr)_150px]"
