@@ -11,10 +11,10 @@ export default async function ExportPage({ searchParams }: { searchParams: Promi
   return (
     <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
-        <p className="eyebrow">Sending</p>
+        <p className="eyebrow">Getting it out the door</p>
         <h1 className="dash-title">Export &amp; send</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-ink-muted">
-          Choose the format that matches how each person should hear from you, from printed letters to digital sends.
+          Print it yourself, or let me stamp and mail it. Pick whatever fits how each person should hear from you.
         </p>
         {groups.length > 0 && (
           <div className="mt-4">

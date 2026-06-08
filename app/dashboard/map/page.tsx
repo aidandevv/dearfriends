@@ -15,10 +15,10 @@ export default async function DashboardMapPage() {
   return (
     <div className="dashboard-page-pad space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
-        <p className="eyebrow">Where your people live</p>
+        <p className="eyebrow">Where everyone ended up</p>
         <h1 className="dash-title">Friend map</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-muted">
-          A living view of the cities your letters are headed toward. Hover over a dot to see who&apos;s there.
+          All the cities your letters are headed toward. Hover a dot to see who&apos;s there.
         </p>
       </section>
 

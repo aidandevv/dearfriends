@@ -13,10 +13,10 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
-        <p className="eyebrow">Account</p>
+        <p className="eyebrow">How you show up</p>
         <h1 className="dash-title">Your profile</h1>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-muted">
-          This name and bio appear on your address request page and in emails you send.
+          This is the name and note your friends see when you ask for their address, and at the bottom of what you send.
         </p>
       </section>
 

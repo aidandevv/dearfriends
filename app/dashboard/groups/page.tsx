@@ -7,10 +7,10 @@ export default async function GroupsPage() {
   return (
     <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
-        <p className="eyebrow">Organisation</p>
-        <h1 className="dash-title">Manage groups</h1>
+        <p className="eyebrow">However you think of them</p>
+        <h1 className="dash-title">Groups</h1>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-muted">
-          Organize contacts into relationship groups. Enable birthday tracking per group to get weekly reminders.
+          Family, old roommates, the people from that one summer. Turn on birthday reminders for any group you want to stay close to.
         </p>
       </section>
       <section className="surface-panel px-6 py-5">

@@ -20,12 +20,14 @@ export default async function OnboardingPage() {
       <div className="w-full max-w-lg animate-fade-up">
         <div className="mb-8 flex flex-col items-center text-center">
           <Postmark />
-          <p className="info-chip">A quick setup before you head inside</p>
-          <h1 style={{ fontFamily: newsreader, fontWeight: 400, fontSize: 36, marginTop: 20, color: '#1d2442' }}>
+          <p style={{ fontFamily: newsreader, fontStyle: 'italic', fontSize: 16 }} className="text-blue-slate mt-2">
+            One quick thing before you head in
+          </p>
+          <h1 style={{ fontFamily: newsreader, fontWeight: 400, fontSize: 36, marginTop: 16, color: '#1d2442' }}>
             What should your friends call you?
           </h1>
           <p className="mt-3 max-w-md text-sm leading-6 text-ink-muted">
-            We&apos;ll use your name to personalize address requests and make your first dashboard tour feel a little more welcoming.
+            I&apos;ll sign your address requests with this, so it sounds like it&apos;s coming from you and not from some app.
           </p>
         </div>
 

@@ -51,7 +51,7 @@ export default async function DashboardPage({
 
   const filterChips = [
     { key: 'all',      label: 'Everyone' },
-    { key: 'pending',  label: 'Pending' },
+    { key: 'pending',  label: 'Not yet confirmed' },
     { key: 'verified', label: 'Confirmed' },
   ]
 
@@ -123,29 +123,27 @@ export default async function DashboardPage({
             }}>
               Your people
             </h2>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {filterChips.map(chip => (
-                <Link
-                  key={chip.key}
-                  href={chip.key === 'all' ? '/dashboard' : `/dashboard?filter=${chip.key}`}
-                  style={{
-                    fontSize: 13, fontWeight: 500,
-                    padding: '5px 10px',
-                    borderRadius: 4,
-                    textDecoration: 'none',
-                    border: '1px solid transparent',
-                    ...(filter === chip.key ? {
-                      color: 'var(--ink)',
-                      borderColor: 'var(--line)',
-                      background: 'var(--paper-2)',
-                    } : {
-                      color: 'var(--muted)',
-                    }),
-                  }}
-                >
-                  {chip.label}
-                </Link>
-              ))}
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline' }}>
+              {filterChips.map(chip => {
+                const active = filter === chip.key
+                return (
+                  <Link
+                    key={chip.key}
+                    href={chip.key === 'all' ? '/dashboard' : `/dashboard?filter=${chip.key}`}
+                    style={{
+                      fontFamily: 'var(--font-ppwriter), Georgia, serif',
+                      fontStyle: 'italic',
+                      fontSize: 15.5,
+                      textDecoration: 'none',
+                      paddingBottom: 2,
+                      color: active ? 'var(--blue-ink)' : 'var(--muted)',
+                      borderBottom: active ? '1px solid var(--blue-ink)' : '1px solid transparent',
+                    }}
+                  >
+                    {chip.label}
+                  </Link>
+                )
+              })}
             </div>
           </div>
 

@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { LandingNav } from '@/components/marketing/landing-nav'
 
 export const metadata: Metadata = {
-  title: 'dearfriends — keep up with friends by mail',
-  description: "Collect your friends' addresses, remember birthdays, and actually send a card now and then.",
+  title: 'dearfriends — a little address book for the people you love',
+  description: "Keep your friends' addresses in one place, remember the birthdays, and actually send a card now and then.",
 }
 
 // ─── Palette (small + warm) ────────────────────────────────────────────────
@@ -38,7 +38,7 @@ export default function HomePage() {
         style={{
           maxWidth: 720,
           margin: '0 auto',
-          padding: '170px 28px 90px',
+          padding: '170px 28px 80px',
         }}
       >
         <p style={{
@@ -61,11 +61,11 @@ export default function HomePage() {
         </h1>
 
         <p style={{
-          fontSize: 18, color: inkSoft, maxWidth: 500,
+          fontSize: 18, color: inkSoft, maxWidth: 520,
           margin: '32px 0 40px', lineHeight: 1.65,
         }}>
-          Keep their addresses in one place, remember the birthdays, and
-          get a small nudge to actually send a card now and then. That&apos;s
+          Keep their addresses in one place, remember the birthdays, and get
+          a small nudge to actually send a card now and then. That&apos;s
           really the whole thing.
         </p>
 
@@ -89,7 +89,7 @@ export default function HomePage() {
       </section>
 
       {/* ── A single envelope, plainly drawn ── */}
-      <section style={{ padding: '0 28px 100px' }}>
+      <section style={{ padding: '0 28px 96px' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <div aria-hidden style={{ maxWidth: 420 }}>
             <div style={{
@@ -136,7 +136,7 @@ export default function HomePage() {
         background: paper2,
         borderTop: `1px solid ${line}`,
         borderBottom: `1px solid ${line}`,
-        padding: '90px 28px',
+        padding: '92px 28px',
       }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <p style={{
@@ -152,13 +152,13 @@ export default function HomePage() {
           }}>
             <p style={{ margin: '0 0 24px' }}>
               I kept losing touch with people I genuinely loved. Not on
-              purpose — just the slow drift of busy weeks, until a year had
-              quietly gone by.
+              purpose &mdash; just the slow drift of busy weeks, until a year
+              had quietly gone by.
             </p>
             <p style={{ margin: '0 0 24px' }}>
-              So I made a small place to keep their addresses and the dates
+              So I built a small place to keep their addresses and the dates
               that matter, and to nudge me to write before the moment passes.
-              No feeds, no streaks, no notifications begging for my attention.
+              No feeds, no streaks, nothing begging for my attention.
             </p>
             <p style={{ margin: 0, color: inkSoft }}>
               If it helps you mail one card you would have otherwise only
@@ -168,61 +168,40 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── The rituals — a plain numbered read ── */}
-      <section id="rituals" style={{ padding: '90px 28px' }}>
+      {/* ── How it works — woven into prose, not steps ── */}
+      <section id="how" style={{ padding: '92px 28px' }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <h2 style={{
             fontFamily: serif, fontWeight: 400,
             fontSize: 'clamp(30px, 4vw, 44px)',
-            lineHeight: 1.1, letterSpacing: '-0.02em',
-            margin: '0 0 44px', color: ink,
-          }}>
-            It only asks three small things of you.
+            lineHeight: 1.12, letterSpacing: '-0.02em',
+            margin: '0 0 32px', color: ink,
+          }}
+            className="text-pretty"
+          >
+            How it works, more or less.
           </h2>
 
-          <ol style={{
-            listStyle: 'none', margin: 0, padding: 0,
-            display: 'flex', flexDirection: 'column',
+          <div style={{
+            fontFamily: serif, fontSize: 'clamp(19px, 2.2vw, 23px)',
+            lineHeight: 1.7, color: ink,
           }}>
-            {[
-              {
-                t: 'Keep their addresses.',
-                d: 'Add the people you care about, or send a private link and let them fill in their own. No account needed on their end.',
-              },
-              {
-                t: 'Remember the dates.',
-                d: 'Birthdays and the days that matter. You will hear from me about a week before — enough time to put something in the mail.',
-              },
-              {
-                t: 'Actually write.',
-                d: 'A card in your own words. Print it at home, or I will stamp and mail it for you. Your handwriting still counts for something.',
-              },
-            ].map((r, i) => (
-              <li key={r.t} style={{
-                display: 'flex', gap: 22, padding: '24px 0',
-                borderTop: `1px solid ${line}`,
-                ...(i === 2 ? { borderBottom: `1px solid ${line}` } : {}),
-              }}>
-                <span style={{
-                  fontFamily: serif, fontStyle: 'italic', fontSize: 22,
-                  color: blueSlate, flexShrink: 0, width: 24,
-                }}>
-                  {i + 1}
-                </span>
-                <div>
-                  <h3 style={{
-                    fontFamily: serif, fontSize: 21, fontWeight: 500,
-                    margin: '0 0 6px', color: ink,
-                  }}>
-                    {r.t}
-                  </h3>
-                  <p style={{ fontSize: 16.5, color: inkSoft, margin: 0, lineHeight: 1.6 }}>
-                    {r.d}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
+            <p style={{ margin: '0 0 22px' }}>
+              You add the people you care about &mdash; or send them a private
+              link and let them fill in their own address. Nothing for them to
+              sign up for.
+            </p>
+            <p style={{ margin: '0 0 22px' }}>
+              You note the birthdays and the days that matter, and you&apos;ll
+              hear from me about a week before each one &mdash; enough time to
+              put something in the mail.
+            </p>
+            <p style={{ margin: 0, color: inkSoft }}>
+              Then you <Italic>write</Italic>. A card in your own words. Print
+              it at home, or I&apos;ll stamp and mail it for you. Your
+              handwriting still counts for something.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -231,7 +210,7 @@ export default function HomePage() {
         background: paper2,
         borderTop: `1px solid ${line}`,
         borderBottom: `1px solid ${line}`,
-        padding: '90px 28px',
+        padding: '92px 28px',
       }}>
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
           <div style={{
@@ -247,12 +226,13 @@ export default function HomePage() {
             </p>
             <p style={{ fontSize: 17, color: ink, margin: '0 0 16px' }}>
               It&apos;s been a strange spring. I keep thinking about that
-              winter we spent in Helsinki — the little kitchen, the candles,
-              the way you made coffee at 11pm and we somehow still slept.
+              winter we spent in Helsinki &mdash; the little kitchen, the
+              candles, the way you made coffee at 11pm and we somehow still
+              slept.
             </p>
             <p style={{ fontSize: 17, color: ink, margin: '0 0 24px' }}>
               I hope the new apartment is warm. Tell me about it. I&apos;ll be
-              in Copenhagen in June — any chance?
+              in Copenhagen in June &mdash; any chance?
             </p>
             <p style={{ fontStyle: 'italic', color: blueInk, fontSize: 18, margin: 0 }}>
               Yours, always.
@@ -264,8 +244,9 @@ export default function HomePage() {
             margin: '28px 0 0',
           }}>
             dearfriends quietly holds onto the small things you&apos;ve
-            mentioned — a trip, a new kid, a hard season — so your letters
-            never have to start with &ldquo;sorry it&apos;s been so long.&rdquo;
+            mentioned &mdash; a trip, a new kid, a hard season &mdash; so your
+            letters never have to start with &ldquo;sorry it&apos;s been so
+            long.&rdquo;
           </p>
         </div>
       </section>
@@ -308,7 +289,7 @@ export default function HomePage() {
         fontSize: 13, color: muted,
       }}>
         <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 16, color: blueSlate }}>
-          dearfriends
+          A small thing I built, for my friends and anyone else who wants it.
         </div>
         <ul style={{ display: 'flex', gap: 22, listStyle: 'none', margin: 0, padding: 0, flexWrap: 'wrap' }}>
           {['About', 'Privacy'].map(item => (

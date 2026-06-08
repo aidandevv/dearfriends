@@ -5,7 +5,6 @@ import Link from 'next/link'
 
 const ink = '#1d2442'
 const paper = '#faf4e4'
-const blueInk = '#3358ba'
 const line = '#d9cfb0'
 const newsreader = "var(--font-ppwriter), Georgia, serif"
 
@@ -43,13 +42,6 @@ export function LandingNav() {
         >
           <span style={{ fontStyle: 'italic', fontWeight: 500 }}>dear</span>
           <span style={{ fontWeight: 500 }}>friends</span>
-          <span style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: blueInk,
-            margin: '0 8px 3px',
-            display: 'inline-block',
-            alignSelf: 'center',
-          }} />
         </Link>
 
         <ul style={{ display: 'flex', gap: 28, listStyle: 'none', margin: 0, padding: 0, fontSize: 14.5, color: '#3a4263' }}
@@ -57,7 +49,7 @@ export function LandingNav() {
         >
           {[
             { href: '#why', label: 'Why' },
-            { href: '#rituals', label: 'The rituals' },
+            { href: '#how', label: 'How it works' },
             { href: '#letter', label: 'A letter' },
           ].map(({ href, label }) => (
             <li key={href}>
@@ -74,10 +66,10 @@ export function LandingNav() {
           href="/login"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '9px 18px',
+            padding: '10px 18px',
             background: ink,
             color: paper,
-            borderRadius: 999,
+            borderRadius: 4,
             fontSize: 14, fontWeight: 500,
             textDecoration: 'none',
             transition: 'background 0.15s ease',
@@ -85,9 +77,6 @@ export function LandingNav() {
           className="hover:bg-[#3358ba] transition-colors"
         >
           Start writing
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
         </Link>
       </nav>
     </header>

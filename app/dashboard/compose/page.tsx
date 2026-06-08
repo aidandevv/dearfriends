@@ -21,10 +21,10 @@ export default async function ComposePage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-5 p-6">
       <section className="surface-panel px-6 py-5">
-        <p className="eyebrow">Writing desk</p>
-        <h1 className="dash-title">Compose your letter</h1>
+        <p className="eyebrow">At the writing desk</p>
+        <h1 className="dash-title">Write something</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-ink-muted">
-          Draft once, personalize with merge tags, and check the live preview before you export or send.
+          Say it once. Their name drops in for each person, and you can read it back before it goes out.
         </p>
         {groups.length > 0 && (
           <div className="mt-4">
