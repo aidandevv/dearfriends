@@ -56,9 +56,9 @@ export function LandingNav() {
           className="hidden md:flex"
         >
           {[
-            { href: '#how', label: 'How it works' },
-            { href: '#friends', label: 'Your people' },
-            { href: '#letters', label: 'Letters' },
+            { href: '#why', label: 'Why' },
+            { href: '#rituals', label: 'The rituals' },
+            { href: '#letter', label: 'A letter' },
           ].map(({ href, label }) => (
             <li key={href}>
               <a href={href} style={{ color: 'inherit', textDecoration: 'none' }}
