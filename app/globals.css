@@ -3,29 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --linen: #F5F5F3;
-  --surface: #F0F0ED;
-  --surface-raised: #FAFAF9;
-  --paper: #F0F0ED;
-  --paper-2: #E8E8E4;
-  --paper-3: #DFDDD8;
-  --paper-deep: #D1CEC7;
+  --porcelain: #F8F9FB;
+  --linen: #F8F9FB;
+  --surface: #EEF1F6;
+  --surface-raised: #FFFFFF;
+  --paper: #F8F9FB;
+  --paper-2: #EEF1F6;
+  --paper-3: #E4E8F0;
+  --paper-deep: #D7DCE8;
+  --periwinkle: #4A6CD4;
+  --periwinkle-deep: #3A55AC;
+  --peach: #E8927C;
   --blue-ink: #3358ba;
   --blue-mid: #3e5da0;
-  --ink: #1d2442;
-  --ink-soft: #3a4263;
-  --ink-muted: #6b7290;
-  --border: #C8C6BF;
-  --line: #C8C6BF;
-  --line-soft: #DDDBD5;
+  --ink: #232940;
+  --ink-soft: #4A5168;
+  --ink-muted: #8A91A6;
+  --border: #DFE3EC;
+  --line: #DFE3EC;
+  --line-soft: #E9ECF3;
   --sage: #5A7A5A;
   --sidebar: #EAEAE6;
-  --cream: #B8B5AE;
-  --cream-soft: #CCCAC4;
+  --cream: #EEF1F6;
+  --cream-soft: #E4E8F0;
   --blue-slate: #516183;
   --stamp: #b8453b;
   --stamp-soft: #d97757;
-  --muted: #6b7290;
+  --muted: #8A91A6;
   --font-caveat: var(--font-ppwriter), cursive;
 }
 
@@ -164,6 +168,26 @@ body {
     animation: floatSlow 8.5s ease-in-out infinite;
     animation-delay: 1.2s;
   }
+
+  .grain-cool {
+    background-image: radial-gradient(rgba(35, 41, 64, 0.04) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  .dashed-rule {
+    border-top: 1px dashed var(--line);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 600ms ease, transform 600ms ease;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes fadeUp {
@@ -197,6 +221,12 @@ body {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 
