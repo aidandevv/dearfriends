@@ -201,6 +201,28 @@ export async function generateShareSlug(userId?: string): Promise<string> {
   throw new Error('Could not generate a unique share slug after 3 attempts')
 }
 
+export async function updateShareMessage(message: string): Promise<{ error?: string }> {
+  const trimmed = message.trim()
+  if (!trimmed) return { error: 'Message cannot be empty.' }
+  if (trimmed.length > 200) return { error: 'Message must be 200 characters or fewer.' }
+
+  const anon = await createClient()
+  const admin = createAdminClient()
+
+  const { data: { user } } = await anon.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: userData } = await admin.auth.admin.getUserById(user.id)
+  const existingMeta = userData.user?.user_metadata ?? {}
+  const { error } = await admin.auth.admin.updateUserById(user.id, {
+    user_metadata: { ...existingMeta, share_message: trimmed },
+  })
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard')
+  return {}
+}
+
 export async function updateShareSlug(slug: string): Promise<{ error?: string }> {
   const normalised = slug.toLowerCase()
   const parsed = slugSchema.safeParse(normalised)

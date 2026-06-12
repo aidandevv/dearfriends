@@ -107,16 +107,19 @@ export function buildVerificationEmail(opts: {
   verifyUrl: string
   adminName?: string | null
 }): { subject: string; html: string } {
+  const escapedFirstName = escapeHtml(opts.firstName)
+  const escapedAdminName = opts.adminName ? escapeHtml(opts.adminName) : null
+  const href = safeHref(opts.verifyUrl)
   const senderLine = opts.adminName
-    ? `<p>${opts.adminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
+    ? `<p>${escapedAdminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
     : '<p>Please confirm your mailing address (or update it / opt out) using the link below:</p>'
 
   return {
     subject: opts.adminName ? `${opts.adminName} asked you to verify your address` : 'Please verify your address',
     html: `
-      <p>Hi ${opts.firstName},</p>
+      <p>Hi ${escapedFirstName},</p>
       ${senderLine}
-      <p><a href="${opts.verifyUrl}">Verify / Update / Opt out</a></p>
+      <p><a href="${href}">Verify / Update / Opt out</a></p>
       <p>This link is unique to you.</p>
     `,
   }

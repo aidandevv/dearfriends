@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail } from 'lucide-react'
-import { upsertContact, submitNote, notifyAdminOfNote } from '@/lib/actions/contacts'
+import { submitPublicContact } from '@/lib/actions/contacts'
 import { contactSchema, type ContactInput } from '@/lib/schemas'
 
 function firstName(name: string | null) {
@@ -14,22 +14,21 @@ function firstName(name: string | null) {
 const newsreader = "var(--font-ppwriter), Georgia, serif"
 const caveat = "var(--font-caveat), cursive"
 
-export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
-  adminId: string
+export function ShareForm({ shareCapability, senderName, senderBio, shareMessage }: {
+  shareCapability: string
   senderName: string | null
   senderBio: string | null
-  autoGroupId?: string | null
+  shareMessage?: string | null
 }) {
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
-  const [contactId, setContactId] = useState<string | null>(null)
   const [recipientFirstName, setRecipientFirstName] = useState<string>('')
   const [note, setNote] = useState('')
-  const [noteSubmitting, setNoteSubmitting] = useState(false)
   const [noteSubmitted, setNoteSubmitted] = useState(false)
   const [isInternational, setIsInternational] = useState(false)
 
   const displayName = useMemo(() => firstName(senderName) ?? senderName, [senderName])
+  const recipientMessage = shareMessage?.trim() || "Can't wait to send you something"
 
   const {
     register,
@@ -42,35 +41,14 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
 
   async function onSubmit(data: ContactInput) {
     setServerError(null)
-    const result = await upsertContact(adminId, data, autoGroupId)
+    const result = await submitPublicContact(shareCapability, data, note)
     if (result.error) {
       setServerError(typeof result.error === 'string' ? result.error : 'Something went wrong.')
       return
     }
     setRecipientFirstName(data.first_name)
-    setContactId(result.contactId ?? null)
-
-    if (result.contactId && note.trim()) {
-      const noteResult = await submitNote(result.contactId, note)
-      if (!noteResult.error) {
-        await notifyAdminOfNote({ adminId, recipientFirstName: data.first_name, note })
-        setNoteSubmitted(true)
-      }
-    }
-
+    setNoteSubmitted(Boolean(note.trim()))
     setSubmitted(true)
-  }
-
-  async function handleNoteSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!contactId || !note.trim()) return
-    setNoteSubmitting(true)
-    const result = await submitNote(contactId, note)
-    if (!result.error) {
-      await notifyAdminOfNote({ adminId, recipientFirstName, note })
-      setNoteSubmitted(true)
-    }
-    setNoteSubmitting(false)
   }
 
   // ── Success state ──────────────────────────────────────────────────────────
@@ -100,35 +78,6 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
               ? `Thanks, ${recipientFirstName}! Your address is saved. ${displayName} can't wait to send you something.`
               : 'Your address has been saved. Expect something special in the mail.'}
           </p>
-
-          {contactId && !noteSubmitted && (
-            <form
-              onSubmit={handleNoteSubmit}
-              className="w-full flex flex-col gap-3"
-              style={{ background: 'white', border: '1px solid #d9cfb0', borderRadius: 10, padding: '16px 20px' }}
-            >
-              <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted text-left">
-                Leave a note for {displayName ?? 'them'} (optional)
-              </label>
-              <textarea
-                value={note}
-                onChange={e => setNote(e.target.value.slice(0, 280))}
-                rows={3}
-                placeholder={`Leave a note for ${displayName ?? 'them'}…`}
-                className="input resize-none"
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-muted">{note.length}/280</span>
-                <button
-                  type="submit"
-                  disabled={noteSubmitting || !note.trim()}
-                  className="btn-primary min-h-9 px-4 text-sm"
-                >
-                  {noteSubmitting ? 'Sending...' : 'Send note'}
-                </button>
-              </div>
-            </form>
-          )}
 
           {noteSubmitted && <p className="text-sm text-ink-muted">Note sent ✓</p>}
         </div>
@@ -210,8 +159,8 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
             )}
           </div>
 
-          <p style={{ fontFamily: caveat, fontSize: 17, color: '#3a4263', lineHeight: 1.5 }}>
-            Can&apos;t wait to send<br />you something ✉
+          <p style={{ fontFamily: caveat, fontSize: 17, color: '#3a4263', lineHeight: 1.5, maxWidth: 240 }}>
+            {recipientMessage} ✉
           </p>
         </div>
 
@@ -235,9 +184,11 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
             Share your address
           </h1>
           <p className="text-sm text-ink-muted mb-6">
-            {displayName
-              ? `${displayName} will use this to send you something in the mail.`
-              : 'Your address will be used to send you something special.'}
+            {shareMessage?.trim()
+              ? shareMessage.trim()
+              : displayName
+                ? `${displayName} will use this to send you something in the mail.`
+                : 'Your address will be used to send you something special.'}
           </p>
 
           {serverError && (
@@ -249,20 +200,20 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">First name</label>
-                <input {...register('first_name')} className="input min-h-11" />
+                <label htmlFor="first-name" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">First name</label>
+                <input id="first-name" {...register('first_name')} className="input min-h-11" />
                 {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Last name</label>
-                <input {...register('last_name')} className="input min-h-11" />
+                <label htmlFor="last-name" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Last name</label>
+                <input id="last-name" {...register('last_name')} className="input min-h-11" />
                 {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Email</label>
-              <input {...register('email')} type="email" className="input min-h-11" />
+              <label htmlFor="email" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Email</label>
+              <input id="email" {...register('email')} type="email" className="input min-h-11" />
               {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
 
@@ -298,10 +249,11 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
             />
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Address</label>
-              <input {...register('address_line_1')} placeholder="Street address" className="input min-h-11" />
+              <label htmlFor="address-line-1" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Address</label>
+              <input id="address-line-1" {...register('address_line_1')} placeholder="Street address" className="input min-h-11" />
               {errors.address_line_1 && <p className="text-xs text-red-500">{errors.address_line_1.message}</p>}
               <input
+                aria-label="Address line 2"
                 {...register('address_line_2')}
                 placeholder="Apt, suite, etc. (optional)"
                 className="input min-h-11 mt-2"
@@ -310,26 +262,26 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
 
             <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">City</label>
-                <input {...register('city')} className="input min-h-11" />
+                <label htmlFor="city" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">City</label>
+                <input id="city" {...register('city')} className="input min-h-11" />
                 {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Region' : 'State'}</label>
-                <input {...register('state')} className="input min-h-11" />
+                <label htmlFor="state" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Region' : 'State'}</label>
+                <input id="state" {...register('state')} className="input min-h-11" />
                 {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Postal' : 'ZIP'}</label>
-                <input {...register('zip')} className="input min-h-11" />
+                <label htmlFor="zip" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">{isInternational ? 'Postal' : 'ZIP'}</label>
+                <input id="zip" {...register('zip')} className="input min-h-11" />
                 {errors.zip && <p className="text-xs text-red-500">{errors.zip.message}</p>}
               </div>
             </div>
 
             {isInternational && (
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Country</label>
-                <input {...register('country')} className="input min-h-11" placeholder="Country" />
+                <label htmlFor="country" className="text-xs text-ink-muted font-medium uppercase tracking-[0.18em]">Country</label>
+                <input id="country" {...register('country')} className="input min-h-11" placeholder="Country" />
                 {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
               </div>
             )}
@@ -352,6 +304,7 @@ export function ShareForm({ adminId, senderName, senderBio, autoGroupId }: {
                 </p>
               </div>
               <textarea
+                aria-label={`Note for ${displayName ?? 'your friend'}`}
                 value={note}
                 onChange={e => setNote(e.target.value.slice(0, 280))}
                 rows={3}

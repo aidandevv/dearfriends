@@ -36,11 +36,6 @@ function dateKey(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function parseDateOnly(value: string) {
-  const [year, month, day] = value.split('-').map(Number)
-  return new Date(Date.UTC(year, month - 1, day))
-}
-
 function startOfMonth(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
 }
@@ -83,10 +78,8 @@ export function CalendarManager({
 }) {
   const [status, setStatus] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
-  const initialMonth = events[0]?.mailByDate
-    ? startOfMonth(parseDateOnly(events[0].mailByDate))
-    : startOfMonth(new Date())
-  const [visibleMonth, setVisibleMonth] = useState(initialMonth)
+  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()))
+  const todayKey = dateKey(new Date())
 
   const calendarDays = buildCalendarDays(visibleMonth)
   const displayEvents = events.flatMap<DisplayEvent>(event => [
@@ -164,6 +157,7 @@ export function CalendarManager({
               const key = dateKey(day)
               const dayEvents = eventsByDate[key] ?? []
               const isCurrentMonth = day.getUTCMonth() === visibleMonth.getUTCMonth()
+              const isToday = key === todayKey
 
               return (
                 <div
@@ -171,7 +165,7 @@ export function CalendarManager({
                   className={`min-h-[132px] border-b border-r border-border/60 p-2 ${isCurrentMonth ? 'bg-white' : 'bg-linen/30 text-ink-muted/60'}`}
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm ${isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium ${isToday ? 'bg-blue-ink text-white' : isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
                       {day.getUTCDate()}
                     </span>
                   </div>

@@ -18,7 +18,8 @@ type CsvContact = {
 }
 
 function formatCsvField(value: string | null | undefined): string {
-  const str = value ?? ''
+  const raw = value ?? ''
+  const str = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }

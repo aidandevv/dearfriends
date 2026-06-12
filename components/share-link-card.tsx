@@ -1,17 +1,13 @@
-import Link from 'next/link'
-import { ShareLinkActions } from '@/components/share-link-actions'
+import { ShareLinkEditor } from '@/components/share-link-editor'
 
 interface ShareLinkCardProps {
   shareSlug: string | null
+  shareMessage: string | null
 }
 
-export function ShareLinkCard({ shareSlug }: ShareLinkCardProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const url = shareSlug ? `${siteUrl}/share/${shareSlug}` : null
-
-  const siteDisplay = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-    .replace(/^https?:\/\//, '')
-    .replace(/\/$/, '')
+export function ShareLinkCard({ shareSlug, shareMessage }: ShareLinkCardProps) {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const siteDisplay = siteUrl.replace(/^https?:\/\//, '')
 
   return (
     <section style={{
@@ -43,85 +39,13 @@ export function ShareLinkCard({ shareSlug }: ShareLinkCardProps) {
         <em style={{ fontStyle: 'italic', color: 'var(--blue-ink)' }}>share link</em>
       </h3>
 
-      {url ? (
-        <>
-          {/* URL field */}
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            background: 'var(--paper)',
-            border: '1px solid var(--line)',
-            borderRadius: 8, overflow: 'hidden',
-            marginBottom: 14,
-          }}>
-            <div style={{
-              flex: 1, padding: '12px 14px',
-              fontFamily: 'var(--font-dm-sans), sans-serif',
-              fontSize: 12.5, color: 'var(--ink-soft)',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              fontFeatureSettings: '"tnum"',
-            }}>
-              <span style={{ color: 'var(--muted)' }}>{siteDisplay}/share/</span>
-              <span style={{ color: 'var(--blue-ink)', fontWeight: 600 }}>{shareSlug}</span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <ShareLinkActions url={url} />
-
-          {/* Edit slug */}
-          <Link href="/dashboard/settings" className="edit-slug-link">
-            Edit slug →
-          </Link>
-
-          {/* Dashed divider */}
-          <div style={{
-            height: 1,
-            background: 'repeating-linear-gradient(to right, var(--line) 0 6px, transparent 6px 12px)',
-            margin: '18px -4px 16px',
-          }} />
-
-          {/* Share preview */}
-          <div style={{
-            background: 'var(--paper)',
-            border: '1px solid var(--line)',
-            borderRadius: 8, padding: '14px 16px',
-            display: 'flex', gap: 14, alignItems: 'flex-start',
-            position: 'relative',
-          }}>
-            <div style={{
-              width: 36, height: 44,
-              background: 'var(--cream)',
-              border: '1.5px dashed var(--paper)',
-              outline: '1px solid var(--line)',
-              flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-ppwriter), Georgia, serif',
-              fontStyle: 'italic', fontSize: 14, color: 'var(--blue-ink)',
-              transform: 'rotate(-4deg)',
-            }}>
-              df
-            </div>
-            <div style={{
-              fontFamily: 'var(--font-ppwriter), Georgia, serif',
-              fontSize: 13.5, color: 'var(--ink-soft)',
-              lineHeight: 1.45, flex: 1, minWidth: 0,
-            }}>
-              <b style={{ color: 'var(--ink)', fontWeight: 500 }}>
-                &ldquo;Hey — I&apos;m putting together an address book.&rdquo;
-              </b>
-              <br />
-              They fill it out in a minute. No account, nothing weird.
-              <span style={{
-                fontFamily: 'var(--font-dm-sans), sans-serif',
-                fontSize: 11, color: 'var(--muted)',
-                textTransform: 'uppercase', letterSpacing: '0.16em',
-                display: 'block', marginTop: 6,
-              }}>
-                how it&apos;ll read
-              </span>
-            </div>
-          </div>
-        </>
+      {shareSlug ? (
+        <ShareLinkEditor
+          shareSlug={shareSlug}
+          shareMessage={shareMessage}
+          siteDisplay={siteDisplay}
+          siteUrl={siteUrl}
+        />
       ) : (
         <p style={{ fontSize: 14, color: 'var(--muted)', margin: 0 }}>
           Your link is being set up — refresh to try again.

@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { calendarEventSchema, calendarImportSchema, mailingOriginSchema } from '@/lib/schemas'
 import { buildCalendarReminderEmail, getResend } from '@/lib/resend'
 import { getUserProfile } from '@/lib/user-profile'
+import { fetchCalendarSubscription } from '@/lib/calendar-subscription'
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
@@ -263,10 +264,10 @@ export async function importCalendarSubscription(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  const response = await fetch(parsed.data.subscription_url, { cache: 'no-store' })
-  if (!response.ok) return { error: 'Could not read that calendar URL.' }
+  const subscription = await fetchCalendarSubscription(parsed.data.subscription_url)
+  if (subscription.error || !subscription.text) return { error: subscription.error ?? 'Could not read that calendar URL.' }
 
-  const ics = await response.text()
+  const ics = subscription.text
   const parsedEvents = parseIcsEvents(ics).slice(0, 80)
   if (!parsedEvents.length) return { error: 'No events found in that calendar.' }
 

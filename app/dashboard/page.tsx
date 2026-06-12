@@ -504,63 +504,9 @@ export default async function DashboardPage({
         {/* ── Right column ── */}
         <aside style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 22 }}>
 
-          <ShareLinkCard shareSlug={shareSlug} />
+          <ShareLinkCard shareSlug={shareSlug} shareMessage={profile.shareMessage} />
 
           <CalendarWidget events={calendarWidget.events} />
-
-          {/* Nudge card */}
-          <section style={{
-            background: 'var(--blue-ink)',
-            border: '1px solid var(--blue-mid)',
-            borderRadius: 10,
-            padding: '22px 24px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 1px 0 rgba(255,255,255,.6) inset, 0 18px 36px -22px rgba(45,35,10,.18)',
-          }}>
-            <div style={{
-              position: 'absolute', right: -40, bottom: -40,
-              width: 160, height: 160, borderRadius: '50%',
-              background: 'radial-gradient(circle at 30% 30%, rgba(228,206,149,.18), transparent 65%)',
-              pointerEvents: 'none',
-            }} />
-            <div className="eyebrow" style={{ color: 'var(--cream)' }}>A gentle nudge</div>
-            <h4 style={{
-              fontFamily: 'var(--font-ppwriter), Georgia, serif',
-              fontWeight: 400, fontSize: 22,
-              letterSpacing: '-0.015em',
-              margin: '0 0 10px',
-              color: 'var(--paper)', lineHeight: 1.15,
-            }}>
-              Add three more{' '}
-              <em style={{ fontStyle: 'italic', color: 'var(--cream)' }}>before Sunday</em>.
-            </h4>
-            <p style={{
-              fontSize: 13.5, color: 'rgba(250,244,228,.78)',
-              lineHeight: 1.5, margin: '0 0 16px', maxWidth: 250,
-            }}>
-              Most books start with the people you&apos;d call at midnight. Keep going - three names is enough to feel real.
-            </p>
-            <a
-              href="/dashboard"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                padding: '9px 14px',
-                background: 'var(--cream)',
-                color: 'var(--ink)',
-                border: 'none', borderRadius: 999,
-                fontFamily: 'var(--font-dm-sans), sans-serif',
-                fontSize: 12.5, fontWeight: 600,
-                cursor: 'pointer', textDecoration: 'none',
-                boxShadow: '0 2px 0 0 #8a7a3a',
-              }}
-            >
-              Add a friend
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-                <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-          </section>
 
         </aside>
       </div>

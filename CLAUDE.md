@@ -35,11 +35,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `tags` (text[]), `delivery_method` (enum: `handwrite` | `print` | `digital`)
 - `created_at`, `updated_at`
 
-**RLS policy:** All SELECT/UPDATE/DELETE on `contacts` must enforce `admin_id = auth.uid()`. Public inserts allowed only when `admin_id` matches a valid user (for the share form).
+**RLS policy:** All authenticated contact CRUD must enforce `admin_id = auth.uid()`. Public share and verification flows are server-mediated; do not add anonymous direct contact insert/update policies.
 
 ## Architecture Notes
 
-- Form submissions on `/share/[admin_uuid]` write directly to Supabase — handle duplicate emails via upsert keyed on `(admin_id, email)`.
+- Form submissions on `/share/[slug]` go through a signed server capability and never overwrite existing `(admin_id, email)` contacts.
+- Public share pages resolve only configured share slugs; `/share/<user-uuid>` is not supported.
+- Public share form submissions use a short-lived signed server capability and insert new contacts only. Existing contacts must be updated through verification links, not by public share overwrite.
+- Verification links are server-mediated, single-use, and expire after 14 days. Do not grant anonymous direct table update policies for contact verification.
 - The letter composer uses `{{first_name}}` / `{{last_name}}` variable interpolation rendered into live markdown preview with a randomly selected contact.
 - CSV export targets Avery label mail-merge format for `handwrite` and `print` contacts.
 - PDF export renders one letter per page for `print` contacts with variables injected.
@@ -55,15 +58,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `RESEND_API_KEY` | Resend dashboard -> API Keys |
 | `RESEND_FROM_EMAIL` | Verified sender in Resend |
 | `NEXT_PUBLIC_SITE_URL` | Vercel deployment URL (or `http://localhost:3000` locally) |
-| `CRON_SECRET` | Random secret shared with Vercel cron auth header |
+| `CRON_SECRET` | Non-empty random secret shared with Vercel cron auth header |
 
-Cron endpoint: `GET /api/cron/send-verifications` requires `Authorization: Bearer ${CRON_SECRET}`.
+Cron endpoints fail closed when `CRON_SECRET` is missing or blank. `GET /api/cron/send-verifications` and `GET /api/cron/send-calendar-reminders` require `Authorization: Bearer ${CRON_SECRET}`.
 
 ## Build Order (per PRD)
 
 1. Scaffold (Next.js, Tailwind, shadcn, Supabase client)
 2. Apply SQL schema + RLS policies
-3. Epic 1: Public collection form (`/share/[admin_uuid]`)
+3. Epic 1: Public collection form (`/share/[slug]`)
 4. Epic 2: Admin dashboard (`/dashboard`)
 5. Epic 3: Hybrid composer (`/dashboard/compose`)
 6. Epic 4: Export & dispatch (`/dashboard/export`)

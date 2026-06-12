@@ -129,22 +129,14 @@ export function GlobePanel({
 
   const setClampedZoom = useCallback((
     next: number | ((current: number) => number),
-    anchor?: { x: number; y: number },
   ) => {
     setZoom(current => {
       const resolved = typeof next === 'function' ? next(current) : next
       const clamped = Math.max(0.72, Math.min(4.4, resolved))
-      const currentTranslate = translate.current
-      const target = anchor ?? { x: W / 2, y: H / 2 }
-      const ratio = clamped / current
-      translate.current = {
-        x: target.x - (target.x - currentTranslate.x) * ratio,
-        y: target.y - (target.y - currentTranslate.y) * ratio,
-      }
       zoomRef.current = clamped
       return clamped
     })
-  }, [H, W])
+  }, [])
 
   useEffect(() => {
     zoomRef.current = zoom
@@ -355,12 +347,7 @@ export function GlobePanel({
       e.preventDefault()
       paused.current = true
       clearResume()
-      const rect = globeSvg.getBoundingClientRect()
-      const anchor = {
-        x: ((e.clientX - rect.left) / rect.width) * W,
-        y: ((e.clientY - rect.top) / rect.height) * H,
-      }
-      setClampedZoom(current => current * (e.deltaY > 0 ? 0.88 : 1.14), anchor)
+      setClampedZoom(current => current * (e.deltaY > 0 ? 0.88 : 1.14))
       scheduleResume()
     }
 
@@ -413,23 +400,17 @@ export function GlobePanel({
         borderRadius: 8,
         overflow: 'hidden',
         background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
-        minHeight: variant === 'feature' ? 460 : undefined,
       }}
     >
       {/* Starfield */}
       <Stars />
 
-      {/*
-        The feature globe intentionally uses the full panel width so zoomed
-        geography can crop naturally instead of feeling boxed in.
-      */}
       <div style={{ position: 'relative', width: '100%', margin: '0 auto' }}>
       <svg
         ref={svgRef}
         width="100%"
-        height={H}
         viewBox={`0 0 ${W} ${H}`}
-        style={{ display: 'block', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}
+        style={{ display: 'block', cursor: 'grab', touchAction: 'none', userSelect: 'none', aspectRatio: `${W} / ${H}` }}
         aria-label="Globe showing where your contacts live"
       >
         <defs>

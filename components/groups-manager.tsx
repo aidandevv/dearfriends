@@ -154,6 +154,7 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
                   <Link2 size={14} className="mr-2 shrink-0 text-ink-muted" />
                   <span className="shrink-0 text-sm text-ink-muted select-none">{siteUrl}/share/</span>
                   <input
+                    aria-label={`${group.name} share slug`}
                     value={slugValues[group.id] ?? ''}
                     onChange={e => handleSlugChange(group.id, e.target.value)}
                     placeholder={`${group.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -166,6 +167,7 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
                   type="button"
                   onClick={() => handleSaveSlug(group)}
                   disabled={savingSlug === group.id || (slugValues[group.id] ?? '') === (group.share_slug ?? '')}
+                  aria-label={`Save ${group.name} share slug`}
                   className="btn-primary min-h-10 px-4 text-sm"
                 >
                   {savingSlug === group.id ? 'Saving...' : 'Save'}

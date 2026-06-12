@@ -7,29 +7,86 @@ import { getUserProfile } from '@/lib/user-profile'
 import { randomUUID } from 'crypto'
 import { getResend, buildNoteNotificationEmail, buildAddressRefreshEmail } from '@/lib/resend'
 import { geocodeAddress } from '@/lib/geocode'
+import { verifyShareCapability } from '@/lib/share-capability'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
-export async function upsertContact(adminId: string, formData: unknown, autoGroupId?: string | null) {
+async function notifyAdminOfNote(opts: {
+  adminId: string
+  recipientFirstName: string
+  note: string
+}) {
+  const supabase = await createServiceClient()
+  const { data: { user } } = await supabase.auth.admin.getUserById(opts.adminId)
+  if (!user?.email) return
+
+  const profile = getUserProfile(user)
+  const { subject, html } = buildNoteNotificationEmail({
+    recipientFirstName: opts.recipientFirstName,
+    note: opts.note,
+    adminName: profile.firstName,
+  })
+
+  await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: user.email,
+    subject,
+    html,
+  })
+}
+
+export async function submitPublicContact(shareCapability: string, formData: unknown, note?: string) {
+  const capability = verifyShareCapability(shareCapability)
+  if (!capability) return { error: 'This share link has expired. Please reload the page and try again.' }
+
   const parsed = contactSchema.safeParse(formData)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
   const supabase = await createServiceClient()
+
+  const { data: existing } = await supabase
+    .from('contacts')
+    .select('id')
+    .eq('admin_id', capability.adminId)
+    .eq('email', parsed.data.email)
+    .maybeSingle()
+
+  if (existing) {
+    return { success: true }
+  }
+
+  const publicContact = {
+    first_name: parsed.data.first_name,
+    last_name: parsed.data.last_name,
+    email: parsed.data.email,
+    address_line_1: parsed.data.address_line_1,
+    address_line_2: parsed.data.address_line_2,
+    city: parsed.data.city,
+    state: parsed.data.state,
+    zip: parsed.data.zip,
+    is_international: parsed.data.is_international,
+    country: parsed.data.country,
+    delivery_method: 'print',
+    tags: [],
+    admin_id: capability.adminId,
+    ...(note?.trim() ? { note: note.trim().slice(0, 280) } : {}),
+  }
+
   const { data, error } = await supabase
     .from('contacts')
-    .upsert({ ...parsed.data, admin_id: adminId }, { onConflict: 'admin_id,email' })
+    .insert(publicContact)
     .select('id')
     .single()
 
   if (error) return { error: error.message }
 
-  if (autoGroupId) {
+  if (capability.groupId) {
     const { data: group } = await supabase
       .from('groups')
       .select('id')
-      .eq('id', autoGroupId)
-      .eq('admin_id', adminId)
+      .eq('id', capability.groupId)
+      .eq('admin_id', capability.adminId)
       .maybeSingle()
 
     if (group) {
@@ -62,44 +119,17 @@ export async function upsertContact(adminId: string, formData: unknown, autoGrou
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/map')
-  if (autoGroupId) revalidatePath('/dashboard/groups')
+  if (capability.groupId) revalidatePath('/dashboard/groups')
 
-  return { success: true, contactId: data.id }
-}
+  if (note?.trim()) {
+    await notifyAdminOfNote({
+      adminId: capability.adminId,
+      recipientFirstName: parsed.data.first_name,
+      note: note.trim().slice(0, 280),
+    })
+  }
 
-export async function submitNote(contactId: string, note: string) {
-  if (!note.trim()) return { success: true }
-  const supabase = await createServiceClient()
-  const { error } = await supabase
-    .from('contacts')
-    .update({ note: note.slice(0, 280) })
-    .eq('id', contactId)
-  if (error) return { error: error.message }
   return { success: true }
-}
-
-export async function notifyAdminOfNote(opts: {
-  adminId: string
-  recipientFirstName: string
-  note: string
-}) {
-  const supabase = await createServiceClient()
-  const { data: { user } } = await supabase.auth.admin.getUserById(opts.adminId)
-  if (!user?.email) return
-
-  const profile = getUserProfile(user)
-  const { subject, html } = buildNoteNotificationEmail({
-    recipientFirstName: opts.recipientFirstName,
-    note: opts.note,
-    adminName: profile.firstName,
-  })
-
-  await getResend().emails.send({
-    from: FROM_EMAIL,
-    to: user.email,
-    subject,
-    html,
-  })
 }
 
 export async function getContacts() {

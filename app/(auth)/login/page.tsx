@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AuthArtPanel } from '@/components/ui/auth-art-panel'
-import { Mail, LogIn, UserPlus, KeyRound } from 'lucide-react'
+import { Mail, LogIn, UserPlus, KeyRound, Eye, EyeOff } from 'lucide-react'
 
 type Mode = 'sign-in' | 'sign-up' | 'magic-link' | 'forgot-password'
 
@@ -25,13 +24,16 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
     setPassword('')
     setConfirmPassword('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -45,7 +47,7 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push('/dashboard')
+    window.location.assign('/dashboard')
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -177,24 +179,44 @@ export default function LoginPage() {
             {(mode === 'sign-in' || mode === 'sign-up') && (
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-ink-muted font-medium">Password</label>
-                <input
-                  type="password" required value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="input"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'} required value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    className="input pr-10 w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
             )}
 
             {mode === 'sign-up' && (
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-ink-muted font-medium">Confirm password</label>
-                <input
-                  type="password" required value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat your password"
-                  className="input"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat your password"
+                    className="input pr-10 w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
             )}
 

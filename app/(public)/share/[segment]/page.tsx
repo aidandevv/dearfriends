@@ -4,14 +4,13 @@ import { ShareForm } from '@/components/share-form'
 import { createAdminClient } from '@/lib/supabase/server'
 import { resolveShareSlug, type ShareSlugResolution } from '@/lib/actions/user'
 import { getUserProfile } from '@/lib/user-profile'
+import { createShareCapability } from '@/lib/share-capability'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 async function resolveShareTarget(segment: string): Promise<ShareSlugResolution | null> {
   if (UUID_RE.test(segment)) {
-    const admin = createAdminClient()
-    const { data } = await admin.auth.admin.getUserById(segment)
-    return data.user ? { adminId: data.user.id, groupId: null } : null
+    return null
   }
   return resolveShareSlug(segment)
 }
@@ -36,10 +35,7 @@ export async function generateMetadata({
     `${name} is putting together something special and would love to send it your way. Share your address to receive real mail.`
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const isSlug = !UUID_RE.test(segment)
-  const canonicalUrl = isSlug
-    ? `${siteUrl}/share/${segment}`
-    : `${siteUrl}/share/${target.adminId}`
+  const canonicalUrl = `${siteUrl}/share/${segment}`
 
   return {
     title,
@@ -72,13 +68,14 @@ export default async function SharePage({
   const admin = createAdminClient()
   const { data } = await admin.auth.admin.getUserById(target.adminId)
   const senderProfile = getUserProfile(data.user)
+  const shareCapability = createShareCapability(target)
 
   return (
     <ShareForm
-      adminId={target.adminId}
-      autoGroupId={target.groupId}
+      shareCapability={shareCapability}
       senderName={senderProfile.fullName}
       senderBio={senderProfile.bio}
+      shareMessage={senderProfile.shareMessage}
     />
   )
 }
