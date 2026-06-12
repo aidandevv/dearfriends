@@ -22,9 +22,16 @@ function isPrivateIPv4(address: string) {
 
 function isPrivateIPv6(address: string) {
   const normal = address.toLowerCase()
+  // IPv4-mapped/compatible forms (::ffff:10.0.0.1, ::10.0.0.1) embed an IPv4
+  // address that must pass the IPv4 checks, not the IPv6 prefix checks.
+  const embeddedIPv4 = normal.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/)
+  if (embeddedIPv4) {
+    return isIP(embeddedIPv4[1]) !== 4 || isPrivateIPv4(embeddedIPv4[1])
+  }
   return (
     normal === '::1' ||
     normal === '::' ||
+    normal.startsWith('::') ||
     normal.startsWith('fc') ||
     normal.startsWith('fd') ||
     normal.startsWith('fe80:') ||
@@ -56,8 +63,10 @@ export async function validateCalendarSubscriptionUrl(rawUrl: string): Promise<s
   if (url.username || url.password) return 'Calendar URLs cannot include credentials.'
   if (isBlockedHost(url.hostname)) return 'Calendar URL host is not allowed.'
 
-  if (isIP(url.hostname)) {
-    return isBlockedAddress(url.hostname) ? 'Calendar URL host is not allowed.' : null
+  // IPv6 literals arrive bracketed ([::1]) from url.hostname; strip before isIP.
+  const hostLiteral = url.hostname.replace(/^\[|\]$/g, '')
+  if (isIP(hostLiteral)) {
+    return isBlockedAddress(hostLiteral) ? 'Calendar URL host is not allowed.' : null
   }
 
   try {

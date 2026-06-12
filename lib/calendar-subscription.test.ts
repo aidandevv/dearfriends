@@ -28,6 +28,14 @@ describe('calendar subscription URL validation', () => {
     expect(await validateCalendarSubscriptionUrl('https://192.168.1.10/calendar.ics')).toBe('Calendar URL host is not allowed.')
   })
 
+  it('rejects IPv4-mapped IPv6 forms of private addresses', async () => {
+    vi.mocked(lookup).mockResolvedValueOnce([{ address: '::ffff:10.0.0.2', family: 6 }] as never)
+    expect(await validateCalendarSubscriptionUrl('https://calendar.example.com/feed.ics')).toBe('Calendar URL host is not allowed.')
+    expect(await validateCalendarSubscriptionUrl('https://[::ffff:192.168.1.10]/feed.ics')).toBe('Calendar URL host is not allowed.')
+    expect(await validateCalendarSubscriptionUrl('https://[::127.0.0.1]/feed.ics')).toBe('Calendar URL host is not allowed.')
+    expect(await validateCalendarSubscriptionUrl('https://[::ffff:7f00:1]/feed.ics')).toBe('Calendar URL host is not allowed.')
+  })
+
   it('rejects DNS results that resolve to private addresses', async () => {
     vi.mocked(lookup).mockResolvedValueOnce([{ address: '10.0.0.2', family: 4 }] as never)
     expect(await validateCalendarSubscriptionUrl('https://calendar.example.com/feed.ics')).toBe('Calendar URL host is not allowed.')
