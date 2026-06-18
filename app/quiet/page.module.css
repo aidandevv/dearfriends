@@ -404,6 +404,18 @@
   line-height: 1.62;
 }
 
+.letter .smallCaps {
+  margin-bottom: 10px;
+  color: #516183;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
 .letter .greeting,
 .letter .signoff {
   color: #3358ba;

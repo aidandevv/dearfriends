@@ -44,7 +44,7 @@ export default function QuietConceptPage() {
               Start your book
             </Link>
             <a className={styles.textAction} href="#why">
-              why I made this
+              why it exists
             </a>
           </div>
         </div>
@@ -66,14 +66,14 @@ export default function QuietConceptPage() {
         <div className={styles.readerBlock}>
           <p className={styles.smallCaps}>Why this exists</p>
           <p>
-            I kept losing touch with people I genuinely loved. Not on purpose, just the slow drift
-            of busy weeks, until a year had quietly gone by.
+            Keeping in touch is easy to mean well about and surprisingly easy to postpone. Busy
+            weeks become quiet months, even with people who matter.
           </p>
           <p>
-            So I made a small place to keep their addresses and the dates that matter, and to nudge
-            me to write before the moment passes.
+            dearfriends keeps addresses and meaningful dates together, then gives you enough notice
+            to write before the moment passes.
           </p>
-          <p>No feed. No streaks. No notifications begging for my attention.</p>
+          <p>No feed. No streaks. No notifications begging for your attention.</p>
         </div>
       </section>
 
@@ -95,8 +95,8 @@ export default function QuietConceptPage() {
           <div className={styles.nudgeBody}>
             <p className={styles.nudgeTo}>Mira&apos;s birthday is next Thursday.</p>
             <p>
-              Write by Friday if you want it to arrive on time. Last year she mentioned the new
-              apartment in Helsinki and the little kitchen with the candles.
+              Write by Friday to give your note time to arrive. Start with something small and
+              specific while the date is still ahead of you.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export default function QuietConceptPage() {
 
       <section id="keeps" className={styles.keeps}>
         <div className={styles.keepsInner}>
-          <h2>It remembers the part I usually forget.</h2>
+          <h2>It remembers the part that&apos;s easy to forget.</h2>
           <dl>
             <div>
               <dt>Addresses</dt>
@@ -129,23 +129,23 @@ export default function QuietConceptPage() {
 
       <section id="letter" className={styles.letterSection}>
         <article className={styles.letter}>
+          <p className={styles.smallCaps}>Sample letter</p>
           <time dateTime="2026-04-26">April 26, 2026</time>
           <p className={styles.greeting}>Dear Mira,</p>
           <p>
-            It&apos;s been a strange spring. I keep thinking about that winter we spent in Helsinki,
-            the little kitchen, the candles, the way you made coffee at 11pm and we somehow still
-            slept.
+            I&apos;ve been meaning to write before another season slips by. I hope the new place is
+            beginning to feel like home.
           </p>
           <p>
-            I hope the new apartment is warm. Tell me about it. I&apos;ll be in Copenhagen in June,
-            any chance?
+            Tell me what has been filling your days lately. I&apos;d love to hear the small things,
+            not just the headline version.
           </p>
           <p className={styles.signoff}>Yours, always.</p>
         </article>
 
         <p className={styles.letterNote}>
-          dearfriends quietly holds onto the small things you&apos;ve mentioned, so your letters never
-          have to start with &ldquo;sorry it&apos;s been so long.&rdquo;
+          dearfriends keeps the practical details nearby, so there is less friction between meaning
+          to write and actually beginning.
         </p>
       </section>
 
