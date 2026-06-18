@@ -421,9 +421,9 @@ export default async function DashboardPage({
                 fontFamily: 'var(--font-ppwriter), Georgia, serif',
                 fontStyle: 'italic', fontSize: 13.5, color: 'var(--blue-slate)',
               }}>
-                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>0</b> letters sent</span>
-                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>0</b> received</span>
-                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>{contacts.length}</b> {contacts.length === 1 ? 'friend' : 'friends'} kept</span>
+                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>{contacts.length}</b> {contacts.length === 1 ? 'contact' : 'contacts'} in your book</span>
+                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>{verifiedCount}</b> verified</span>
+                <span><b style={{ fontStyle: 'normal', fontWeight: 500, color: 'var(--ink)', fontSize: 17, marginRight: 4 }}>{uniqueCities.length}</b> {uniqueCities.length === 1 ? 'city' : 'cities'}</span>
               </div>
             </div>
           </section>
@@ -485,7 +485,7 @@ export default async function DashboardPage({
                   transform: 'rotate(-2deg)',
                   textShadow: '0 2px 8px rgba(0,0,0,.28)',
                 }}>
-                  &ldquo;your letters have<br />somewhere to go.&rdquo;
+                  your people,<br />mapped at a glance.
                 </p>
                 <span style={{
                   fontFamily: 'var(--font-dm-sans), sans-serif',
