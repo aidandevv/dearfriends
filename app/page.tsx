@@ -5,7 +5,7 @@ import {
   HowItWorks,
   People,
   Reminders,
-  Quote,
+  ProductPrinciple,
   Closing,
   Footer,
 } from '@/components/marketing/sections'
@@ -26,7 +26,7 @@ export default function HomePage() {
         <HowItWorks />
         <People />
         <Reminders />
-        <Quote />
+        <ProductPrinciple />
         <Closing />
       </main>
       <div className="relative z-10">

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Reveal } from './reveal'
 
@@ -147,17 +148,14 @@ export function Hero() {
 
 const steps = [
   {
-    num: '01',
     title: 'Share one link.',
     desc: 'Post it anywhere. Friends add their address in under a minute — no account needed.',
   },
   {
-    num: '02',
     title: 'Remember the dates.',
     desc: 'Birthdays and big days, with a nudge a week early.',
   },
   {
-    num: '03',
     title: 'Send something real.',
     desc: 'Write it, print it, or drop it in the mail.',
   },
@@ -165,22 +163,74 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-20 sm:px-10 sm:py-28">
-      <Reveal>
-        <Eyebrow>How it works</Eyebrow>
-        <SectionTitle>Three small habits.</SectionTitle>
-      </Reveal>
+    <section id="how" className="relative scroll-mt-24 overflow-hidden bg-porcelain py-20 sm:py-28">
+      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-10">
+        <Reveal>
+          <Eyebrow>How it works</Eyebrow>
+          <SectionTitle>Three small habits.</SectionTitle>
+        </Reveal>
+      </div>
 
-      <div className="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8">
-        {steps.map((step, i) => (
-          <Reveal key={step.num} delay={i * 90}>
-            <div className="border-t border-line pt-6">
-              <p className="font-serif text-[15px] italic text-periwinkle">{step.num}</p>
-              <h3 className="mt-3 font-serif text-[24px] font-normal text-ink" style={{ letterSpacing: '-0.015em' }}>
+      <div className="relative mt-12 hidden h-[430px] sm:block">
+        <Image
+          aria-hidden
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 640px) 100vw, 1px"
+          src="/images/timeline/postal-arc-desktop.png"
+          className="pointer-events-none object-cover"
+        />
+
+        <div className="relative z-10 mx-auto grid h-full max-w-6xl grid-cols-3 px-10">
+          {steps.map((step, i) => (
+            <Reveal
+              key={step.title}
+              delay={i * 100}
+              className={[
+                'w-full max-w-[310px]',
+                i === 0 ? 'self-start justify-self-start pt-3' : '',
+                i === 1 ? 'self-end justify-self-center pb-2 text-center' : '',
+                i === 2 ? 'self-start justify-self-end pt-3 text-right' : '',
+              ].join(' ')}
+            >
+              <h3 className="font-serif text-[25px] font-normal text-ink" style={{ letterSpacing: '-0.015em' }}>
                 {step.title}
               </h3>
-              <p className="mt-2.5 text-[15px] leading-relaxed text-ink-soft">{step.desc}</p>
-            </div>
+              <p className={`mt-3 text-[15px] leading-relaxed text-ink-soft ${i === 1 ? 'mx-auto max-w-[280px]' : ''}`}>
+                {step.desc}
+              </p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mx-5 mt-10 h-[760px] sm:hidden">
+        <Image
+          aria-hidden
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 639px) calc(100vw - 40px), 1px"
+          src="/images/timeline/postal-arc-mobile.png"
+          className="pointer-events-none object-cover"
+        />
+
+        {steps.map((step, i) => (
+          <Reveal
+            key={step.title}
+            delay={i * 90}
+            className={[
+              'absolute z-10 w-[43%]',
+              i === 0 ? 'right-0 top-0' : '',
+              i === 1 ? 'left-0 top-[31%] text-right' : '',
+              i === 2 ? 'right-0 top-[61%]' : '',
+            ].join(' ')}
+          >
+            <h3 className="font-serif text-[21px] font-normal leading-tight text-ink" style={{ letterSpacing: '-0.015em' }}>
+              {step.title}
+            </h3>
+            <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-soft">{step.desc}</p>
           </Reveal>
         ))}
       </div>
@@ -216,7 +266,7 @@ export function People() {
           <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-24px_rgba(35,41,64,0.18)]">
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <h4 className="font-serif text-[18px] font-medium text-ink">My people</h4>
-              <span className="text-[12.5px] text-ink-muted">34 friends</span>
+              <span className="text-[12.5px] text-ink-muted">private address book</span>
             </div>
             {friends.map(friend => (
               <div key={friend.name} className="flex items-center gap-3.5 border-b border-line/70 px-5 py-3.5">
@@ -273,8 +323,8 @@ export function Reminders() {
               </div>
             </div>
             <p className="mt-4 text-[14.5px] leading-relaxed text-ink-soft">
-              Mail something by Tuesday and it&apos;ll land right on time. You sent
-              a postcard last year — she wrote back.
+              Mail by Tuesday to give it time to arrive. Start with a card, a note,
+              or a few honest lines.
             </p>
             <div className="mt-5 flex gap-2.5">
               <span className="rounded-full bg-periwinkle px-4 py-2 text-[13px] font-medium text-white">Start a card</span>
@@ -287,21 +337,25 @@ export function Reminders() {
   )
 }
 
-// ─── Quote ───────────────────────────────────────────────────────────────────
+// ─── Product principle ───────────────────────────────────────────────────────
 
-export function Quote() {
+export function ProductPrinciple() {
   return (
     <section className="border-y border-dashed border-line bg-surface/50">
       <div className="mx-auto max-w-3xl px-5 py-20 text-center sm:px-10 sm:py-24">
         <Reveal>
-          <p
-            className="font-serif font-normal italic text-ink"
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-periwinkle">
+            A quieter kind of social
+          </p>
+          <h2
+            className="mt-5 font-serif font-normal text-ink"
             style={{ fontSize: 'clamp(24px, 3vw, 38px)', lineHeight: 1.25, letterSpacing: '-0.015em' }}
           >
-            &ldquo;I sent my grandmother a postcard for the first time in twelve
-            years. She called me the day it arrived.&rdquo;
+            Friendship doesn&apos;t need another feed.
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-ink-soft">
+            Just a place to remember the people, dates, and little gestures that matter.
           </p>
-          <p className="mt-6 text-[14px] text-ink-muted">Jules — Brooklyn</p>
         </Reveal>
       </div>
     </section>
@@ -325,7 +379,7 @@ export function Closing() {
           <CtaButton href="/login">Start your book</CtaButton>
         </div>
         <p className="mt-10 text-[13.5px] text-ink-muted">
-          Made by one person, for a few hundred friends.
+          Made for keeping in touch, one letter at a time.
         </p>
       </Reveal>
     </section>

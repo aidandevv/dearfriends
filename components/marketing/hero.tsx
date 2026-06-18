@@ -58,7 +58,7 @@ export function Hero() {
                   <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">Dashboard</p>
                   <p className="mt-0.5 font-serif text-xl text-ink">Spring update</p>
                 </div>
-                <div className="rounded-full bg-blue-ink px-3 py-1 text-xs font-medium text-white">42 contacts</div>
+                <div className="rounded-full bg-blue-ink px-3 py-1 text-xs font-medium text-white">Sample address book</div>
               </div>
 
               <div className="space-y-2.5 p-4">
