@@ -164,3 +164,20 @@ beta readiness
 **Verification:**
 - `npm test` (71), `npm run test:e2e` (8), `npm run build` pass.
 
+---
+
+<!-- SESSION: 2026-06-20 02:36 | Vercel pnpm lockfile deployment fix -->
+
+### [CP-DEBUG] | 2026-06-20: Vercel frozen pnpm lockfile mismatch
+
+**Summary:** Vercel deployment failed before build because `package.json` had gained map/geography/testing packages and `eslint-config-next@15.0.7`, while `pnpm-lock.yaml` still reflected the older dependency specifier set. Regenerated the pnpm lockfile with the repo-declared `pnpm@9.15.0`, scoped to this package so the parent workspace did not interfere.
+
+**Files/Modules Affected:** `pnpm-lock.yaml`.
+
+**Key Trade-off:** Kept the fix to the pnpm lockfile that Vercel actually uses instead of changing package specs or package-manager configuration during a deployment repair.
+
+**Evidence:** `corepack pnpm install --frozen-lockfile --lockfile-only --ignore-workspace`, `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`, `./node_modules/.bin/next build`, and `git diff --check` all passed.
+
+**Follow-ups:** Commit and push the lockfile change so Vercel rebuilds from a package/lockfile pair that satisfies frozen install.
+
+---
