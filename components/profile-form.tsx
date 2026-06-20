@@ -14,6 +14,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   const [bio, setBio] = useState(profile.bio ?? '')
   const [senderName, setSenderName] = useState(profile.senderName ?? '')
   const [anniversaryReminders, setAnniversaryReminders] = useState(profile.anniversaryRemindersEnabled)
+  const [birthdayReminders, setBirthdayReminders] = useState(profile.birthdayRemindersEnabled)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -29,6 +30,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       bio: bio || undefined,
       sender_name: senderName || undefined,
       anniversary_reminders_enabled: anniversaryReminders,
+      birthday_reminders_enabled: birthdayReminders,
     })
 
     if (result.error) {
@@ -85,7 +87,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   return (
     <div className="flex flex-col gap-5 max-w-lg">
       {/* Profile form */}
-      <form onSubmit={handleSubmit} className="surface-panel flex flex-col gap-5 px-6 py-5">
+      <form onSubmit={handleSubmit} className="form-panel flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="full-name" className="text-[11px] font-semibold uppercase tracking-[0.15em] text-ink-muted">Display name</label>
           <input id="full-name" value={fullName} onChange={e => setFullName(e.target.value)} className="input min-h-11" required />
@@ -128,6 +130,16 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           Send me annual reminders to write again
         </label>
 
+        <label className="flex items-center gap-2.5 text-sm text-ink-muted cursor-pointer">
+          <input
+            type="checkbox"
+            checked={birthdayReminders}
+            onChange={e => setBirthdayReminders(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Send weekly birthday digests for tracked groups
+        </label>
+
         {error && <p className="text-sm text-stamp">{error}</p>}
         {saved && <p className="text-sm text-sage">Profile saved.</p>}
 
@@ -137,7 +149,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       </form>
 
       {/* Slug mini-form */}
-      <form onSubmit={handleSlugSubmit} className="surface-panel flex flex-col gap-5 px-6 py-5">
+      <form onSubmit={handleSlugSubmit} className="form-panel flex flex-col gap-5">
         <div>
           <p className="eyebrow">Share link</p>
           <p className="mt-1 text-sm text-ink-muted">

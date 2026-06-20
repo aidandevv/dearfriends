@@ -1,13 +1,14 @@
 'use server'
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { contactSchema } from '@/lib/schemas'
+import { contactEditSchema, contactSchema } from '@/lib/schemas'
 import { revalidatePath } from 'next/cache'
 import { getUserProfile } from '@/lib/user-profile'
 import { randomUUID } from 'crypto'
 import { getResend, buildNoteNotificationEmail, buildAddressRefreshEmail } from '@/lib/resend'
 import { geocodeAddress } from '@/lib/geocode'
 import { verifyShareCapability } from '@/lib/share-capability'
+import type { Contact } from '@/lib/database.types'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
@@ -53,7 +54,7 @@ export async function submitPublicContact(shareCapability: string, formData: unk
     .maybeSingle()
 
   if (existing) {
-    return { success: true }
+    return { success: true, alreadyExists: true }
   }
 
   const publicContact = {
@@ -132,7 +133,7 @@ export async function submitPublicContact(shareCapability: string, formData: unk
   return { success: true }
 }
 
-export async function getContacts() {
+export async function getContacts(): Promise<Contact[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('contacts')
@@ -147,12 +148,82 @@ export async function updateContact(id: string, updates: Partial<{
   delivery_method: string
   tags: string[]
   opted_out: boolean
+  birthday: string | null
 }>) {
   const supabase = await createClient()
   const { error } = await supabase.from('contacts').update(updates).eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/map')
+}
+
+export async function updateContactDetails(id: string, formData: unknown) {
+  const parsed = contactEditSchema.safeParse(formData)
+  if (!parsed.success) return { error: parsed.error.flatten() }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: existing, error: existingError } = await supabase
+    .from('contacts')
+    .select('id, email')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (existingError) return { error: existingError.message }
+  if (!existing) return { error: 'Contact not found.' }
+
+  const tags = (parsed.data.tags ?? '')
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean)
+
+  if (parsed.data.email !== existing.email) {
+    const { data: duplicate } = await supabase
+      .from('contacts')
+      .select('id')
+      .eq('email', parsed.data.email)
+      .neq('id', id)
+      .maybeSingle()
+
+    if (duplicate) return { error: 'Another contact already uses that email.' }
+  }
+
+  const coords = await geocodeAddress(
+    parsed.data.address_line_1,
+    parsed.data.city,
+    parsed.data.state,
+    parsed.data.zip,
+    parsed.data.is_international ? parsed.data.country ?? null : null,
+  )
+
+  const { error } = await supabase
+    .from('contacts')
+    .update({
+      first_name: parsed.data.first_name,
+      last_name: parsed.data.last_name,
+      email: parsed.data.email,
+      address_line_1: parsed.data.address_line_1,
+      address_line_2: parsed.data.address_line_2?.trim() || null,
+      city: parsed.data.city,
+      state: parsed.data.state,
+      zip: parsed.data.zip,
+      is_international: parsed.data.is_international,
+      country: parsed.data.is_international ? parsed.data.country?.trim() ?? null : null,
+      tags,
+      ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
+    })
+    .eq('id', id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
+  revalidatePath('/dashboard/export')
+  return { success: true }
 }
 
 export async function deleteContact(id: string) {
@@ -207,4 +278,36 @@ export async function sendAddressRefreshNudge(contactId: string) {
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/map')
   return { success: true }
+}
+
+export async function backfillContactGeocodes() {
+  const supabase = await createServiceClient()
+  const { data: contacts, error } = await supabase
+    .from('contacts')
+    .select('id, address_line_1, city, state, zip, country, is_international, lat, lng')
+    .or('lat.is.null,lng.is.null')
+
+  if (error) return { error: error.message }
+
+  let updated = 0
+  for (const contact of contacts ?? []) {
+    if (contact.lat != null && contact.lng != null) continue
+    const coords = await geocodeAddress(
+      contact.address_line_1,
+      contact.city,
+      contact.state,
+      contact.zip,
+      contact.is_international ? contact.country : null,
+    )
+    if (!coords) continue
+    const { error: updateError } = await supabase
+      .from('contacts')
+      .update({ lat: coords.lat, lng: coords.lng })
+      .eq('id', contact.id)
+    if (!updateError) updated++
+  }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
+  return { success: true, updated }
 }

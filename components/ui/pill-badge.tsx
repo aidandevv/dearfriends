@@ -1,7 +1,7 @@
 type DeliveryMethod = 'handwrite' | 'print' | 'digital'
 
 const styles: Record<DeliveryMethod, string> = {
-  digital: 'bg-blue-ink text-white',
+  digital: 'bg-periwinkle text-white',
   print: 'bg-ink text-white',
   handwrite: 'bg-sage text-white',
 }

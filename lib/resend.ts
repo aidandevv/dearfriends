@@ -196,3 +196,45 @@ export function buildCalendarReminderEmail(opts: {
     `,
   }
 }
+
+export function buildAnniversaryReminderEmail(opts: {
+  adminName?: string | null
+  yearsSinceFirstSend: number
+  composeUrl: string
+}): { subject: string; html: string } {
+  const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
+  const href = safeHref(opts.composeUrl)
+  const yearLabel = opts.yearsSinceFirstSend === 1 ? 'a year' : `${opts.yearsSinceFirstSend} years`
+
+  return {
+    subject: `Time to write again? It's been ${yearLabel}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
+        <p>Hi${escapedName},</p>
+        <p>You sent your first letters through dearfriends about <strong>${yearLabel} ago</strong>. Want to draft this year's note?</p>
+        <p><a href="${href}" style="background:#4A6CD4;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Open composer</a></p>
+      </div>
+    `,
+  }
+}
+
+export function buildBirthdayDigestEmail(opts: {
+  adminName?: string | null
+  birthdays: Array<{ name: string; label: string }>
+}): { subject: string; html: string } {
+  const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
+  const items = opts.birthdays
+    .map(entry => `<li><strong>${escapeHtml(entry.name)}</strong> — ${escapeHtml(entry.label)}</li>`)
+    .join('')
+
+  return {
+    subject: `Upcoming birthdays this week (${opts.birthdays.length})`,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
+        <p>Hi${escapedName},</p>
+        <p>Here are the birthdays coming up in the next week for groups you're tracking:</p>
+        <ul>${items}</ul>
+      </div>
+    `,
+  }
+}

@@ -165,7 +165,7 @@ export function CalendarManager({
                   className={`min-h-[132px] border-b border-r border-border/60 p-2 ${isCurrentMonth ? 'bg-white' : 'bg-linen/30 text-ink-muted/60'}`}
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium ${isToday ? 'bg-blue-ink text-white' : isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium ${isToday ? 'bg-periwinkle text-white' : isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
                       {day.getUTCDate()}
                     </span>
                   </div>
@@ -176,7 +176,7 @@ export function CalendarManager({
                         className={`rounded-md px-2 py-1 text-xs leading-4 ${
                           event.kind === 'reminder'
                             ? 'border border-stamp/20 bg-stamp/10 text-stamp'
-                            : 'border border-blue-ink/15 bg-blue-ink/10 text-blue-ink'
+                            : 'border border-periwinkle/15 bg-periwinkle/10 text-periwinkle'
                         }`}
                         title={`${event.title} · ${event.meta}`}
                       >
@@ -207,7 +207,7 @@ export function CalendarManager({
               className="grid gap-3 rounded-lg border border-border/70 bg-linen/70 px-4 py-4 md:grid-cols-[96px_minmax(0,1fr)_150px]"
             >
               <div className="flex flex-col">
-                <span className="font-serif text-2xl text-blue-ink">{formatDate(event.occurrenceDate)}</span>
+                <span className="font-serif text-2xl text-periwinkle">{formatDate(event.occurrenceDate)}</span>
                 <span className="text-xs uppercase tracking-[0.18em] text-ink-muted">{event.event_type}</span>
               </div>
               <div>
@@ -231,7 +231,7 @@ export function CalendarManager({
       <aside className="grid gap-5">
         <section className="surface-panel px-5 py-5">
           <div className="mb-4 flex items-center gap-3">
-            <MapPin size={18} className="text-blue-ink" />
+            <MapPin size={18} className="text-periwinkle" />
             <div>
               <p className="section-title">Mailing origin</p>
               <p className="text-sm text-ink-muted">Used for same-state, nearby, and far-state estimates.</p>
@@ -245,7 +245,7 @@ export function CalendarManager({
 
         <section className="surface-panel px-5 py-5">
           <div className="mb-4 flex items-center gap-3">
-            <CalendarPlus size={18} className="text-blue-ink" />
+            <CalendarPlus size={18} className="text-periwinkle" />
             <div>
               <p className="section-title">Add a date</p>
               <p className="text-sm text-ink-muted">Birthdays, anniversaries, holidays, and custom dates.</p>
@@ -280,7 +280,7 @@ export function CalendarManager({
 
         <section className="surface-panel px-5 py-5">
           <div className="mb-4 flex items-center gap-3">
-            <LinkIcon size={18} className="text-blue-ink" />
+            <LinkIcon size={18} className="text-periwinkle" />
             <div>
               <p className="section-title">Import calendar</p>
               <p className="text-sm text-ink-muted">Paste a Google, Outlook, or ICS subscription URL.</p>

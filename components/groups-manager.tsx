@@ -111,7 +111,7 @@ export function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
               <div className="flex items-center gap-3">
                 <span
                   className="flex h-8 w-8 items-center justify-center rounded-full text-white"
-                  style={{ background: 'linear-gradient(135deg, var(--blue-ink), var(--blue-slate))' }}
+                  style={{ background: 'linear-gradient(135deg, var(--periwinkle), var(--blue-slate))' }}
                 >
                   <Users size={14} />
                 </span>

@@ -35,9 +35,9 @@ export function EnvelopePreview({ senderName, recipient }: EnvelopePreviewProps)
             <p className="italic text-ink-muted">Return address</p>
           </div>
 
-          <div className="flex h-24 w-24 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-ink/35 bg-blue-ink/5 text-center">
-            <Mail size={18} className="text-blue-ink" />
-            <span className="mt-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-ink">
+          <div className="flex h-24 w-24 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-periwinkle/35 bg-periwinkle/5 text-center">
+            <Mail size={18} className="text-periwinkle" />
+            <span className="mt-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-periwinkle">
               Stamp
             </span>
           </div>

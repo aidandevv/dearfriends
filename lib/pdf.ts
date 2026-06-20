@@ -137,7 +137,7 @@ function renderMarkdownBlocks(markdown: string) {
   return elements
 }
 
-function buildLetterDocument(pages: { name: string; body: string }[]) {
+function buildLetterDocument(pages: { name: string; subject?: string; body: string }[]) {
   return createElement(
     AnyDocument,
     null,
@@ -145,7 +145,14 @@ function buildLetterDocument(pages: { name: string; body: string }[]) {
       createElement(
         AnyPage,
         { key: i, size: 'A4', style: styles.page },
-        createElement(AnyView, { style: styles.body }, ...renderMarkdownBlocks(page.body)),
+        createElement(
+          AnyView,
+          { style: styles.body },
+          ...(page.subject
+            ? [createElement(AnyText, { key: 'subject', style: styles.h1 }, page.subject)]
+            : []),
+          ...renderMarkdownBlocks(page.body),
+        ),
       ),
     ),
   )
@@ -154,11 +161,16 @@ function buildLetterDocument(pages: { name: string; body: string }[]) {
 export async function generateLetterPdf(
   contacts: { first_name: string; last_name: string }[],
   body: string,
+  subjectTemplate?: string,
 ): Promise<Buffer> {
-  const pages = contacts.map((contact) => ({
-    name: `${contact.first_name} ${contact.last_name}`,
-    body: interpolate(body, { first_name: contact.first_name, last_name: contact.last_name }),
-  }))
+  const pages = contacts.map((contact) => {
+    const vars = { first_name: contact.first_name, last_name: contact.last_name }
+    return {
+      name: `${contact.first_name} ${contact.last_name}`,
+      subject: subjectTemplate ? interpolate(subjectTemplate, vars) : undefined,
+      body: interpolate(body, vars),
+    }
+  })
 
   const doc = buildLetterDocument(pages)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

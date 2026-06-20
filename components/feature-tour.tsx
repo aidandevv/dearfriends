@@ -65,7 +65,7 @@ export function FeatureTour({ initialOpen = false, name }: { initialOpen?: boole
         <div className="flex items-start justify-between gap-4 border-b border-border/70 pb-5">
           <div>
             <div className="info-chip">
-              <Sparkles size={14} className="text-blue-ink" />
+              <Sparkles size={14} className="text-periwinkle" />
               Welcome tour
             </div>
             <h2 className="mt-4 font-serif text-4xl text-ink">
@@ -93,7 +93,7 @@ export function FeatureTour({ initialOpen = false, name }: { initialOpen?: boole
                 type="button"
                 onClick={() => setStepIndex(index)}
                 className={index === stepIndex
-                  ? 'rounded-[1.2rem] border border-blue-ink bg-blue-ink/10 px-4 py-3 text-left'
+                  ? 'rounded-[1.2rem] border border-periwinkle bg-periwinkle/10 px-4 py-3 text-left'
                   : 'rounded-[1.2rem] border border-border/80 bg-surface px-4 py-3 text-left'}
               >
                 <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">0{index + 1}</p>
@@ -103,7 +103,7 @@ export function FeatureTour({ initialOpen = false, name }: { initialOpen?: boole
           </div>
 
           <div className="rounded-[1.5rem] border border-border/80 bg-surface p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-ink/10 text-blue-ink">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-periwinkle/10 text-periwinkle">
               <StepIcon size={22} />
             </div>
             <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">{step.eyebrow}</p>

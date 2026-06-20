@@ -64,7 +64,7 @@ export function LandingNav() {
             href="/login"
             className="inline-flex items-center gap-2 rounded-full bg-periwinkle px-[18px] py-[9px] text-[14px] font-medium text-white shadow-[0_4px_14px_-4px_rgba(74,108,212,0.5)] transition-all hover:bg-periwinkle-deep hover:shadow-[0_6px_18px_-4px_rgba(74,108,212,0.55)]"
           >
-            Start your book
+            Start your list
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden>
               <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

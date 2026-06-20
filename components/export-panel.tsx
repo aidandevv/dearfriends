@@ -15,7 +15,11 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
     if (!confirm('Send the composed letter to all digital contacts?')) return
     setSending(true)
     const result = await sendDigitalLetters(groupId ?? null)
-    setDigitalStatus(result.error ? `Error: ${result.error}` : `Sent to ${(result as { count?: number }).count} contacts.`)
+    setDigitalStatus(
+      result.error
+        ? `Error: ${result.error}`
+        : `Sent to ${(result as { count?: number }).count} contacts.${(result as { failed?: number }).failed ? ` ${(result as { failed?: number }).failed} failed.` : ''}`,
+    )
     setSending(false)
   }
 
@@ -89,7 +93,7 @@ function ExportCard({
     <section className="surface-panel flex h-full flex-col gap-4 px-5 py-5">
       <div
         className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70"
-        style={{ color: 'var(--blue-ink)', background: 'rgba(51,88,186,0.07)' }}
+        style={{ color: 'var(--periwinkle)', background: 'rgba(74,108,212,0.1)' }}
       >
         {icon}
       </div>

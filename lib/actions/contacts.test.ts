@@ -124,7 +124,7 @@ describe('submitPublicContact', () => {
     const token = createShareCapability({ adminId: 'admin-1', groupId: null })
     const result = await submitPublicContact(token, validContact())
 
-    expect(result).toEqual({ success: true })
+    expect(result).toEqual({ success: true, alreadyExists: true })
     expect(state.insertedContact).toBeNull()
   })
 

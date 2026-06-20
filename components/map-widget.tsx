@@ -41,7 +41,7 @@ export function MapWidget({ contacts }: MapWidgetProps) {
           <ContactMap contacts={contacts} interactive={false} heightClassName="h-[250px]" />
         </div>
 
-        <p className="mt-4 text-sm font-medium text-blue-ink transition-colors group-hover:text-blue-mid">
+        <p className="mt-4 text-sm font-medium text-periwinkle transition-colors group-hover:text-periwinkle-deep">
           Click to explore full map →
         </p>
       </section>

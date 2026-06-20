@@ -176,7 +176,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
                       onClick={button.action}
                       aria-label={button.label}
                       title={button.label}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-linen hover:text-blue-ink"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-surface hover:text-periwinkle"
                     >
                       <Icon size={16} />
                     </button>
@@ -196,8 +196,8 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
           </div>
 
           <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4 text-sm text-ink-muted">
-            Use <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{first_name}}'}</code> and{' '}
-            <code className="rounded bg-linen px-1.5 py-0.5 font-mono text-blue-ink">{'{{last_name}}'}</code> to personalize the subject and body.
+            Use <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-periwinkle">{'{{first_name}}'}</code> and{' '}
+            <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-periwinkle">{'{{last_name}}'}</code> to personalize the subject and body.
           </div>
         </div>
       </section>
@@ -215,7 +215,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
         </div>
 
         <div
-          className="mt-4 min-h-[420px] rounded-[1.5rem] border border-border/80 bg-[linear-gradient(180deg,#ffffff_0%,#fdf9f3_100%)] px-6 py-6 shadow-sm overflow-hidden relative"
+          className="relative mt-4 min-h-[420px] overflow-hidden rounded-[1.5rem] border border-line bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FB_100%)] px-6 py-6 shadow-sm"
         >
           {selectedTemplate && (
             <div

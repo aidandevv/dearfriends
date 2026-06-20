@@ -111,10 +111,10 @@ export function ShareLinkEditor({
               style={{
                 flex: 1, border: 'none', outline: 'none', background: 'transparent', minWidth: 0,
                 fontFamily: 'var(--font-dm-sans), sans-serif',
-                fontSize: 12.5, color: 'var(--blue-ink)', fontWeight: 600,
+              fontSize: 12.5, color: 'var(--periwinkle)', fontWeight: 600,
               }}
             />
-            <button onClick={saveSlug} disabled={pending} title="Save" style={{ color: 'var(--blue-ink)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
+            <button onClick={saveSlug} disabled={pending} title="Save" style={{ color: 'var(--periwinkle)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
               <Check size={14} />
             </button>
             <button onClick={cancelSlug} title="Cancel" style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
@@ -131,7 +131,7 @@ export function ShareLinkEditor({
               fontFeatureSettings: '"tnum"',
             }}>
               <span style={{ color: 'var(--muted)' }}>{siteDisplay}/share/</span>
-              <span style={{ color: 'var(--blue-ink)', fontWeight: 600 }}>{slug}</span>
+              <span style={{ color: 'var(--periwinkle)', fontWeight: 600 }}>{slug}</span>
             </div>
             <button
               onClick={openSlug}
@@ -149,7 +149,7 @@ export function ShareLinkEditor({
       </div>
 
       {slugError && (
-        <p style={{ fontSize: 12, color: '#dc2626', margin: '0 0 10px' }}>{slugError}</p>
+        <p style={{ fontSize: 12, color: 'var(--stamp)', margin: '0 0 10px' }}>{slugError}</p>
       )}
 
       <ShareLinkActions url={currentUrl} />
@@ -181,7 +181,7 @@ export function ShareLinkEditor({
             }}
           />
           {messageError && (
-            <p style={{ fontSize: 12, color: '#dc2626', margin: '4px 0 6px' }}>{messageError}</p>
+            <p style={{ fontSize: 12, color: 'var(--stamp)', margin: '4px 0 6px' }}>{messageError}</p>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
             <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: 11, color: 'var(--muted)' }}>
@@ -202,7 +202,7 @@ export function ShareLinkEditor({
                 disabled={pending}
                 style={{
                   fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: 12, fontWeight: 600,
-                  color: 'white', background: 'var(--blue-ink)', border: 'none',
+                  color: 'white', background: 'var(--periwinkle)', border: 'none',
                   borderRadius: 999, padding: '4px 12px', cursor: 'pointer',
                 }}
               >
@@ -237,7 +237,7 @@ export function ShareLinkEditor({
             outline: '1px solid var(--line)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: 'var(--font-ppwriter), Georgia, serif',
-            fontStyle: 'italic', fontSize: 14, color: 'var(--blue-ink)',
+            fontStyle: 'italic', fontSize: 14, color: 'var(--periwinkle)',
             transform: 'rotate(-4deg)',
           }}>
             df
@@ -251,7 +251,7 @@ export function ShareLinkEditor({
               &ldquo;{message}&rdquo;
             </b>
             <br />
-            They fill it out in a minute. No account, nothing weird.
+            They fill it out in a minute. No account required.
             <span style={{
               fontFamily: 'var(--font-dm-sans), sans-serif',
               fontSize: 11, color: 'var(--muted)',

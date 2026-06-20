@@ -30,9 +30,9 @@ export function NavLink({
         textDecoration: 'none',
         transition: 'background 0.15s ease, color 0.15s ease',
         ...(isActive ? {
-          background: 'var(--blue-ink)',
+          background: 'var(--periwinkle)',
           color: 'var(--paper)',
-          boxShadow: '0 2px 0 0 var(--ink), 0 6px 16px -6px rgba(51,88,186,.4)',
+          boxShadow: '0 2px 0 0 #1e2b66, 0 6px 16px -6px rgba(74,108,212,.45)',
         } : {
           color: 'var(--ink-soft)',
         }),
@@ -52,7 +52,7 @@ export function NavLink({
     >
       <span style={{
         flexShrink: 0,
-        color: isActive ? 'var(--cream)' : 'var(--blue-slate)',
+        color: isActive ? 'white' : 'var(--blue-slate)',
         display: 'flex',
       }}>
         {children}

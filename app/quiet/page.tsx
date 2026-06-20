@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { PostalLineArt } from '@/components/ui/postal-line-art'
 
 import styles from './page.module.css'
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default function QuietConceptPage() {
   return (
     <main className={styles.page}>
+      <PostalLineArt variant="full" className={styles.lineArt} />
       <nav className={styles.nav} aria-label="Quiet concept navigation">
         <Link className={styles.brand} href="/">
           <span>dear</span>friends
@@ -30,7 +32,7 @@ export default function QuietConceptPage() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p className={styles.kicker}>A little address book for the people you love.</p>
+          <p className={styles.kicker}>A private address list for people you want to keep close.</p>
           <h1>
             Write to the people you&apos;d <em>miss</em>, before another year quietly slips by.
           </h1>
@@ -41,7 +43,7 @@ export default function QuietConceptPage() {
 
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/login">
-              Start your book
+              Start your list
             </Link>
             <a className={styles.textAction} href="#why">
               why it exists
@@ -151,9 +153,9 @@ export default function QuietConceptPage() {
 
       <section className={styles.close}>
         <h2>
-          The people you love won&apos;t know <em>unless you tell them.</em>
+          The people who matter won&apos;t know <em>unless you tell them.</em>
         </h2>
-        <p>Start your little book today. It takes about four minutes.</p>
+        <p>Set up your list today. It takes about four minutes.</p>
         <Link className={styles.primaryAction} href="/login">
           Begin writing
         </Link>
@@ -164,8 +166,6 @@ export default function QuietConceptPage() {
           dearfriends
         </Link>
         <div>
-          <Link href="/about">About</Link>
-          <Link href="/login">Privacy</Link>
           <a href="mailto:hi@dearfriends.co">hi@dearfriends.co</a>
         </div>
         <span>2026</span>

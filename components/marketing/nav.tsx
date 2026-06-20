@@ -21,20 +21,14 @@ export function MarketingNav() {
       }`}
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="font-serif text-2xl text-ink transition-colors hover:text-blue-ink">
+        <Link href="/" className="font-serif text-2xl text-ink transition-colors hover:text-periwinkle">
           Dear Friends
         </Link>
 
         <nav className="flex items-center gap-2">
           <Link
-            href="/about"
-            className="rounded-full px-4 py-2 text-sm text-ink-muted transition-colors hover:bg-surface hover:text-ink"
-          >
-            About
-          </Link>
-          <Link
             href="/login"
-            className="rounded-full bg-ink px-5 py-2 text-sm font-medium text-linen transition-colors hover:bg-blue-ink"
+            className="rounded-full bg-ink px-5 py-2 text-sm font-medium text-linen transition-colors hover:bg-periwinkle"
           >
             Sign in
           </Link>

@@ -9,6 +9,7 @@ export type UserProfile = {
   hasSeenTour: boolean
   anniversaryRemindersEnabled: boolean
   birthdayRemindersEnabled: boolean
+  firstSentAt: string | null
   shareSlug: string | null
   shareMessage: string | null
 }
@@ -37,6 +38,7 @@ export function getUserProfile(user: Pick<User, 'user_metadata'> | null | undefi
     hasSeenTour: metadata.has_seen_tour === true,
     anniversaryRemindersEnabled: metadata.anniversary_reminders_enabled !== false,
     birthdayRemindersEnabled: metadata.birthday_reminders_enabled !== false,
+    firstSentAt: readString(metadata.first_sent_at),
     shareSlug: readString(metadata.share_slug),
     shareMessage: readString(metadata.share_message),
   }

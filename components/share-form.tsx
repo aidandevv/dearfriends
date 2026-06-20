@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { submitPublicContact } from '@/lib/actions/contacts'
 import { contactSchema, type ContactInput } from '@/lib/schemas'
+import { PostalLineArt } from '@/components/ui/postal-line-art'
 
 function firstName(name: string | null) {
   return name?.trim().split(/\s+/)[0] ?? null
@@ -46,6 +47,7 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
   shareMessage?: string | null
 }) {
   const [submitted, setSubmitted] = useState(false)
+  const [alreadyOnFile, setAlreadyOnFile] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [recipientFirstName, setRecipientFirstName] = useState<string>('')
   const [note, setNote] = useState('')
@@ -71,6 +73,12 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
       setServerError(typeof result.error === 'string' ? result.error : 'Something went wrong.')
       return
     }
+    if ('alreadyExists' in result && result.alreadyExists) {
+      setRecipientFirstName(data.first_name)
+      setAlreadyOnFile(true)
+      setSubmitted(true)
+      return
+    }
     setRecipientFirstName(data.first_name)
     setNoteSubmitted(Boolean(note.trim()))
     setSubmitted(true)
@@ -79,8 +87,9 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
   // ── Success state ──────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <main className="grain-cool flex min-h-screen items-center justify-center bg-porcelain p-6">
-        <div className="animate-fade-up flex w-full max-w-md flex-col items-center gap-5 text-center">
+      <main className="postal-page flex items-center justify-center p-6">
+        <PostalLineArt variant="compact" className="postal-art left-1/2 top-1/2 h-[360px] w-[720px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="postal-page-content postal-card postal-card-plain animate-fade-up flex w-full max-w-md flex-col items-center gap-5 px-7 py-8 text-center">
           {/* Peach stamp mark */}
           <span className="flex h-16 w-14 items-center justify-center rounded-[6px] bg-peach shadow-[0_10px_24px_-8px_rgba(232,146,124,0.6)]">
             <span className="flex h-[52px] w-[44px] items-center justify-center rounded-[3px] border border-dashed border-white/80 font-serif text-[16px] italic text-white">
@@ -89,13 +98,17 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
           </span>
 
           <h1 className="font-serif text-[30px] font-normal text-ink" style={{ letterSpacing: '-0.02em' }}>
-            Address received.
+            {alreadyOnFile ? 'You\'re already on the list.' : 'Address received.'}
           </h1>
 
           <p className="text-[15px] leading-relaxed text-ink-soft">
-            {displayName
-              ? `Thanks, ${recipientFirstName} — ${displayName} can take it from here.`
-              : 'Your address is on its way to your friend.'}
+            {alreadyOnFile
+              ? (displayName
+                ? `Thanks, ${recipientFirstName} — ${displayName} already has your address on file.`
+                : 'Your friend already has your address on file.')
+              : (displayName
+                ? `Thanks, ${recipientFirstName} — ${displayName} can take it from here.`
+                : 'Your address is on its way to your friend.')}
           </p>
 
           {senderBio && displayName && (
@@ -110,8 +123,9 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
 
   // ── Form state ─────────────────────────────────────────────────────────────
   return (
-    <main className="grain-cool min-h-screen bg-porcelain px-5 py-10 sm:py-16">
-      <div className="mx-auto w-full max-w-md">
+    <main className="postal-page px-5 py-10 sm:py-16">
+      <PostalLineArt variant="full" className="postal-art-fixed -right-44 top-8 z-0 h-[70vh] w-[86vw]" />
+      <div className="postal-page-content mx-auto w-full max-w-md">
         {/* Wordmark */}
         <p className="mb-8 text-center font-serif text-[17px] text-ink">
           <em className="italic">dear</em>friends
@@ -137,7 +151,7 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
         )}
 
         {/* Form card */}
-        <div className="rounded-2xl border border-line bg-white p-5 shadow-[0_20px_50px_-24px_rgba(35,41,64,0.18)] sm:p-7">
+        <div className="postal-card p-5 sm:p-7">
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <GroupLabel>You</GroupLabel>
 

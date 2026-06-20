@@ -30,17 +30,18 @@ export function OnboardingForm({ email }: { email: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface-panel flex flex-col gap-5 px-5 py-5 shadow-sm">
-      <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4">
+    <form onSubmit={handleSubmit} className="postal-card flex flex-col gap-5 px-5 py-6 shadow-sm">
+      <div className="rounded-[1.2rem] border border-line bg-surface px-4 py-4">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Signing in as</p>
         <p className="mt-2 text-sm text-ink">{email}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Your name</label>
+        <label htmlFor="onboarding-full-name" className="text-xs font-medium uppercase tracking-[0.22em] text-ink-muted">Your name</label>
         <div className="relative">
           <UserRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
           <input
+            id="onboarding-full-name"
             value={fullName}
             onChange={e => setFullName(e.target.value)}
             placeholder="Aidan"

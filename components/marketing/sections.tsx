@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { PostalTimelineDesktopBg, PostalTimelineMobileBg } from './postal-timeline-bg'
 import { Reveal } from './reveal'
 
 // ─── Shared bits ─────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ export function Hero() {
 
         <Reveal delay={180}>
           <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <CtaButton href="/login">Start your book</CtaButton>
+            <CtaButton href="/login">Start your list</CtaButton>
             <a
               href="#how"
               className="inline-flex min-h-12 items-center gap-1.5 px-3 text-[15px] font-medium text-ink-soft transition-colors hover:text-periwinkle"
@@ -172,15 +172,7 @@ export function HowItWorks() {
       </div>
 
       <div className="relative mt-12 hidden h-[430px] sm:block">
-        <Image
-          aria-hidden
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 640px) 100vw, 1px"
-          src="/images/timeline/postal-arc-desktop.png"
-          className="pointer-events-none object-cover"
-        />
+        <PostalTimelineDesktopBg className="pointer-events-none absolute inset-0 h-full w-full" />
 
         <div className="relative z-10 mx-auto grid h-full max-w-6xl grid-cols-3 px-10">
           {steps.map((step, i) => (
@@ -206,15 +198,7 @@ export function HowItWorks() {
       </div>
 
       <div className="relative mx-5 mt-10 h-[760px] sm:hidden">
-        <Image
-          aria-hidden
-          alt=""
-          fill
-          priority
-          sizes="(max-width: 639px) calc(100vw - 40px), 1px"
-          src="/images/timeline/postal-arc-mobile.png"
-          className="pointer-events-none object-cover"
-        />
+        <PostalTimelineMobileBg className="pointer-events-none absolute inset-0 h-full w-full" />
 
         {steps.map((step, i) => (
           <Reveal
@@ -254,11 +238,11 @@ export function People() {
         <Reveal>
           <Eyebrow>Your people</Eyebrow>
           <SectionTitle>
-            A little book of everyone{' '}
+            A private list of everyone{' '}
             <em className="italic text-periwinkle">you&apos;d miss</em>.
           </SectionTitle>
           <p className="mt-5 max-w-md text-[16px] leading-relaxed text-ink-soft sm:text-[17px]">
-            Not a CRM — just your people, their addresses, and the dates that matter.
+            Just the people who matter — where they live, and the dates that deserve a real note in the mail.
           </p>
         </Reveal>
 
@@ -354,7 +338,7 @@ export function ProductPrinciple() {
             Friendship doesn&apos;t need another feed.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-ink-soft">
-            Just a place to remember the people, dates, and little gestures that matter.
+            Just a place to remember the people, dates, and small gestures that matter.
           </p>
         </Reveal>
       </div>
@@ -373,10 +357,10 @@ export function Closing() {
           <em className="italic text-periwinkle">waiting</em>.
         </SectionTitle>
         <p className="mt-5 text-[16px] text-ink-soft sm:text-[17px]">
-          Starting your book takes about four minutes.
+          Setting up your list takes about four minutes.
         </p>
         <div className="mt-8 flex justify-center">
-          <CtaButton href="/login">Start your book</CtaButton>
+          <CtaButton href="/login">Start your list</CtaButton>
         </div>
         <p className="mt-10 text-[13.5px] text-ink-muted">
           Made for keeping in touch, one letter at a time.
@@ -396,9 +380,6 @@ export function Footer() {
           <em className="italic">dear</em>friends
         </p>
         <ul className="flex flex-wrap items-center gap-6">
-          <li><Link href="/about" className="transition-colors hover:text-periwinkle">About</Link></li>
-          <li><Link href="/privacy" className="transition-colors hover:text-periwinkle">Privacy</Link></li>
-          <li><Link href="/changelog" className="transition-colors hover:text-periwinkle">Changelog</Link></li>
           <li><a href="mailto:hi@dearfriends.co" className="transition-colors hover:text-periwinkle">hi@dearfriends.co</a></li>
         </ul>
         <p>© 2026</p>

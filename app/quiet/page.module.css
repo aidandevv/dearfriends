@@ -1,10 +1,38 @@
 .page {
+  position: relative;
   min-height: 100vh;
-  background: #f8f3ea;
-  color: #1d2442;
+  overflow: hidden;
+  background: var(--porcelain);
+  color: var(--ink);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
+}
+
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(35, 41, 64, 0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+
+.lineArt {
+  position: fixed;
+  top: 80px;
+  right: -210px;
+  z-index: 0;
+  width: min(94vw, 1180px);
+  height: 68vh;
+  color: var(--periwinkle);
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+.page > *:not(.lineArt) {
+  position: relative;
+  z-index: 1;
 }
 
 .page a {
@@ -27,7 +55,7 @@
   align-items: baseline;
   gap: 1px;
   width: fit-content;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 19px;
   font-weight: 450;
@@ -46,14 +74,14 @@
   height: 5px;
   margin: 0 0 2px 8px;
   border-radius: 50%;
-  background: #3358ba;
+  background: var(--periwinkle);
 }
 
 .navLinks {
   display: flex;
   align-items: center;
   gap: 28px;
-  color: #3a4263;
+  color: var(--ink-soft);
   font-size: 12px;
 }
 
@@ -66,7 +94,7 @@
 .navLinks a:hover,
 .textAction:hover,
 .footer a:hover {
-  color: #3358ba;
+  color: var(--periwinkle);
 }
 
 .navAction,
@@ -78,10 +106,10 @@
   width: fit-content;
   min-height: 41px;
   padding: 0 19px;
-  border: 1px solid #1d2442;
+  border: 1px solid var(--periwinkle);
   border-radius: 3px;
-  background: #1d2442;
-  color: #faf4e4;
+  background: var(--periwinkle);
+  color: white;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -89,13 +117,13 @@
 
 .page .navAction,
 .page .primaryAction {
-  color: #faf4e4;
+  color: white;
 }
 
 .navAction:hover,
 .primaryAction:hover {
-  background: #3358ba;
-  border-color: #3358ba;
+  background: var(--periwinkle-deep);
+  border-color: var(--periwinkle-deep);
 }
 
 .hero {
@@ -114,7 +142,7 @@
 
 .kicker {
   margin: 0 0 22px;
-  color: #516183;
+  color: var(--blue-slate);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 17px;
   font-style: italic;
@@ -124,7 +152,7 @@
 .keeps h2,
 .close h2 {
   margin: 0;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-weight: 400;
   letter-spacing: 0;
@@ -138,14 +166,14 @@
 
 .hero em,
 .close em {
-  color: #3358ba;
+  color: var(--periwinkle);
   font-style: italic;
 }
 
 .heroText {
   max-width: 440px;
   margin: 22px 0 0;
-  color: #313955;
+  color: var(--ink-soft);
 }
 
 .heroActions {
@@ -156,7 +184,7 @@
 }
 
 .textAction {
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 13px;
   font-style: italic;
@@ -168,19 +196,19 @@
   position: relative;
   min-height: 188px;
   padding: 102px 28px 25px;
-  border: 1px solid #d9cfb0;
-  background: #f5ecd3;
-  box-shadow: 0 16px 36px rgba(63, 50, 18, 0.08);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  box-shadow: 0 24px 60px -34px rgba(35, 41, 64, 0.24);
 }
 
 .envelopeFold {
   position: absolute;
   inset: 0 0 auto;
   height: 84px;
-  border-bottom: 1px solid rgba(217, 207, 176, 0.8);
+  border-bottom: 1px solid var(--line);
   background:
-    linear-gradient(22deg, transparent 49.7%, rgba(217, 207, 176, 0.75) 50%, transparent 50.3%),
-    linear-gradient(-22deg, transparent 49.7%, rgba(217, 207, 176, 0.75) 50%, transparent 50.3%);
+    linear-gradient(22deg, transparent 49.7%, rgba(223, 227, 236, 0.9) 50%, transparent 50.3%),
+    linear-gradient(-22deg, transparent 49.7%, rgba(223, 227, 236, 0.9) 50%, transparent 50.3%);
 }
 
 .stamp {
@@ -191,9 +219,9 @@
   place-items: center;
   width: 45px;
   height: 55px;
-  border: 1px solid #d9cfb0;
-  background: #faf4e4;
-  color: #3358ba;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--periwinkle);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 17px;
   font-style: italic;
@@ -202,7 +230,7 @@
 .envelope address {
   position: relative;
   margin: 0;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 15px;
   font-style: normal;
@@ -211,9 +239,9 @@
 
 .why,
 .letterSection {
-  border-top: 1px solid #e4d9b8;
-  border-bottom: 1px solid #e4d9b8;
-  background: #f0e6c9;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(238, 241, 246, 0.82);
 }
 
 .readerBlock {
@@ -224,7 +252,7 @@
 
 .smallCaps {
   margin: 0 0 26px;
-  color: #516183;
+  color: var(--blue-slate);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -233,7 +261,7 @@
 
 .readerBlock p:not(.smallCaps) {
   margin: 0 0 22px;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: clamp(24px, 3vw, 31px);
   line-height: 1.28;
@@ -255,7 +283,7 @@
 
 .nudgeIntro h2 {
   margin: 0;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: clamp(38px, 4.6vw, 58px);
   font-weight: 400;
@@ -266,14 +294,14 @@
 .nudgeIntro > p:last-child {
   max-width: 330px;
   margin: 22px 0 0;
-  color: #3a4263;
+  color: var(--ink-soft);
 }
 
 .nudge {
-  border: 1px solid #d9cfb0;
-  border-radius: 3px;
-  background: #fbf7ec;
-  box-shadow: 0 18px 38px rgba(63, 50, 18, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: 0 24px 60px -34px rgba(35, 41, 64, 0.24);
 }
 
 .nudge header,
@@ -282,21 +310,21 @@
   justify-content: space-between;
   gap: 18px;
   padding: 18px 22px;
-  color: #6b7290;
+  color: var(--ink-muted);
   font-size: 12px;
 }
 
 .nudge header {
-  border-bottom: 1px solid #e4d9b8;
+  border-bottom: 1px solid var(--line);
 }
 
 .nudge footer {
   align-items: center;
-  border-top: 1px solid #e4d9b8;
+  border-top: 1px solid var(--line);
 }
 
 .nudge footer a {
-  color: #3358ba;
+  color: var(--periwinkle);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 16px;
   font-style: italic;
@@ -310,7 +338,7 @@
 .nudgeBody p {
   max-width: 410px;
   margin: 0;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 20px;
   line-height: 1.45;
@@ -318,13 +346,13 @@
 
 .nudgeBody p + p {
   margin-top: 18px;
-  color: #3a4263;
+  color: var(--ink-soft);
   font-size: 17px;
   line-height: 1.56;
 }
 
 .nudgeBody .nudgeTo {
-  color: #3358ba;
+  color: var(--periwinkle);
   font-size: 28px;
   font-style: italic;
   line-height: 1.15;
@@ -337,7 +365,7 @@
 
 .keeps {
   padding: 72px 0 88px;
-  border-top: 1px solid #e4d9b8;
+  border-top: 1px solid var(--line);
 }
 
 .keepsInner {
@@ -355,12 +383,12 @@
 .keeps dl div {
   padding: 0 0 24px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #d9cfb0;
+  border-bottom: 1px solid var(--line);
 }
 
 .keeps dt {
   margin-bottom: 6px;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 23px;
   font-weight: 400;
@@ -368,7 +396,7 @@
 
 .keeps dd {
   margin: 0;
-  color: #3a4263;
+  color: var(--ink-soft);
 }
 
 .letterSection {
@@ -384,21 +412,22 @@
 
 .letter {
   padding: 46px 40px;
-  border: 1px solid #e4d9b8;
-  border-radius: 3px;
-  background: #fbf7ec;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: 0 24px 60px -34px rgba(35, 41, 64, 0.22);
 }
 
 .letter time {
   display: block;
   margin-bottom: 24px;
-  color: #6b7290;
+  color: var(--ink-muted);
   font-size: 12px;
 }
 
 .letter p {
   margin: 0 0 18px;
-  color: #1d2442;
+  color: var(--ink);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 17px;
   line-height: 1.62;
@@ -406,7 +435,7 @@
 
 .letter .smallCaps {
   margin-bottom: 10px;
-  color: #516183;
+  color: var(--blue-slate);
   font-family: var(--font-dm-sans), sans-serif;
   font-size: 10px;
   font-style: normal;
@@ -418,7 +447,7 @@
 
 .letter .greeting,
 .letter .signoff {
-  color: #3358ba;
+  color: var(--periwinkle);
   font-style: italic;
 }
 
@@ -428,7 +457,7 @@
 
 .letterNote {
   margin-top: 32px;
-  color: #3a4263;
+  color: var(--ink-soft);
   font-family: var(--font-ppwriter), Georgia, serif;
   font-size: 17px;
   line-height: 1.55;
@@ -448,7 +477,7 @@
 
 .close p {
   margin: 24px 0 28px;
-  color: #3a4263;
+  color: var(--ink-soft);
 }
 
 .footer {
@@ -459,8 +488,8 @@
   width: min(100% - 44px, 760px);
   margin: 0 auto;
   padding: 28px 0 38px;
-  border-top: 1px solid #e4d9b8;
-  color: #516183;
+  border-top: 1px dashed var(--line);
+  color: var(--blue-slate);
   font-size: 11px;
 }
 

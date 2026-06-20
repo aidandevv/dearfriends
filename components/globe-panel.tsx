@@ -415,7 +415,7 @@ export function GlobePanel({
       >
         <defs>
           <radialGradient id={`df-ocean-${uid}`} cx="38%" cy="32%">
-            <stop offset="0%" stopColor="var(--blue-ink)" />
+            <stop offset="0%" stopColor="var(--periwinkle)" />
             <stop offset="60%" stopColor="var(--blue-slate)" />
             <stop offset="100%" stopColor="var(--ink)" />
           </radialGradient>
@@ -428,7 +428,7 @@ export function GlobePanel({
         <circle
           className="g-atmosphere"
           cx={W / 2} cy={H / 2} r={RADIUS + 3}
-          fill="none" stroke="var(--blue-ink)" strokeWidth={2} opacity={0.28}
+          fill="none" stroke="var(--periwinkle)" strokeWidth={2} opacity={0.28}
         />
 
         {/* Graticule — filled by D3 on each frame */}
@@ -523,12 +523,12 @@ export function GlobePanel({
             position: 'absolute',
             left: tooltip.x > W / 2 ? Math.max(0, tooltip.x - 148) : tooltip.x + 20,
             top: tooltip.y - 14,
-            background: 'var(--paper, #faf4e4)',
-            border: '1px solid var(--line, #d9cfb0)',
+            background: 'var(--paper, #F8F9FB)',
+            border: '1px solid var(--line, #DFE3EC)',
             borderRadius: 999,
             padding: '5px 12px 5px 10px',
             fontSize: 12,
-            color: 'var(--ink, #1c1a14)',
+            color: 'var(--ink, #232940)',
             boxShadow: '0 4px 12px rgba(0,0,0,.22)',
             display: 'flex',
             alignItems: 'center',
@@ -541,14 +541,14 @@ export function GlobePanel({
           <span
             style={{
               width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--blue-ink)', flexShrink: 0, display: 'inline-block',
+              background: 'var(--periwinkle)', flexShrink: 0, display: 'inline-block',
             }}
           />
           <span style={{ fontWeight: 600 }}>{tooltip.label}</span>
           {tooltip.count > 1 && (
             <span
               style={{
-                borderLeft: '1px solid var(--line, #d9cfb0)',
+                borderLeft: '1px solid var(--line, #DFE3EC)',
                 paddingLeft: 7, marginLeft: 2,
                 fontStyle: 'italic',
                 color: 'var(--blue-slate, #4a5f8a)',

@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { onboardingSchema, profileSchema, slugSchema } from '@/lib/schemas'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
@@ -35,6 +36,12 @@ export async function completeOnboarding(input: unknown) {
   revalidatePath('/dashboard')
   revalidatePath('/onboarding')
   return { success: true }
+}
+
+export async function signOut() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/login')
 }
 
 export async function markTourSeen() {

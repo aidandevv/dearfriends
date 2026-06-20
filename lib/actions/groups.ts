@@ -123,3 +123,20 @@ export async function getContactsByGroup(groupId: string | null) {
     .eq('group_id', groupId)
   return (data ?? []).flatMap(r => (r.contacts ? [r.contacts] : []))
 }
+
+export async function getBirthdayEditableContactIds(): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id')
+    .eq('birthday_tracking', true)
+
+  if (!groups?.length) return []
+
+  const { data } = await supabase
+    .from('contact_groups')
+    .select('contact_id')
+    .in('group_id', groups.map(group => group.id))
+
+  return [...new Set((data ?? []).map(row => row.contact_id))]
+}
