@@ -253,3 +253,19 @@ beta readiness
 **Evidence:** `npm test` (77 passed) and `npm run typecheck` passed.
 
 ---
+
+<!-- SESSION: 2026-06-21 17:50 | Supabase security remediation -->
+
+### [CP-CONSTRAINT] | 2026-06-21: Harden Supabase cross-tenant relationship boundaries
+
+**Summary:** Fixed all four Supabase audit findings by enforcing same-admin relationship checks for contact groups and calendar events, moving privileged share-slug helpers out of the exported server-action module, and pinning calendar subscription HTTPS requests to the address that passed SSRF validation.
+
+**Files/Modules Affected:** `lib/actions/groups.ts`, `lib/actions/calendar.ts`, `lib/actions/user.ts`, `lib/share-slugs.ts`, `lib/calendar-subscription.ts`, `supabase/migrations/011_harden_cross_tenant_relationships.sql`, and focused security regression tests.
+
+**Key Trade-off:** Added both application-level checks and database triggers/policies because service-role reminder jobs can bypass RLS and should not trust relationship rows that only UI code validated.
+
+**Evidence:** `./node_modules/.bin/vitest run lib/actions/groups-security.test.ts lib/actions/calendar-security.test.ts lib/actions/user-security.test.ts lib/calendar-subscription.test.ts supabase/migrations/security-policies.test.ts`, `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`, and `./node_modules/.bin/next build` passed.
+
+**Follow-ups:** Apply the new migration to Supabase and confirm live migration history with `select * from supabase_migrations.schema_migrations order by version;`.
+
+---

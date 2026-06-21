@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { slugSchema } from '@/lib/schemas'
-import { countShareSlugsForAdmin, isShareSlugTaken } from '@/lib/actions/user'
+import { countShareSlugsForAdmin, isShareSlugTaken } from '@/lib/share-slugs'
 
 export async function getGroups() {
   const supabase = await createClient()
@@ -99,10 +99,31 @@ export async function getContactGroups(contactId: string) {
 
 export async function setContactGroups(contactId: string, groupIds: string[]) {
   const supabase = await createClient()
-  // Delete all existing, then insert new
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: contact, error: contactError } = await supabase
+    .from('contacts')
+    .select('id')
+    .eq('id', contactId)
+    .maybeSingle()
+  if (contactError || !contact) return { error: 'Contact not found.' }
+
+  const uniqueGroupIds = [...new Set(groupIds)]
+  if (uniqueGroupIds.length > 0) {
+    const { data: ownedGroups, error: groupError } = await supabase
+      .from('groups')
+      .select('id')
+      .in('id', uniqueGroupIds)
+    if (groupError) return { error: groupError.message }
+    if ((ownedGroups ?? []).length !== uniqueGroupIds.length) {
+      return { error: 'One or more groups were not found.' }
+    }
+  }
+
   await supabase.from('contact_groups').delete().eq('contact_id', contactId)
-  if (groupIds.length > 0) {
-    const rows = groupIds.map(group_id => ({ contact_id: contactId, group_id }))
+  if (uniqueGroupIds.length > 0) {
+    const rows = uniqueGroupIds.map(group_id => ({ contact_id: contactId, group_id }))
     const { error } = await supabase.from('contact_groups').insert(rows)
     if (error) return { error: error.message }
   }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ShareForm } from '@/components/share-form'
 import { createAdminClient } from '@/lib/supabase/server'
-import { resolveShareSlug, type ShareSlugResolution } from '@/lib/actions/user'
+import { resolveShareSlug, type ShareSlugResolution } from '@/lib/share-slugs'
 import { getUserProfile } from '@/lib/user-profile'
 import { createShareCapability } from '@/lib/share-capability'
 

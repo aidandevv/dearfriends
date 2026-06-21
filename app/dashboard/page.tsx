@@ -31,7 +31,7 @@ export default async function DashboardPage({
 
   let shareSlug = profile.shareSlug
   if (user && !shareSlug) {
-    try { shareSlug = await generateShareSlug(user.id) } catch { /* non-fatal */ }
+    try { shareSlug = await generateShareSlug() } catch { /* non-fatal */ }
   }
 
   const [contacts, groups, calendarWidget, birthdayEditableIds] = await Promise.all([

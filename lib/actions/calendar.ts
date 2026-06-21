@@ -15,6 +15,7 @@ type ContactForOffset = {
   state?: string | null
   is_international?: boolean | null
   country?: string | null
+  admin_id?: string | null
 }
 
 type CalendarEventRow = {
@@ -184,11 +185,24 @@ export async function createCalendarEvent(formData: FormData) {
   if (!parsed.success) return { error: 'Check the event details and try again.' }
 
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
   const payload = {
     ...parsed.data,
     contact_id: parsed.data.contact_id || null,
     source: 'manual',
   }
+
+  if (payload.contact_id) {
+    const { data: contact, error: contactError } = await supabase
+      .from('contacts')
+      .select('id')
+      .eq('id', payload.contact_id)
+      .maybeSingle()
+    if (contactError || !contact) return { error: 'Contact not found.' }
+  }
+
   const { error } = await supabase.from('calendar_events').insert(payload)
   if (error) return { error: error.message }
 
@@ -309,7 +323,7 @@ export async function sendDueCalendarReminders() {
   const supabase = await createServiceClient()
   const { data: events, error } = await supabase
     .from('calendar_events')
-    .select('*, contacts(first_name,last_name,state,is_international,country)')
+    .select('*, contacts(admin_id,first_name,last_name,state,is_international,country)')
     .eq('reminder_enabled', true)
 
   if (error) return { error: error.message }
@@ -322,6 +336,11 @@ export async function sendDueCalendarReminders() {
     const { data: adminData } = await supabase.auth.admin.getUserById((event as CalendarEventRow & { admin_id: string }).admin_id)
     const admin = adminData.user
     if (!admin?.email) continue
+
+    const contact = contactFromRow(event)
+    if (contact?.admin_id && contact.admin_id !== (event as CalendarEventRow & { admin_id: string }).admin_id) {
+      continue
+    }
 
     const decorated = decorateEvent(event, admin.user_metadata?.mailing_state)
     if (decorated.mailByDate > today) continue
