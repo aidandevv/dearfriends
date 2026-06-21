@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AuthArtPanel } from '@/components/ui/auth-art-panel'
+import { PostalLineArt } from '@/components/ui/postal-line-art'
 import { KeyRound } from 'lucide-react'
 
 const newsreader = "var(--font-ppwriter), Georgia, serif"
@@ -28,12 +29,16 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="postal-page flex min-h-screen">
+      <PostalLineArt variant="full" className="postal-art-fixed -right-48 top-10 h-[70vh] w-[88vw]" />
       <AuthArtPanel />
 
-      <div className="flex flex-1 items-center justify-center p-8 bg-linen">
-        <div className="w-full max-w-sm">
-          <h1 style={{ fontFamily: newsreader, fontSize: 30, color: '#1d2442', fontWeight: 400, marginBottom: 4 }}>
+      <div className="postal-page-content flex flex-1 items-center justify-center p-6 sm:p-8">
+        <div className="auth-form-card">
+          <p className="mb-5 text-center font-serif text-[17px] text-ink md:hidden">
+            <em className="italic">dear</em>friends
+          </p>
+          <h1 style={{ fontFamily: newsreader, fontSize: 30, color: 'var(--ink)', fontWeight: 400, marginBottom: 4 }}>
             Set new password
           </h1>
           <p className="text-sm text-ink-muted mb-7">Choose a new password for your account</p>

@@ -20,7 +20,32 @@ type GoogleGeocodeResponse = {
   }>
 }
 
-export async function geocodeAddress(
+type CensusGeocodeResponse = {
+  result?: {
+    addressMatches?: Array<{
+      coordinates?: { x: number; y: number }
+    }>
+  }
+}
+
+const CENSUS_GEOCODER_URL = 'https://geocoding.geo.census.gov/geocoder/locations/address'
+const CENSUS_BENCHMARK = 'Public_AR_Current'
+
+const US_COUNTRY_ALIASES = new Set([
+  'us',
+  'usa',
+  'u.s.',
+  'u.s.a.',
+  'united states',
+  'united states of america',
+])
+
+export function isUsMailableAddress(country?: string | null): boolean {
+  if (!country?.trim()) return true
+  return US_COUNTRY_ALIASES.has(country.trim().toLowerCase())
+}
+
+async function geocodeWithGoogle(
   address: string,
   city: string,
   state: string,
@@ -45,6 +70,50 @@ export async function geocodeAddress(
   } catch {
     return null
   }
+}
+
+async function geocodeWithCensus(
+  address: string,
+  city: string,
+  state: string,
+  zip: string,
+): Promise<GeocodeResult> {
+  const params = new URLSearchParams({
+    street: address,
+    city,
+    state,
+    zip,
+    benchmark: CENSUS_BENCHMARK,
+    format: 'json',
+  })
+
+  try {
+    const res = await fetch(`${CENSUS_GEOCODER_URL}?${params.toString()}`)
+    if (!res.ok) return null
+
+    const json = (await res.json()) as CensusGeocodeResponse
+    const coords = json.result?.addressMatches?.[0]?.coordinates
+    if (coords == null || coords.x == null || coords.y == null) return null
+
+    return { lat: coords.y, lng: coords.x }
+  } catch {
+    return null
+  }
+}
+
+export async function geocodeAddress(
+  address: string,
+  city: string,
+  state: string,
+  zip: string,
+  country?: string | null,
+): Promise<GeocodeResult> {
+  const googleResult = await geocodeWithGoogle(address, city, state, zip, country)
+  if (googleResult) return googleResult
+
+  if (!isUsMailableAddress(country)) return null
+
+  return geocodeWithCensus(address, city, state, zip)
 }
 
 export async function geocodeContacts(contacts: ContactWithCoordinates[]): Promise<GeocodedContact[]> {

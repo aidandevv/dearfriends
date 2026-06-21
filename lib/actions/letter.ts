@@ -67,15 +67,31 @@ export async function sendDigitalLetters(groupId: string | null = null) {
 
   const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
+  let sent = 0
+  let failed = 0
+  const failures: string[] = []
+
   for (const contact of contacts) {
     const body = interpolate(draft.body, { first_name: contact.first_name, last_name: contact.last_name })
     const subject = interpolate(draft.subject, { first_name: contact.first_name, last_name: contact.last_name })
     const { html } = buildLetterEmail({ subject, body })
 
-    await resend.emails.send({ from: FROM_EMAIL, to: contact.email, subject, html })
+    const result = await resend.emails.send({ from: FROM_EMAIL, to: contact.email, subject, html })
+    if (result.error) {
+      failed++
+      failures.push(contact.email)
+      continue
+    }
+    sent++
   }
 
-  return { success: true, count: contacts.length }
+  if (!sent && failed) return { error: `Failed to send ${failed} email(s).` }
+
+  return {
+    success: true,
+    count: sent,
+    ...(failed ? { failed, failures } : {}),
+  }
 }
 
 export async function getRandomContact() {

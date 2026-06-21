@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { slugSchema } from '@/lib/schemas'
+import { countShareSlugsForAdmin, isShareSlugTaken } from '@/lib/actions/user'
 
 export async function getGroups() {
   const supabase = await createClient()
@@ -15,16 +17,63 @@ export async function getGroups() {
 
 export async function createGroup(name: string) {
   const supabase = await createClient()
-  const { error } = await supabase.from('groups').insert({ name: name.trim() })
+  const { data, error } = await supabase
+    .from('groups')
+    .insert({ name: name.trim() })
+    .select('*')
+    .single()
   if (error) return { error: error.message }
   revalidatePath('/dashboard/groups')
-  return { success: true }
+  return { success: true, group: data }
 }
 
 export async function updateGroup(id: string, updates: { name?: string; birthday_tracking?: boolean }) {
   const supabase = await createClient()
   const { error } = await supabase.from('groups').update(updates).eq('id', id)
   if (error) return { error: error.message }
+  revalidatePath('/dashboard/groups')
+  return { success: true }
+}
+
+export async function updateGroupShareSlug(id: string, slug: string): Promise<{ error?: string; success?: boolean }> {
+  const normalised = slug.trim().toLowerCase()
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: group, error: groupError } = await supabase
+    .from('groups')
+    .select('id, admin_id, share_slug')
+    .eq('id', id)
+    .single()
+
+  if (groupError || !group) return { error: 'Group not found.' }
+
+  if (!normalised) {
+    const { error } = await supabase.from('groups').update({ share_slug: null }).eq('id', id)
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/groups')
+    return { success: true }
+  }
+
+  const parsed = slugSchema.safeParse(normalised)
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? 'Invalid slug' }
+
+  const conflict = await isShareSlugTaken(normalised, { excludingGroupId: id })
+  if (conflict) return { error: 'slug_taken' }
+
+  const currentlyHasSlug = typeof group.share_slug === 'string' && group.share_slug.length > 0
+  if (!currentlyHasSlug) {
+    const slugCount = await countShareSlugsForAdmin(user.id)
+    if (slugCount >= 10) return { error: 'slug_limit' }
+  }
+
+  const { error } = await supabase.from('groups').update({ share_slug: normalised }).eq('id', id)
+  if (error) return { error: error.message }
+
   revalidatePath('/dashboard/groups')
   return { success: true }
 }
@@ -73,4 +122,21 @@ export async function getContactsByGroup(groupId: string | null) {
     .select('contacts(*)')
     .eq('group_id', groupId)
   return (data ?? []).flatMap(r => (r.contacts ? [r.contacts] : []))
+}
+
+export async function getBirthdayEditableContactIds(): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id')
+    .eq('birthday_tracking', true)
+
+  if (!groups?.length) return []
+
+  const { data } = await supabase
+    .from('contact_groups')
+    .select('contact_id')
+    .in('group_id', groups.map(group => group.id))
+
+  return [...new Set((data ?? []).map(row => row.contact_id))]
 }

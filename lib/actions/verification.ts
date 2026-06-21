@@ -2,13 +2,21 @@
 
 import { randomUUID } from 'crypto'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { resend, buildVerificationEmail } from '@/lib/resend'
 import { scheduleVerificationSchema, verifySchema } from '@/lib/schemas'
 import { getUserProfile } from '@/lib/user-profile'
+import { geocodeAddress } from '@/lib/geocode'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const VERIFY_TOKEN_TTL_MS = 14 * 24 * 60 * 60 * 1000
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function revalidateContactSurfaces() {
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/map')
+}
 
 export async function sendVerificationToAll() {
   const supabase = await createClient()
@@ -83,7 +91,7 @@ export async function scheduleVerification(formData: FormData) {
 
   if (error) return { error: error.message }
 
-  revalidatePath('/dashboard')
+  revalidateContactSurfaces()
   return { success: true }
 }
 
@@ -92,44 +100,81 @@ export async function handleVerifyToken(
   action: 'confirm' | 'update' | 'optout',
   updates?: { address_line_1: string; address_line_2?: string; city: string; state: string; zip: string },
 ) {
-  const supabase = await createClient()
+  if (!UUID_RE.test(token)) return { error: 'This verification link is invalid or has expired.' }
+
+  const supabase = await createServiceClient()
   const { data: tokenContact, error: tokenError } = await supabase
     .from('contacts')
-    .select('id')
+    .select('id, verification_sent_at')
     .eq('verification_token', token)
     .maybeSingle()
 
   if (tokenError) return { error: tokenError.message }
   if (!tokenContact) return { error: 'This verification link is invalid or has expired.' }
 
+  const sentAt = tokenContact.verification_sent_at ? new Date(tokenContact.verification_sent_at).getTime() : 0
+  if (!sentAt || Number.isNaN(sentAt) || Date.now() - sentAt > VERIFY_TOKEN_TTL_MS) {
+    return { error: 'This verification link is invalid or has expired.' }
+  }
+
   if (action === 'optout') {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('contacts')
       .update({ opted_out: true, verification_token: null })
       .eq('id', tokenContact.id)
+      .eq('verification_token', token)
+      .select('id')
+      .maybeSingle()
 
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    if (!data) return { error: 'This verification link is invalid or has expired.' }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   if (action === 'confirm') {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('contacts')
       .update({ verified_at: new Date().toISOString(), verification_token: null })
       .eq('id', tokenContact.id)
+      .eq('verification_token', token)
+      .select('id')
+      .maybeSingle()
 
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    if (!data) return { error: 'This verification link is invalid or has expired.' }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   if (action === 'update' && updates) {
     const parsed = verifySchema.safeParse(updates)
     if (!parsed.success) return { error: 'Invalid address.' }
 
-    const { error } = await supabase
-      .from('contacts')
-      .update({ ...parsed.data, verified_at: new Date().toISOString(), verification_token: null })
-      .eq('id', tokenContact.id)
+    const coords = await geocodeAddress(
+      parsed.data.address_line_1,
+      parsed.data.city,
+      parsed.data.state,
+      parsed.data.zip,
+    )
 
-    return error ? { error: error.message } : { success: true }
+    const { data, error } = await supabase
+      .from('contacts')
+      .update({
+        ...parsed.data,
+        ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
+        verified_at: new Date().toISOString(),
+        verification_token: null,
+      })
+      .eq('id', tokenContact.id)
+      .eq('verification_token', token)
+      .select('id')
+      .maybeSingle()
+
+    if (error) return { error: error.message }
+    if (!data) return { error: 'This verification link is invalid or has expired.' }
+    revalidateContactSurfaces()
+    return { success: true }
   }
 
   return { error: 'Unknown action.' }

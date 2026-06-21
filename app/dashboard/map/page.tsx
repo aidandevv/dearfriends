@@ -8,13 +8,13 @@ export default async function DashboardMapPage() {
     first_name: contact.first_name,
     city: contact.city,
     state: contact.state,
-    lat: (contact as { lat?: number | null }).lat ?? null,
-    lng: (contact as { lng?: number | null }).lng ?? null,
+    lat: contact.lat,
+    lng: contact.lng,
   }))
 
   return (
-    <div className="dashboard-page-pad space-y-5 p-6">
-      <section className="surface-panel px-6 py-5">
+    <div className="dashboard-page-pad app-page-stack">
+      <section className="app-page-header">
         <p className="eyebrow">Where your people live</p>
         <h1 className="dash-title">Friend map</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-muted">

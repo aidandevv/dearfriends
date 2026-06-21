@@ -40,7 +40,7 @@ export function Features() {
             <span className="absolute right-5 top-5 font-serif text-6xl font-bold leading-none text-border/60 select-none">
               {number}
             </span>
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-blue-ink/10 text-blue-ink">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-periwinkle/10 text-periwinkle">
               <Icon size={22} />
             </div>
             <h3 className="font-serif text-2xl text-ink">{title}</h3>

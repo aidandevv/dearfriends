@@ -14,7 +14,7 @@ export function CalendarWidget({ events }: { events: CalendarEventView[] }) {
           <p className="eyebrow">Calendar</p>
           <h3 className="section-title">Mail-by dates</h3>
         </div>
-        <CalendarDays size={18} className="text-blue-ink" />
+        <CalendarDays size={18} className="text-periwinkle" />
       </div>
       <div className="grid gap-2">
         {events.length === 0 && (
@@ -30,7 +30,7 @@ export function CalendarWidget({ events }: { events: CalendarEventView[] }) {
           </div>
         ))}
       </div>
-      <Link href="/dashboard/calendar" className="mt-4 inline-flex text-sm font-medium text-blue-ink hover:underline">
+      <Link href="/dashboard/calendar" className="mt-4 inline-flex text-sm font-medium text-periwinkle hover:underline">
         Open calendar →
       </Link>
     </section>

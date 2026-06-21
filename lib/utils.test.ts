@@ -30,4 +30,13 @@ describe('toCsv', () => {
     const rows = [{ first_name: 'A,B', last_name: 'L', address_line_1: '1 Main', address_line_2: '', city: 'NY', state: 'NY', zip: '10001' }]
     expect(toCsv(rows)).toContain('"A,B"')
   })
+
+  it('neutralizes spreadsheet formula-leading fields', () => {
+    const rows = [{ first_name: '=HYPERLINK("http://bad")', last_name: '+cmd', address_line_1: '@SUM(1,1)', address_line_2: '', city: '-1+2', state: 'NY', zip: '10001' }]
+    const csv = toCsv(rows)
+    expect(csv).toContain('\'=HYPERLINK')
+    expect(csv).toContain("'+cmd")
+    expect(csv).toContain("'@SUM")
+    expect(csv).toContain("'-1+2")
+  })
 })

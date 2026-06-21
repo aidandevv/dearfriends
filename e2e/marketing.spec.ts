@@ -1,30 +1,31 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('marketing pages', () => {
-  test('landing page links into about and login flows', async ({ page }) => {
+  test('landing page links into login and avoids removed footer pages', async ({ page }) => {
     await page.goto('/')
 
     await expect(
-      page.getByRole('heading', { name: /keep up with the people you love/i }),
+      page.getByRole('heading', { name: /real mail, for the people you'd miss/i }),
     ).toBeVisible()
     await expect(
-      page.getByText(/collect your friends' addresses, remember birthdays/i),
+      page.getByText(/dearfriends collects your friends' addresses, remembers their birthdays/i),
     ).toBeVisible()
 
     await page.getByRole('link', { name: /see how it works/i }).click()
     await expect(page).toHaveURL(/#how$/)
     await expect(
-      page.getByRole('heading', { name: /three small rituals/i }),
-    ).toBeVisible()
-
-    await page.goto('/about')
-    await expect(
-      page.getByRole('heading', { name: /a warmer home for mailing lists and meaningful updates/i }),
+      page.getByRole('heading', { name: /three small habits/i }),
     ).toBeVisible()
 
     await page.goto('/')
-    await page.getByRole('link', { name: /start writing/i }).click()
+    await page.locator('header').getByRole('link', { name: /start your list/i }).click()
     await expect(page).toHaveURL(/\/login$/)
     await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+
+    await page.goto('/')
+    await expect(page.getByRole('link', { name: /^about$/i })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /^privacy$/i })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /^changelog$/i })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /hi@dearfriends.co/i })).toBeVisible()
   })
 })

@@ -1,5 +1,27 @@
 import { describe, it, expect } from 'vitest'
-import { contactSchema, letterDraftSchema, slugSchema } from './schemas'
+import { contactSchema, contactEditSchema, letterDraftSchema, slugSchema } from './schemas'
+
+describe('contactEditSchema', () => {
+  const valid = {
+    first_name: 'Ada',
+    last_name: 'Lovelace',
+    email: 'ada@example.com',
+    address_line_1: '1 Main St',
+    city: 'Austin',
+    state: 'TX',
+    zip: '78701',
+    is_international: false,
+    tags: 'family, college',
+  }
+
+  it('accepts a full admin edit payload', () => {
+    expect(contactEditSchema.safeParse(valid).success).toBe(true)
+  })
+
+  it('requires country for international addresses', () => {
+    expect(contactEditSchema.safeParse({ ...valid, is_international: true }).success).toBe(false)
+  })
+})
 
 describe('contactSchema', () => {
   const valid = {

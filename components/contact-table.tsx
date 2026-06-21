@@ -2,21 +2,10 @@
 
 import { useState } from 'react'
 import { deleteContact, updateContact, sendAddressRefreshNudge } from '@/lib/actions/contacts'
+import { ContactEditForm } from '@/components/contact-edit-form'
 import { ContactGroupSelect } from '@/components/contact-group-select'
-import { Trash2 } from 'lucide-react'
-
-type Contact = {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-  city: string
-  state: string
-  delivery_method: string
-  opted_out: boolean
-  verified_at: string | null
-  tags: string[]
-}
+import { Pencil, Trash2 } from 'lucide-react'
+import type { Contact } from '@/lib/database.types'
 
 const deliveryOptions = [
   { value: 'handwrite', label: 'Handwrite' },
@@ -24,7 +13,7 @@ const deliveryOptions = [
   { value: 'digital', label: 'Digital' },
 ]
 
-const avatarColors = ['#516183', '#3358ba', '#5A7A5A', '#b8453b', '#3e5da0', '#3a4263']
+const avatarColors = ['#516183', '#4A6CD4', '#5A7A5A', '#E8927C', '#3A55AC', '#4A5168']
 
 function avatarColor(name: string) {
   let hash = 0
@@ -34,13 +23,29 @@ function avatarColor(name: string) {
 
 const COL = 'minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1.1fr) minmax(0, 1fr) 60px'
 
-export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]; allGroups?: { id: string; name: string }[] }) {
+export function ContactTable({
+  contacts,
+  allGroups = [],
+  birthdayEditableIds = [],
+}: {
+  contacts: Contact[]
+  allGroups?: { id: string; name: string }[]
+  birthdayEditableIds?: string[]
+}) {
   const [pending, setPending] = useState<string | null>(null)
   const [nudgePending, setNudgePending] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const birthdayEditable = new Set(birthdayEditableIds)
 
   async function handleDeliveryChange(id: string, value: string) {
     setPending(id)
     await updateContact(id, { delivery_method: value })
+    setPending(null)
+  }
+
+  async function handleBirthdayChange(id: string, value: string) {
+    setPending(id)
+    await updateContact(id, { birthday: value || null })
     setPending(null)
   }
 
@@ -70,7 +75,6 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
 
   return (
     <div>
-      {/* Table header */}
       <div className="contact-table-header" style={{
         display: 'grid',
         gridTemplateColumns: COL,
@@ -90,16 +94,16 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
         ))}
       </div>
 
-      {/* Rows */}
       {contacts.map(contact => {
         const isVerified = Boolean(contact.verified_at) && !contact.opted_out
         const isOptedOut = contact.opted_out
         const initials = `${contact.first_name[0] ?? ''}${contact.last_name[0] ?? ''}`.toUpperCase()
         const bg = avatarColor(contact.first_name + contact.last_name)
+        const canEditBirthday = birthdayEditable.has(contact.id)
 
         return (
+          <div key={contact.id}>
           <div
-            key={contact.id}
             className="contact-table-row group"
             style={{
               display: 'grid',
@@ -114,7 +118,6 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
             onMouseOver={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(228,206,149,.18)'}
             onMouseOut={e => (e.currentTarget as HTMLDivElement).style.background = ''}
           >
-            {/* Name */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
               <div style={{
                 width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
@@ -127,17 +130,47 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
               }}>
                 {initials}
               </div>
-              <span style={{ fontWeight: 500, color: 'var(--ink)', fontSize: 14.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {contact.first_name} {contact.last_name}
-              </span>
+              <div style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', fontWeight: 500, color: 'var(--ink)', fontSize: 14.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {contact.first_name} {contact.last_name}
+                </span>
+                {contact.note && (
+                  <span style={{ display: 'block', marginTop: 2, fontSize: 12, fontStyle: 'italic', color: 'var(--blue-slate)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={contact.note}>
+                    “{contact.note}”
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Location */}
-            <span style={{ fontSize: 13.5, color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {contact.city}, {contact.state}
-            </span>
+            <div style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 13.5, color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {contact.city}, {contact.state} {contact.zip}
+              </span>
+              <span style={{ display: 'block', marginTop: 2, fontSize: 12, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {contact.address_line_1}
+              </span>
+              {canEditBirthday && (
+                <input
+                  type="date"
+                  value={contact.birthday?.split('T')[0] ?? ''}
+                  onChange={e => handleBirthdayChange(contact.id, e.target.value)}
+                  disabled={pending === contact.id}
+                  aria-label={`Birthday for ${contact.first_name}`}
+                  style={{
+                    marginTop: 6,
+                    width: '100%',
+                    maxWidth: 150,
+                    padding: '4px 8px',
+                    borderRadius: 8,
+                    border: '1px solid var(--line)',
+                    fontSize: 12,
+                    color: 'var(--ink-soft)',
+                    background: 'var(--paper)',
+                  }}
+                />
+              )}
+            </div>
 
-            {/* Delivery */}
             <select
               value={contact.delivery_method}
               onChange={e => handleDeliveryChange(contact.id, e.target.value)}
@@ -150,7 +183,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
                 borderRadius: 999,
                 fontFamily: 'var(--font-dm-sans), sans-serif',
                 fontSize: 13, fontWeight: 500,
-                color: 'var(--blue-ink)',
+                color: 'var(--periwinkle)',
                 cursor: 'pointer',
                 appearance: 'none',
                 WebkitAppearance: 'none',
@@ -164,24 +197,29 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
               ))}
             </select>
 
-            {/* Group */}
             <ContactGroupSelect contactId={contact.id} allGroups={allGroups} />
 
-            {/* Status */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--ink-soft)' }}>
               <span style={{
                 width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
                 ...(isOptedOut ? { background: 'var(--stamp)' } :
-                   isVerified  ? { background: '#5A7A5A' } :
-                   { background: 'var(--cream)', border: '1px solid #b8a657' }),
+                   isVerified  ? { background: 'var(--sage)' } :
+                   { background: 'var(--surface)', border: '1px solid var(--peach)' }),
               }} />
-              <span style={{ color: isOptedOut ? 'var(--stamp)' : isVerified ? '#5A7A5A' : 'var(--ink-soft)' }}>
+              <span style={{ color: isOptedOut ? 'var(--stamp)' : isVerified ? 'var(--sage)' : 'var(--ink-soft)' }}>
                 {isOptedOut ? 'Opted out' : isVerified ? 'Verified' : 'Pending'}
               </span>
             </div>
 
-            {/* Actions */}
             <div className="contact-table-row-actions flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => setEditingId(editingId === contact.id ? null : contact.id)}
+                title="Edit contact"
+                aria-label={`Edit ${contact.first_name} ${contact.last_name}`}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle ${editingId === contact.id ? 'bg-periwinkle/10 text-periwinkle opacity-100' : ''}`}
+              >
+                <Pencil size={13} />
+              </button>
               <button
                 onClick={async () => {
                   setNudgePending(contact.id)
@@ -192,7 +230,7 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
                 disabled={nudgePending === contact.id}
                 title="Send address refresh nudge"
                 aria-label="Send address refresh nudge"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:text-blue-ink hover:bg-blue-ink/10 disabled:opacity-50 text-xs transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle disabled:opacity-50"
               >
                 ↩
               </button>
@@ -205,6 +243,15 @@ export function ContactTable({ contacts, allGroups = [] }: { contacts: Contact[]
                 <Trash2 size={13} />
               </button>
             </div>
+          </div>
+
+          {editingId === contact.id && (
+            <ContactEditForm
+              contact={contact}
+              onCancel={() => setEditingId(null)}
+              onSaved={() => setEditingId(null)}
+            />
+          )}
           </div>
         )
       })}

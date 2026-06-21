@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react'
+import { useRouter } from 'next/navigation'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
 import { feature, mesh } from 'topojson-client'
 
@@ -68,11 +69,14 @@ function mkCircle(
 export function GlobePanel({
   contacts,
   variant = 'compact',
+  autoRefresh = false,
 }: {
   contacts: ContactGeo[]
   variant?: 'compact' | 'feature'
+  autoRefresh?: boolean
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
+  const router = useRouter()
   const { width: W, height: H, radius: RADIUS } = DIMENSIONS[variant]
 
   // Mutable rotation state — lives in a ref so the RAF loop reads current value
@@ -125,26 +129,34 @@ export function GlobePanel({
 
   const setClampedZoom = useCallback((
     next: number | ((current: number) => number),
-    anchor?: { x: number; y: number },
   ) => {
     setZoom(current => {
       const resolved = typeof next === 'function' ? next(current) : next
       const clamped = Math.max(0.72, Math.min(4.4, resolved))
-      const currentTranslate = translate.current
-      const target = anchor ?? { x: W / 2, y: H / 2 }
-      const ratio = clamped / current
-      translate.current = {
-        x: target.x - (target.x - currentTranslate.x) * ratio,
-        y: target.y - (target.y - currentTranslate.y) * ratio,
-      }
       zoomRef.current = clamped
       return clamped
     })
-  }, [H, W])
+  }, [])
 
   useEffect(() => {
     zoomRef.current = zoom
   }, [zoom])
+
+  useEffect(() => {
+    if (!autoRefresh) return
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === 'visible') router.refresh()
+    }
+
+    const intervalId = window.setInterval(refreshWhenVisible, 15000)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+
+    return () => {
+      window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+    }
+  }, [autoRefresh, router])
 
   useEffect(() => {
     const svg = svgRef.current
@@ -160,7 +172,6 @@ export function GlobePanel({
     const pinsEl = svg.querySelector<SVGGElement>('.g-pins')!
     const oceanEl = svg.querySelector<SVGCircleElement>('.g-ocean')!
     const atmosphereEl = svg.querySelector<SVGCircleElement>('.g-atmosphere')!
-    const shineEl = svg.querySelector<SVGEllipseElement>('.g-shine')!
 
     function makeProjection() {
       const scale = RADIUS * zoomRef.current
@@ -184,10 +195,6 @@ export function GlobePanel({
       atmosphereEl.setAttribute('cx', String(translate.current.x))
       atmosphereEl.setAttribute('cy', String(translate.current.y))
       atmosphereEl.setAttribute('r', String(currentRadius + 3))
-      shineEl.setAttribute('cx', String(translate.current.x - currentRadius * 0.24))
-      shineEl.setAttribute('cy', String(translate.current.y - currentRadius * 0.32))
-      shineEl.setAttribute('rx', String(currentRadius * 0.18))
-      shineEl.setAttribute('ry', String(currentRadius * 0.12))
 
       gratEl.setAttribute('d', pathFn(graticuleGeom) ?? '')
 
@@ -340,12 +347,7 @@ export function GlobePanel({
       e.preventDefault()
       paused.current = true
       clearResume()
-      const rect = globeSvg.getBoundingClientRect()
-      const anchor = {
-        x: ((e.clientX - rect.left) / rect.width) * W,
-        y: ((e.clientY - rect.top) / rect.height) * H,
-      }
-      setClampedZoom(current => current * (e.deltaY > 0 ? 0.88 : 1.14), anchor)
+      setClampedZoom(current => current * (e.deltaY > 0 ? 0.88 : 1.14))
       scheduleResume()
     }
 
@@ -398,28 +400,22 @@ export function GlobePanel({
         borderRadius: 8,
         overflow: 'hidden',
         background: 'linear-gradient(180deg, var(--ink) 0%, #111a30 100%)',
-        minHeight: variant === 'feature' ? 460 : undefined,
       }}
     >
       {/* Starfield */}
       <Stars />
 
-      {/*
-        The feature globe intentionally uses the full panel width so zoomed
-        geography can crop naturally instead of feeling boxed in.
-      */}
       <div style={{ position: 'relative', width: '100%', margin: '0 auto' }}>
       <svg
         ref={svgRef}
         width="100%"
-        height={H}
         viewBox={`0 0 ${W} ${H}`}
-        style={{ display: 'block', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}
+        style={{ display: 'block', cursor: 'grab', touchAction: 'none', userSelect: 'none', aspectRatio: `${W} / ${H}` }}
         aria-label="Globe showing where your contacts live"
       >
         <defs>
           <radialGradient id={`df-ocean-${uid}`} cx="38%" cy="32%">
-            <stop offset="0%" stopColor="var(--blue-ink)" />
+            <stop offset="0%" stopColor="var(--periwinkle)" />
             <stop offset="60%" stopColor="var(--blue-slate)" />
             <stop offset="100%" stopColor="var(--ink)" />
           </radialGradient>
@@ -432,7 +428,7 @@ export function GlobePanel({
         <circle
           className="g-atmosphere"
           cx={W / 2} cy={H / 2} r={RADIUS + 3}
-          fill="none" stroke="var(--blue-ink)" strokeWidth={2} opacity={0.28}
+          fill="none" stroke="var(--periwinkle)" strokeWidth={2} opacity={0.28}
         />
 
         {/* Graticule — filled by D3 on each frame */}
@@ -469,14 +465,6 @@ export function GlobePanel({
           stroke="rgba(250,244,228,.72)"
           strokeWidth={zoom > 2 ? 0.58 : 0.38}
           opacity={zoom > 1.35 ? 0.86 : 0.38}
-        />
-
-        {/* Shine highlight */}
-        <ellipse
-          className="g-shine"
-          cx={W / 2 - 28} cy={H / 2 - 38}
-          rx={22} ry={14}
-          fill="white" opacity={0.06}
         />
 
         {/* Contact pins — rebuilt each frame by the RAF loop */}
@@ -535,12 +523,12 @@ export function GlobePanel({
             position: 'absolute',
             left: tooltip.x > W / 2 ? Math.max(0, tooltip.x - 148) : tooltip.x + 20,
             top: tooltip.y - 14,
-            background: 'var(--paper, #faf4e4)',
-            border: '1px solid var(--line, #d9cfb0)',
+            background: 'var(--paper, #F8F9FB)',
+            border: '1px solid var(--line, #DFE3EC)',
             borderRadius: 999,
             padding: '5px 12px 5px 10px',
             fontSize: 12,
-            color: 'var(--ink, #1c1a14)',
+            color: 'var(--ink, #232940)',
             boxShadow: '0 4px 12px rgba(0,0,0,.22)',
             display: 'flex',
             alignItems: 'center',
@@ -553,14 +541,14 @@ export function GlobePanel({
           <span
             style={{
               width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--blue-ink)', flexShrink: 0, display: 'inline-block',
+              background: 'var(--periwinkle)', flexShrink: 0, display: 'inline-block',
             }}
           />
           <span style={{ fontWeight: 600 }}>{tooltip.label}</span>
           {tooltip.count > 1 && (
             <span
               style={{
-                borderLeft: '1px solid var(--line, #d9cfb0)',
+                borderLeft: '1px solid var(--line, #DFE3EC)',
                 paddingLeft: 7, marginLeft: 2,
                 fontStyle: 'italic',
                 color: 'var(--blue-slate, #4a5f8a)',

@@ -14,7 +14,7 @@ export function Hero() {
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/3 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full opacity-20"
-        style={{ background: 'radial-gradient(circle, #3358ba 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, var(--periwinkle) 0%, transparent 70%)' }}
       />
 
       <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-28">
@@ -22,7 +22,7 @@ export function Hero() {
         <div className="relative z-10 max-w-2xl">
           <h1 className="font-serif text-5xl leading-[1.1] text-linen sm:text-6xl lg:text-7xl">
             Your people deserve more than{' '}
-            <em className="not-italic text-blue-ink">a group text.</em>
+            <em className="not-italic text-periwinkle">a group text.</em>
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-8 text-linen/70">
@@ -32,7 +32,7 @@ export function Hero() {
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-ink px-7 py-3.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-blue-mid"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-periwinkle px-7 py-3.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-periwinkle-deep"
             >
               Get started free
               <ArrowRight size={16} />
@@ -58,7 +58,7 @@ export function Hero() {
                   <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">Dashboard</p>
                   <p className="mt-0.5 font-serif text-xl text-ink">Spring update</p>
                 </div>
-                <div className="rounded-full bg-blue-ink px-3 py-1 text-xs font-medium text-white">42 contacts</div>
+                <div className="rounded-full bg-periwinkle px-3 py-1 text-xs font-medium text-white">Sample address book</div>
               </div>
 
               <div className="space-y-2.5 p-4">
@@ -79,7 +79,7 @@ export function Hero() {
                 <p className="text-[10px] uppercase tracking-widest text-linen/50">Letter preview</p>
                 <p className="mt-1.5 font-serif text-xl">Dear Maya,</p>
                 <p className="mt-1 text-sm leading-6 text-linen/70">
-                  Here&apos;s a little update from our year. Hope something lovely finds its way to your mailbox soon.
+                  Here&apos;s a quick update from our year. Hope something good finds its way to your mailbox soon.
                 </p>
               </div>
             </div>
@@ -91,7 +91,7 @@ export function Hero() {
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-24"
-        style={{ background: 'linear-gradient(to bottom, transparent, #F8F3EA)' }}
+        style={{ background: 'linear-gradient(to bottom, transparent, var(--porcelain))' }}
       />
     </section>
   )

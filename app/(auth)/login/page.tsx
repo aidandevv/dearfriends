@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AuthArtPanel } from '@/components/ui/auth-art-panel'
-import { Mail, LogIn, UserPlus, KeyRound } from 'lucide-react'
+import { PostalLineArt } from '@/components/ui/postal-line-art'
+import { Mail, LogIn, UserPlus, KeyRound, Eye, EyeOff } from 'lucide-react'
 
 type Mode = 'sign-in' | 'sign-up' | 'magic-link' | 'forgot-password'
 
@@ -25,13 +25,16 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
     setPassword('')
     setConfirmPassword('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -45,7 +48,7 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push('/dashboard')
+    window.location.assign('/dashboard')
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -107,8 +110,8 @@ export default function LoginPage() {
   }
 
   const subtitle: Record<Mode, string> = {
-    'sign-in': 'Sign in to your little book',
-    'sign-up': 'Start keeping up with the people you love',
+    'sign-in': 'Sign in to your account',
+    'sign-up': 'Start your private address list',
     'magic-link': 'We\'ll email you a sign-in link',
     'forgot-password': 'We\'ll email you a reset link',
   }
@@ -122,21 +125,21 @@ export default function LoginPage() {
   if (sent) {
     return (
       <main
-        className="min-h-screen flex items-center justify-center p-6"
-        style={{ background: '#faf4e4' }}
+        className="postal-page flex items-center justify-center p-6"
       >
-        <div className="flex flex-col items-center text-center gap-3 max-w-sm">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full border-2 border-dashed border-blue-ink text-blue-ink mb-1">
+        <PostalLineArt variant="compact" className="postal-art left-1/2 top-1/2 h-[360px] w-[720px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="postal-page-content postal-card postal-card-plain flex max-w-sm flex-col items-center gap-3 px-7 py-8 text-center">
+          <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-periwinkle text-periwinkle">
             <Mail size={22} strokeWidth={1.5} />
           </div>
-          <h1 style={{ fontFamily: newsreader, fontSize: 28, color: '#1d2442', fontWeight: 400 }}>
+          <h1 style={{ fontFamily: newsreader, fontSize: 28, color: 'var(--ink)', fontWeight: 400 }}>
             Check your inbox
           </h1>
           <p className="text-ink-muted text-sm leading-6">
             {sentMessages[mode] ?? 'We sent a link to'}{' '}
             <strong className="text-ink">{email}</strong>. Click it to continue.
           </p>
-          <Link href="/" className="mt-2 text-sm text-blue-ink hover:underline underline-offset-2">
+          <Link href="/" className="mt-2 text-sm text-periwinkle underline-offset-2 hover:underline">
             ← back to dearfriends
           </Link>
         </div>
@@ -145,12 +148,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="postal-page flex min-h-screen">
+      <PostalLineArt variant="full" className="postal-art-fixed -right-48 top-10 h-[70vh] w-[88vw]" />
       <AuthArtPanel />
 
-      <div className="flex flex-1 items-center justify-center p-8 bg-linen">
-        <div className="w-full max-w-sm">
-          <h1 style={{ fontFamily: newsreader, fontSize: 30, color: '#1d2442', fontWeight: 400, marginBottom: 4 }}>
+      <div className="postal-page-content flex flex-1 items-center justify-center p-6 sm:p-8">
+        <div className="auth-form-card">
+          <p className="mb-5 text-center font-serif text-[17px] text-ink md:hidden">
+            <em className="italic">dear</em>friends
+          </p>
+          <h1 style={{ fontFamily: newsreader, fontSize: 30, color: 'var(--ink)', fontWeight: 400, marginBottom: 4 }}>
             {heading[mode]}
           </h1>
           <p className="text-sm text-ink-muted mb-7">{subtitle[mode]}</p>
@@ -165,8 +172,9 @@ export default function LoginPage() {
             className="flex flex-col gap-4"
           >
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-ink-muted font-medium">Email</label>
+              <label htmlFor="auth-email" className="text-xs text-ink-muted font-medium">Email</label>
               <input
+                id="auth-email"
                 type="email" required value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -176,25 +184,49 @@ export default function LoginPage() {
 
             {(mode === 'sign-in' || mode === 'sign-up') && (
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium">Password</label>
-                <input
-                  type="password" required value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="input"
-                />
+                <label htmlFor="auth-password" className="text-xs text-ink-muted font-medium">Password</label>
+                <div className="relative">
+                  <input
+                    id="auth-password"
+                    type={showPassword ? 'text' : 'password'} required value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    className="input pr-10 w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
             )}
 
             {mode === 'sign-up' && (
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-ink-muted font-medium">Confirm password</label>
-                <input
-                  type="password" required value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat your password"
-                  className="input"
-                />
+                <label htmlFor="auth-confirm-password" className="text-xs text-ink-muted font-medium">Confirm password</label>
+                <div className="relative">
+                  <input
+                    id="auth-confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat your password"
+                    className="input pr-10 w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                    aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
             )}
 

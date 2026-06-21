@@ -18,7 +18,8 @@ type CsvContact = {
 }
 
 function formatCsvField(value: string | null | undefined): string {
-  const str = value ?? ''
+  const raw = value ?? ''
+  const str = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }
@@ -35,6 +36,24 @@ export function toCsv(contacts: CsvContact[]): string {
   ])
   const rows = contacts.map(c =>
     formatCsvRow([c.first_name, c.last_name, c.address_line_1, c.address_line_2, c.city, c.state, c.zip])
+  )
+  return [header, ...rows].join('\n')
+}
+
+/** Avery 5160 / 8160 mail-merge column layout */
+export function toAveryCsv(contacts: CsvContact[]): string {
+  const header = formatCsvRow([
+    'Name', 'Address Line 1', 'Address Line 2', 'City', 'State', 'ZIP Code',
+  ])
+  const rows = contacts.map(c =>
+    formatCsvRow([
+      `${c.first_name} ${c.last_name}`.trim(),
+      c.address_line_1,
+      c.address_line_2,
+      c.city,
+      c.state,
+      c.zip,
+    ])
   )
   return [header, ...rows].join('\n')
 }

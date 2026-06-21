@@ -25,6 +25,30 @@ export const contactSchema = z.object({
 
 export type ContactInput = z.infer<typeof contactSchema>
 
+export const contactEditSchema = z.object({
+  first_name: z.string().trim().min(1),
+  last_name: z.string().trim().min(1),
+  email: z.string().email(),
+  address_line_1: z.string().trim().min(1),
+  address_line_2: z.string().trim().optional(),
+  city: z.string().trim().min(1),
+  state: z.string().trim().min(1),
+  zip: z.string().trim().min(1),
+  is_international: z.boolean(),
+  country: z.string().trim().max(80).optional(),
+  tags: z.string().optional(),
+}).superRefine((value, ctx) => {
+  if (value.is_international && !value.country?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['country'],
+      message: 'Country is required for international addresses',
+    })
+  }
+})
+
+export type ContactEditInput = z.infer<typeof contactEditSchema>
+
 export const letterDraftSchema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   body: z.string(),
@@ -77,6 +101,7 @@ export const profileSchema = z.object({
   bio: z.string().trim().max(160).optional(),
   sender_name: z.string().trim().max(80).optional(),
   anniversary_reminders_enabled: z.boolean().optional(),
+  birthday_reminders_enabled: z.boolean().optional(),
 })
 
 export type ProfileInput = z.infer<typeof profileSchema>

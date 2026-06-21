@@ -8,6 +8,84 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function safeHref(url: string) {
+  const trimmed = url.trim()
+  return /^(https?:|mailto:)/i.test(trimmed) ? escapeHtml(trimmed) : '#'
+}
+
+function renderInlineMarkdown(text: string) {
+  return escapeHtml(text)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => `<a href="${safeHref(href)}">${label}</a>`)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*(?!\s)(.+?)(?<!\s)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[^_])_(?!\s)(.+?)(?<!\s)_/g, '$1<em>$2</em>')
+}
+
+function renderLetterMarkdown(markdown: string) {
+  const lines = markdown.replace(/\r\n/g, '\n').split('\n')
+  const html: string[] = []
+  let paragraph: string[] = []
+  let listItems: string[] = []
+  let orderedList = false
+
+  function flushParagraph() {
+    if (!paragraph.length) return
+    html.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br/>')}</p>`)
+    paragraph = []
+  }
+
+  function flushList() {
+    if (!listItems.length) return
+    html.push(`<${orderedList ? 'ol' : 'ul'}>${listItems.join('')}</${orderedList ? 'ol' : 'ul'}>`)
+    listItems = []
+  }
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      flushParagraph()
+      flushList()
+      continue
+    }
+
+    const heading = line.match(/^(#{1,3})\s+(.+)$/)
+    if (heading) {
+      flushParagraph()
+      flushList()
+      const level = heading[1].length
+      html.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`)
+      continue
+    }
+
+    const unordered = line.match(/^\s*[-*]\s+(.+)$/)
+    const ordered = line.match(/^\s*\d+\.\s+(.+)$/)
+    if (unordered || ordered) {
+      flushParagraph()
+      const isOrdered = Boolean(ordered)
+      if (listItems.length && orderedList !== isOrdered) flushList()
+      orderedList = isOrdered
+      listItems.push(`<li>${renderInlineMarkdown((ordered ?? unordered)?.[1] ?? '')}</li>`)
+      continue
+    }
+
+    const quote = line.match(/^>\s?(.+)$/)
+    if (quote) {
+      flushParagraph()
+      flushList()
+      html.push(`<blockquote>${renderInlineMarkdown(quote[1])}</blockquote>`)
+      continue
+    }
+
+    flushList()
+    paragraph.push(line)
+  }
+
+  flushParagraph()
+  flushList()
+
+  return html.join('\n')
+}
+
 let _resend: Resend | null = null
 
 export function getResend(): Resend {
@@ -29,16 +107,19 @@ export function buildVerificationEmail(opts: {
   verifyUrl: string
   adminName?: string | null
 }): { subject: string; html: string } {
+  const escapedFirstName = escapeHtml(opts.firstName)
+  const escapedAdminName = opts.adminName ? escapeHtml(opts.adminName) : null
+  const href = safeHref(opts.verifyUrl)
   const senderLine = opts.adminName
-    ? `<p>${opts.adminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
+    ? `<p>${escapedAdminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
     : '<p>Please confirm your mailing address (or update it / opt out) using the link below:</p>'
 
   return {
     subject: opts.adminName ? `${opts.adminName} asked you to verify your address` : 'Please verify your address',
     html: `
-      <p>Hi ${opts.firstName},</p>
+      <p>Hi ${escapedFirstName},</p>
       ${senderLine}
-      <p><a href="${opts.verifyUrl}">Verify / Update / Opt out</a></p>
+      <p><a href="${href}">Verify / Update / Opt out</a></p>
       <p>This link is unique to you.</p>
     `,
   }
@@ -48,17 +129,9 @@ export function buildLetterEmail(opts: {
   subject: string
   body: string
 }): { subject: string; html: string } {
-  const htmlBody = opts.body
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br/>')
-
   return {
     subject: opts.subject,
-    html: `<p>${htmlBody}</p>`,
+    html: renderLetterMarkdown(opts.body),
   }
 }
 
@@ -119,6 +192,48 @@ export function buildCalendarReminderEmail(opts: {
         <p><strong>${escapedTitle}</strong>${escapedContact ? ` for ${escapedContact}` : ''} is coming up on <strong>${opts.occurrenceDate}</strong>.</p>
         <p>Based on ${escapeHtml(opts.offsetLabel.toLowerCase())}, dearfriends estimates you should mail something by <strong>${opts.mailByDate}</strong>.</p>
         <p style="font-size:13px;color:#6b7290">Delivery offset: ${opts.offsetDays} days · Event type: ${escapeHtml(opts.eventType)}</p>
+      </div>
+    `,
+  }
+}
+
+export function buildAnniversaryReminderEmail(opts: {
+  adminName?: string | null
+  yearsSinceFirstSend: number
+  composeUrl: string
+}): { subject: string; html: string } {
+  const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
+  const href = safeHref(opts.composeUrl)
+  const yearLabel = opts.yearsSinceFirstSend === 1 ? 'a year' : `${opts.yearsSinceFirstSend} years`
+
+  return {
+    subject: `Time to write again? It's been ${yearLabel}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
+        <p>Hi${escapedName},</p>
+        <p>You sent your first letters through dearfriends about <strong>${yearLabel} ago</strong>. Want to draft this year's note?</p>
+        <p><a href="${href}" style="background:#4A6CD4;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Open composer</a></p>
+      </div>
+    `,
+  }
+}
+
+export function buildBirthdayDigestEmail(opts: {
+  adminName?: string | null
+  birthdays: Array<{ name: string; label: string }>
+}): { subject: string; html: string } {
+  const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
+  const items = opts.birthdays
+    .map(entry => `<li><strong>${escapeHtml(entry.name)}</strong> — ${escapeHtml(entry.label)}</li>`)
+    .join('')
+
+  return {
+    subject: `Upcoming birthdays this week (${opts.birthdays.length})`,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
+        <p>Hi${escapedName},</p>
+        <p>Here are the birthdays coming up in the next week for groups you're tracking:</p>
+        <ul>${items}</ul>
       </div>
     `,
   }

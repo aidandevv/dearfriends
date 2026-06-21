@@ -20,8 +20,8 @@ export function TemplatePicker({
             onClick={() => onSelect(template)}
             className={`flex-shrink-0 w-[88px] rounded-xl border bg-white text-left transition-all overflow-hidden ${
               isSelected
-                ? 'border-blue-ink shadow-[0_0_0_2px_rgba(51,88,186,0.18)]'
-                : 'border-border/80 hover:border-blue-ink/40'
+                ? 'border-periwinkle shadow-[0_0_0_2px_rgba(74,108,212,0.18)]'
+                : 'border-border/80 hover:border-periwinkle/40'
             }`}
           >
             {/* Mini letter preview */}

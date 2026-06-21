@@ -17,7 +17,7 @@ export function ShareLinkActions({ url, compact = false }: { url: string; compac
       <button
         onClick={handleCopy}
         title={copied ? 'Copied!' : 'Copy share link'}
-        className="flex h-5 w-5 items-center justify-center text-ink-muted transition-colors hover:text-blue-ink"
+        className="flex h-5 w-5 items-center justify-center text-ink-muted transition-colors hover:text-periwinkle"
       >
         {copied ? <Check size={12} /> : <Copy size={12} />}
       </button>
