@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Contact } from '@/lib/database.types'
+import { isPhysicalMailMethod } from '@/lib/delivery-methods'
 
 type ExportContact = Pick<
   Contact,
@@ -32,7 +33,9 @@ export async function getExportContacts(
     })
 
     contacts = contacts.filter(contact => !contact.opted_out)
-    if (method && method !== 'all') {
+    if (method === 'physical') {
+      contacts = contacts.filter(contact => isPhysicalMailMethod(contact.delivery_method))
+    } else if (method && method !== 'all') {
       contacts = contacts.filter(contact => contact.delivery_method === method)
     }
 
@@ -44,7 +47,9 @@ export async function getExportContacts(
     .select(EXPORT_FIELDS)
     .eq('opted_out', false)
 
-  if (method && method !== 'all') {
+  if (method === 'physical') {
+    query = query.in('delivery_method', ['handwrite', 'print'])
+  } else if (method && method !== 'all') {
     query = query.eq('delivery_method', method)
   }
 
@@ -54,11 +59,11 @@ export async function getExportContacts(
   return (data ?? []).map(stripExportFields)
 }
 
-export async function getPrintContactsForPdf(
+export async function getLetterPdfContacts(
   supabase: SupabaseClient,
   groupId?: string | null,
 ): Promise<Array<Pick<Contact, 'first_name' | 'last_name'>>> {
-  const contacts = await getExportContacts(supabase, { method: 'print', groupId })
+  const contacts = await getExportContacts(supabase, { method: 'physical', groupId })
   return contacts.map(({ first_name, last_name }) => ({ first_name, last_name }))
 }
 

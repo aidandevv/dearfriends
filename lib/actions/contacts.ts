@@ -145,7 +145,7 @@ export async function getContacts(): Promise<Contact[]> {
 }
 
 export async function updateContact(id: string, updates: Partial<{
-  delivery_method: string
+  delivery_method: 'handwrite' | 'print' | 'digital'
   tags: string[]
   opted_out: boolean
   birthday: string | null

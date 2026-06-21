@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { geocodeAddress, isUsMailableAddress } from './geocode'
+import { contactsWithCoordinates, geocodeAddress, isUsMailableAddress } from './geocode'
 
 describe('isUsMailableAddress', () => {
   it('treats missing country as US', () => {
@@ -15,6 +15,28 @@ describe('isUsMailableAddress', () => {
   it('rejects non-US countries', () => {
     expect(isUsMailableAddress('Canada')).toBe(false)
     expect(isUsMailableAddress('GB')).toBe(false)
+  })
+})
+
+describe('contactsWithCoordinates', () => {
+  it('keeps coordinate-bearing contacts and preserves their fields', () => {
+    const contacts = [
+      { id: 'a', first_name: 'Ada', city: 'Austin', state: 'TX', lat: 30.2672, lng: -97.7431 },
+      { id: 'b', first_name: 'Bea', city: 'Portland', state: 'OR', lat: null, lng: -122.6784 },
+      { id: 'c', first_name: 'Cal', city: 'Chicago', state: 'IL', lat: 41.8781, lng: null },
+    ]
+
+    expect(contactsWithCoordinates(contacts)).toEqual([
+      {
+        id: 'a',
+        first_name: 'Ada',
+        city: 'Austin',
+        state: 'TX',
+        lat: 30.2672,
+        lng: -97.7431,
+        coordinates: [30.2672, -97.7431],
+      },
+    ])
   })
 })
 

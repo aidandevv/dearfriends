@@ -14,7 +14,7 @@ export default async function ExportPage({ searchParams }: { searchParams: Promi
         <p className="eyebrow">Sending</p>
         <h1 className="dash-title">Export &amp; send</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-ink-muted">
-          Choose the format that matches how each person should hear from you, from printed letters to digital sends.
+          Export labels and letter PDFs for mail you send yourself, or email contacts marked digital. Dear Friends is your address book and composer — not a mailing service.
         </p>
         {groups.length > 0 && (
           <div className="mt-4">

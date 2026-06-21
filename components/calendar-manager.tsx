@@ -156,39 +156,46 @@ export function CalendarManager({
             {calendarDays.map(day => {
               const key = dateKey(day)
               const dayEvents = eventsByDate[key] ?? []
+              const mailByEvents = dayEvents.filter(event => event.kind === 'reminder')
+              const occasionEvents = dayEvents.filter(event => event.kind === 'occasion')
+              const visibleMailBy = mailByEvents.slice(0, 2)
+              const visibleOccasions = occasionEvents.slice(0, Math.max(0, 3 - visibleMailBy.length))
+              const hiddenCount = dayEvents.length - visibleMailBy.length - visibleOccasions.length
               const isCurrentMonth = day.getUTCMonth() === visibleMonth.getUTCMonth()
               const isToday = key === todayKey
 
               return (
                 <div
                   key={key}
-                  className={`min-h-[132px] border-b border-r border-border/60 p-2 ${isCurrentMonth ? 'bg-white' : 'bg-linen/30 text-ink-muted/60'}`}
+                  className={`flex min-h-[132px] flex-col border-b border-r border-border/60 p-2 ${isCurrentMonth ? 'bg-white' : 'bg-linen/30 text-ink-muted/60'}`}
                 >
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-1.5 flex items-center justify-between">
                     <span className={`flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium ${isToday ? 'bg-periwinkle text-white' : isCurrentMonth ? 'text-ink' : 'text-ink-muted/60'}`}>
                       {day.getUTCDate()}
                     </span>
                   </div>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map(event => (
+                  <div className="-mx-2 flex min-h-0 flex-1 flex-col gap-px">
+                    {visibleMailBy.map(event => (
                       <div
                         key={event.id}
-                        className={`rounded-md px-2 py-1 text-xs leading-4 ${
-                          event.kind === 'reminder'
-                            ? 'border border-stamp/20 bg-stamp/10 text-stamp'
-                            : 'border border-periwinkle/15 bg-periwinkle/10 text-periwinkle'
-                        }`}
+                        className="flex h-5 w-full items-center gap-1 bg-stamp px-1.5 text-[11px] font-medium leading-none text-white"
                         title={`${event.title} · ${event.meta}`}
                       >
-                        <div className="flex items-start gap-1.5">
-                          {event.kind === 'reminder' && <Send size={11} className="mt-0.5 shrink-0" />}
-                          <span className="min-w-0 truncate font-medium">{event.title}</span>
-                        </div>
-                        <div className="truncate opacity-80">{event.meta}</div>
+                        <Send size={10} className="shrink-0 opacity-90" aria-hidden />
+                        <span className="min-w-0 truncate">{event.title}</span>
                       </div>
                     ))}
-                    {dayEvents.length > 3 && (
-                      <div className="px-2 text-xs text-ink-muted">+{dayEvents.length - 3} more</div>
+                    {visibleOccasions.map(event => (
+                      <div
+                        key={event.id}
+                        className="flex h-5 w-full items-center bg-periwinkle/85 px-1.5 text-[11px] font-medium leading-none text-white"
+                        title={`${event.title} · ${event.meta}`}
+                      >
+                        <span className="min-w-0 truncate">{event.title}</span>
+                      </div>
+                    ))}
+                    {hiddenCount > 0 && (
+                      <div className="px-2 pt-0.5 text-[11px] text-ink-muted">+{hiddenCount} more</div>
                     )}
                   </div>
                 </div>

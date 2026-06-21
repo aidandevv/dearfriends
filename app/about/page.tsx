@@ -66,10 +66,10 @@ export default function AboutPage() {
                 Gather mailing addresses through a simple public link, then keep everyone organized in a private dashboard designed around real correspondence.
               </p>
               <p>
-                Write one thoughtful letter, personalize it with names, and choose whether each contact should receive something handwritten, printed, or digital.
+                Write one thoughtful letter, personalize it with names, and mark each contact as write-by-hand, print-at-home, or digital.
               </p>
               <p>
-                When it is time to send, export the formats you need or run quick verification check-ins to make sure every address still feels current.
+                When it is time to send, export label CSVs and letter PDFs for physical mail you handle yourself, or email digital contacts from the app.
               </p>
             </div>
           </div>

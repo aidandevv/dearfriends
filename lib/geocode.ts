@@ -9,7 +9,12 @@ type ContactWithCoordinates = {
   lng?: number | null
 }
 
-export type GeocodedContact = ContactWithCoordinates & {
+type CoordinateInput = {
+  lat?: number | null
+  lng?: number | null
+}
+
+export type GeocodedContact<T extends CoordinateInput = ContactWithCoordinates> = T & {
   coordinates: [number, number]
 }
 
@@ -116,7 +121,7 @@ export async function geocodeAddress(
   return geocodeWithCensus(address, city, state, zip)
 }
 
-export async function geocodeContacts(contacts: ContactWithCoordinates[]): Promise<GeocodedContact[]> {
+export function contactsWithCoordinates<T extends CoordinateInput>(contacts: T[]): GeocodedContact<T>[] {
   return contacts.flatMap(contact => {
     if (contact.lat == null || contact.lng == null) return []
 
@@ -125,4 +130,8 @@ export async function geocodeContacts(contacts: ContactWithCoordinates[]): Promi
       coordinates: [contact.lat, contact.lng],
     }]
   })
+}
+
+export async function geocodeContacts<T extends CoordinateInput>(contacts: T[]): Promise<GeocodedContact<T>[]> {
+  return contactsWithCoordinates(contacts)
 }

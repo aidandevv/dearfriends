@@ -38,6 +38,10 @@ describe('contactSchema', () => {
     expect(contactSchema.safeParse({ ...valid, email: 'bad' }).success).toBe(false)
   })
 
+  it('accepts handwrite delivery_method', () => {
+    expect(contactSchema.safeParse({ ...valid, delivery_method: 'handwrite' }).success).toBe(true)
+  })
+
   it('rejects invalid delivery_method', () => {
     expect(contactSchema.safeParse({ ...valid, delivery_method: 'fax' }).success).toBe(false)
   })

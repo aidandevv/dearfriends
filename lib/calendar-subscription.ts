@@ -1,9 +1,15 @@
 import { lookup } from 'dns/promises'
+import { request } from 'node:https'
 import { isIP } from 'net'
 
 const MAX_CALENDAR_BYTES = 1024 * 1024
 const MAX_REDIRECTS = 3
 const FETCH_TIMEOUT_MS = 8000
+
+type ValidatedAddress = {
+  address: string
+  family: 4 | 6
+}
 
 function isPrivateIPv4(address: string) {
   const parts = address.split('.').map(Number)
@@ -51,61 +57,113 @@ function isBlockedAddress(address: string) {
   return true
 }
 
-export async function validateCalendarSubscriptionUrl(rawUrl: string): Promise<string | null> {
+async function resolveValidatedCalendarUrl(rawUrl: string): Promise<{ url: URL; address: ValidatedAddress } | { error: string }> {
   let url: URL
   try {
     url = new URL(rawUrl)
   } catch {
-    return 'Paste a valid calendar subscription URL.'
+    return { error: 'Paste a valid calendar subscription URL.' }
   }
 
-  if (url.protocol !== 'https:') return 'Calendar subscriptions must use HTTPS.'
-  if (url.username || url.password) return 'Calendar URLs cannot include credentials.'
-  if (isBlockedHost(url.hostname)) return 'Calendar URL host is not allowed.'
+  if (url.protocol !== 'https:') return { error: 'Calendar subscriptions must use HTTPS.' }
+  if (url.username || url.password) return { error: 'Calendar URLs cannot include credentials.' }
+  if (isBlockedHost(url.hostname)) return { error: 'Calendar URL host is not allowed.' }
 
   // IPv6 literals arrive bracketed ([::1]) from url.hostname; strip before isIP.
   const hostLiteral = url.hostname.replace(/^\[|\]$/g, '')
   if (isIP(hostLiteral)) {
-    return isBlockedAddress(hostLiteral) ? 'Calendar URL host is not allowed.' : null
+    if (isBlockedAddress(hostLiteral)) return { error: 'Calendar URL host is not allowed.' }
+    return { url, address: { address: hostLiteral, family: isIP(hostLiteral) as 4 | 6 } }
   }
 
   try {
     const addresses = await lookup(url.hostname, { all: true, verbatim: true })
-    if (!addresses.length || addresses.some(({ address }) => isBlockedAddress(address))) {
-      return 'Calendar URL host is not allowed.'
+    if (!addresses.length) return { error: 'Calendar URL host is not allowed.' }
+    const safeAddresses = addresses.filter(({ address }) => !isBlockedAddress(address))
+    if (safeAddresses.length !== addresses.length) {
+      return { error: 'Calendar URL host is not allowed.' }
+    }
+    const selected = safeAddresses[0]
+    return {
+      url,
+      address: {
+        address: selected.address,
+        family: selected.family as 4 | 6,
+      },
     }
   } catch {
-    return 'Could not resolve that calendar URL.'
+    return { error: 'Could not resolve that calendar URL.' }
   }
-
-  return null
 }
 
-async function fetchWithTimeout(url: string) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-  try {
-    return await fetch(url, {
-      cache: 'no-store',
-      redirect: 'manual',
-      signal: controller.signal,
+export async function validateCalendarSubscriptionUrl(rawUrl: string): Promise<string | null> {
+  const result = await resolveValidatedCalendarUrl(rawUrl)
+  return 'error' in result ? result.error : null
+}
+
+function fetchPinnedUrl(url: URL, pinned: ValidatedAddress): Promise<{
+  ok: boolean
+  status: number
+  headers: Map<string, string>
+  text(): Promise<string>
+}> {
+  return new Promise((resolve, reject) => {
+    const req = request(url, {
+      lookup: (_hostname, _options, callback) => {
+        callback(null, pinned.address, pinned.family)
+      },
+      servername: url.hostname,
+      timeout: FETCH_TIMEOUT_MS,
+    }, response => {
+      const chunks: Buffer[] = []
+      let bytes = 0
+
+      response.on('data', chunk => {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+        bytes += buffer.length
+        if (bytes > MAX_CALENDAR_BYTES) {
+          req.destroy()
+          reject(new Error('too-large'))
+          return
+        }
+        chunks.push(buffer)
+      })
+
+      response.on('end', () => {
+        const headers = new Map<string, string>()
+        for (const [key, value] of Object.entries(response.headers)) {
+          if (Array.isArray(value)) headers.set(key.toLowerCase(), value.join(', '))
+          else if (typeof value === 'string') headers.set(key.toLowerCase(), value)
+        }
+        const status = response.statusCode ?? 0
+        const body = Buffer.concat(chunks).toString('utf8')
+        resolve({
+          ok: status >= 200 && status < 300,
+          status,
+          headers,
+          async text() { return body },
+        })
+      })
     })
-  } finally {
-    clearTimeout(timeout)
-  }
+
+    req.on('timeout', () => req.destroy(new Error('timeout')))
+    req.on('error', reject)
+    req.end()
+  })
 }
 
 export async function fetchCalendarSubscription(rawUrl: string): Promise<{ text?: string; error?: string }> {
   let currentUrl = rawUrl
 
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
-    const validationError = await validateCalendarSubscriptionUrl(currentUrl)
-    if (validationError) return { error: validationError }
+    const validated = await resolveValidatedCalendarUrl(currentUrl)
+    if ('error' in validated) return { error: validated.error }
 
-    let response: Response
+    let response: Awaited<ReturnType<typeof fetchPinnedUrl>>
     try {
-      response = await fetchWithTimeout(currentUrl)
-    } catch {
+      response = await fetchPinnedUrl(validated.url, validated.address)
+    } catch (error) {
+      if (error instanceof Error && error.message === 'too-large') return { error: 'Calendar file is too large.' }
       return { error: 'Could not read that calendar URL.' }
     }
 

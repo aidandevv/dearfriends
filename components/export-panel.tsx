@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { sendDigitalLetters } from '@/lib/actions/letter'
+import { DELIVERY_LABELS } from '@/lib/delivery-methods'
 import { FileDown, FileText, Send } from 'lucide-react'
 
 export function ExportPanel({ groupId }: { groupId?: string | null }) {
@@ -29,14 +30,14 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
         eyebrow="Labels"
         icon={<FileText size={18} strokeWidth={1.6} />}
         title="CSV export"
-        description="Generate mailing data for labels and list cleanup."
+        description="Avery-ready address files for your own printer and stamps. Dear Friends never mails anything for you."
       >
         <div className="grid gap-2">
           <a href={`/api/export/csv?method=handwrite${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
-            Handwrite contacts
+            {DELIVERY_LABELS.handwrite} contacts
           </a>
           <a href={`/api/export/csv?method=print${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
-            Print contacts
+            {DELIVERY_LABELS.print} contacts
           </a>
           <a href={`/api/export/csv?method=all${groupParam}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
             All contacts
@@ -45,13 +46,13 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
       </ExportCard>
 
       <ExportCard
-        eyebrow="Print"
+        eyebrow="Letters"
         icon={<FileDown size={18} strokeWidth={1.6} />}
         title="PDF export"
-        description="Build a ready-to-print packet with one personalized page per print contact."
+        description="One personalized page per contact — a print-ready letter for print-at-home, or a reference draft while you write by hand."
       >
         <a href={`/api/export/pdf${groupId ? `?group=${groupId}` : ''}`} className="btn-outline inline-flex min-h-11 items-center justify-center px-4 text-sm">
-          Download print-ready PDF
+          Download letter PDF
         </a>
       </ExportCard>
 
@@ -59,7 +60,7 @@ export function ExportPanel({ groupId }: { groupId?: string | null }) {
         eyebrow="Email"
         icon={<Send size={18} strokeWidth={1.6} />}
         title="Digital send"
-        description="Use your current letter draft to email everyone marked for digital delivery."
+        description="The only delivery Dear Friends sends for you — email to contacts marked digital."
       >
         <div className="grid gap-3">
           <button

@@ -133,8 +133,8 @@ export function Hero() {
                 <span className="flex h-7 w-6 items-center justify-center rounded-[2px] border border-dashed border-white/80 font-serif text-[10px] italic text-white">df</span>
               </span>
               <div className="text-left">
-                <p className="text-[14px] font-medium text-ink">A card in the mail</p>
-                <p className="text-[12.5px] text-ink-muted">right on their birthday</p>
+                <p className="text-[14px] font-medium text-ink">You mail the card</p>
+                <p className="text-[12.5px] text-ink-muted">labels + addresses exported</p>
               </div>
             </div>
           </VignetteCard>
@@ -157,7 +157,7 @@ const steps = [
   },
   {
     title: 'Send something real.',
-    desc: 'Write it, print it, or drop it in the mail.',
+    desc: 'Export labels and letters, then you print, pen, and stamp. Digital contacts get email from the app.',
   },
 ]
 

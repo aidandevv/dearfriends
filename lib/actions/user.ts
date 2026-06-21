@@ -4,6 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { onboardingSchema, profileSchema, slugSchema } from '@/lib/schemas'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import {
+  countShareSlugsForAdmin,
+  generateShareSlugForUser,
+  isShareSlugTaken,
+} from '@/lib/share-slugs'
 
 export async function completeOnboarding(input: unknown) {
   const parsed = onboardingSchema.safeParse(input)
@@ -28,7 +33,7 @@ export async function completeOnboarding(input: unknown) {
 
   // Fire-and-forget slug generation — don't block onboarding on failure
   try {
-    await generateShareSlug(user.id)
+    await generateShareSlugForUser(user.id)
   } catch {
     // Non-fatal: slug will be generated lazily on first dashboard visit
   }
@@ -93,119 +98,12 @@ export async function updateProfile(data: unknown) {
   return { success: true }
 }
 
-export type ShareSlugResolution = {
-  adminId: string
-  groupId: string | null
-}
+export async function generateShareSlug(): Promise<string> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
 
-// Scans all auth users and group share links for a matching slug.
-export async function resolveShareSlug(slug: string): Promise<ShareSlugResolution | null> {
-  const admin = createAdminClient()
-  const normalised = slug.toLowerCase()
-  let page = 1
-  const perPage = 1000
-
-  while (true) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage })
-    if (error || !data) break
-    const match = data.users.find(
-      u => u.user_metadata?.share_slug === normalised
-    )
-    if (match) return { adminId: match.id, groupId: null }
-    if (data.users.length < perPage) break
-    page++
-  }
-
-  const { data: group } = await admin
-    .from('groups')
-    .select('id, admin_id')
-    .eq('share_slug', normalised)
-    .maybeSingle()
-
-  if (group) return { adminId: group.admin_id, groupId: group.id }
-
-  return null
-}
-
-// Scans all auth users for a matching share_slug. Returns adminId or null.
-export async function resolveSlugToAdminId(slug: string): Promise<string | null> {
-  const resolution = await resolveShareSlug(slug)
-  return resolution?.adminId ?? null
-}
-
-export async function isShareSlugTaken(
-  slug: string,
-  opts: { excludingUserId?: string; excludingGroupId?: string } = {},
-): Promise<boolean> {
-  const admin = createAdminClient()
-  const normalised = slug.toLowerCase()
-  let page = 1
-  const perPage = 1000
-
-  while (true) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage })
-    if (error || !data) break
-    const conflict = data.users.find(
-      u => u.id !== opts.excludingUserId && u.user_metadata?.share_slug === normalised
-    )
-    if (conflict) return true
-    if (data.users.length < perPage) break
-    page++
-  }
-
-  const { data } = await admin
-    .from('groups')
-    .select('id')
-    .eq('share_slug', normalised)
-
-  return (data ?? []).some(group => group.id !== opts.excludingGroupId)
-}
-
-export async function countShareSlugsForAdmin(adminId: string): Promise<number> {
-  const admin = createAdminClient()
-  const { data: userData } = await admin.auth.admin.getUserById(adminId)
-  const hasPrimarySlug = typeof userData.user?.user_metadata?.share_slug === 'string'
-    && userData.user.user_metadata.share_slug.trim().length > 0
-
-  const { count } = await admin
-    .from('groups')
-    .select('id', { count: 'exact', head: true })
-    .eq('admin_id', adminId)
-    .not('share_slug', 'is', null)
-
-  return (hasPrimarySlug ? 1 : 0) + (count ?? 0)
-}
-
-function randomSlug(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-}
-
-// Generates and saves an 8-char share slug for the given user.
-// Pass userId when the caller already has it; omit to resolve from session.
-export async function generateShareSlug(userId?: string): Promise<string> {
-  const admin = createAdminClient()
-
-  const resolvedId = userId ?? (await (await createClient()).auth.getUser()).data.user?.id
-  if (!resolvedId) throw new Error('Not authenticated')
-
-  const existingSlugCount = await countShareSlugsForAdmin(resolvedId)
-  if (existingSlugCount >= 10) throw new Error('Users can have up to 10 share slugs')
-
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const slug = randomSlug()
-    const taken = await isShareSlugTaken(slug)
-    if (taken) continue  // collision — try again
-
-    const { data: userData } = await admin.auth.admin.getUserById(resolvedId)
-    const existingMeta = userData.user?.user_metadata ?? {}
-    const { error } = await admin.auth.admin.updateUserById(resolvedId, {
-      user_metadata: { ...existingMeta, share_slug: slug },
-    })
-    if (error) throw new Error(error.message)
-    return slug
-  }
-  throw new Error('Could not generate a unique share slug after 3 attempts')
+  return generateShareSlugForUser(user.id)
 }
 
 export async function updateShareMessage(message: string): Promise<{ error?: string }> {
