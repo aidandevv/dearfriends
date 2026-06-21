@@ -195,3 +195,61 @@ beta readiness
 **Follow-ups:** Commit and push the dashboard guard before merging the redesign branch into `main`; leave `.playwright-cli/` untracked local scratch out of the merge.
 
 ---
+
+### [CP-FEATURE] | 2026-06-20: Mail-by bars on calendar grid
+
+**Summary:** Restyled mail-by reminders on `/dashboard/calendar` from stacked card chips to full-width horizontal event bars (Google/Apple calendar all-day style). Stamp-colored bars span edge-to-edge within each day cell; occasion dates use matching periwinkle bars.
+
+**Files/Modules Affected:** `components/calendar-manager.tsx`.
+
+**Key Trade-off:** Kept single-day bars on the mail-by date rather than spanning mail-by → occurrence as a multi-day range, since the feature is anchored to one deadline date.
+
+**Evidence:** `next build` passed after the change.
+
+---
+
+<!-- SESSION: 2026-06-20 17:19 | globe city pins -->
+
+### [CP-REFACTOR] | 2026-06-20: Shared coordinate normalization for globe city pins
+
+**Summary:** Started the globe pin work at the city level by extracting the existing map coordinate filtering into `contactsWithCoordinates()`. The dashboard globe now groups city pins from the same persisted `lat`/`lng` normalization path the map uses, keeping the later friend-name tooltip pass focused on presentation rather than coordinate plumbing.
+
+**Files/Modules Affected:** `lib/geocode.ts`, `components/globe-panel.tsx`, `lib/geocode.test.ts`.
+
+**Key Trade-off:** Reused persisted coordinates instead of introducing client-side geocoding or changing the dashboard contact query. Friend names remain deferred until the city-pin rendering path is verified.
+
+**Evidence:** `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run lib/geocode.test.ts`, and `./node_modules/.bin/vitest run` passed.
+
+**Follow-ups:** Verify the globe visually with real/staging contact coordinates, then pass friend identity data into `GlobePanel` for name-level tooltip pins.
+
+---
+
+<!-- SESSION: 2026-06-20 17:29 | globe drag sensitivity -->
+
+### [CP-DEBUG] | 2026-06-20: Zoom-aware globe drag sensitivity
+
+**Summary:** Tuned the dashboard globe so drag rotation and release momentum scale down when the user zooms in. This keeps close-up navigation from feeling like the same wide-view drag force is being applied to a magnified globe.
+
+**Files/Modules Affected:** `components/globe-panel.tsx`.
+
+**Key Trade-off:** Preserved the existing base drag feel at default and zoomed-out levels, then reduced degrees-per-pixel only once zoom exceeds 1x instead of rewriting the interaction model.
+
+**Evidence:** `./node_modules/.bin/tsc --noEmit` passed.
+
+**Follow-ups:** Manually feel-test the globe with real/staging contacts at high zoom to tune the sensitivity curve if it still feels too fast or too slow.
+
+> **[CROSS-LOG]** Product impact logged in `./docs/product_insights.md` - see [PI-UX-FRICTION] | 2026-06-20: Zoomed globe dragging felt overpowered.
+
+---
+
+### [CP-REFACTOR] | 2026-06-21: Restore handwrite delivery with clearer DIY copy
+
+**Summary:** Reverted the mistaken removal of the `handwrite` delivery method. UI now labels it **Write by hand** (vs **Print at home** and **Digital**) with hints that physical mail is always user-handled. Handwrite contacts regain Avery CSV export and letter PDF export (reference while penning cards). Deleted unapplied migration `011_remove_handwrite_delivery.sql`. Centralized labels in `lib/delivery-methods.ts` and tightened marketing/export copy so Dear Friends is framed as address book + composer, not a mailing SaaS.
+
+**Files/Modules Affected:** `lib/delivery-methods.ts`, `lib/schemas.ts`, `lib/export-contacts.ts`, `components/contact-table.tsx`, `components/export-panel.tsx`, `components/ui/pill-badge.tsx`, `app/dashboard/page.tsx`, `app/api/export/csv/route.ts`, `app/api/export/pdf/route.ts`, marketing pages, `CLAUDE.md`.
+
+**Key Trade-off:** Kept DB value `handwrite` for compatibility while changing all user-facing strings; PDF export now includes both physical-mail methods in one download rather than separate flows.
+
+**Evidence:** `npm test` (77 passed) and `npm run typecheck` passed.
+
+---

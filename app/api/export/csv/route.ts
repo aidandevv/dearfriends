@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getExportContacts } from '@/lib/export-contacts'
+import { usesAveryLabels } from '@/lib/delivery-methods'
 import { toAveryCsv, toCsv } from '@/lib/utils'
 import { recordFirstSent } from '@/lib/actions/user'
 
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const contacts = await getExportContacts(supabase, { method, groupId })
-    const useAvery = method === 'handwrite' || method === 'print'
+    const useAvery = usesAveryLabels(method)
     const csv = useAvery ? toAveryCsv(contacts) : toCsv(contacts)
     const suffix = [method || 'all', groupId ? 'group' : null].filter(Boolean).join('-')
 

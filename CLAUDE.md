@@ -45,8 +45,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Verification links are server-mediated, single-use, and expire after 14 days. Do not grant anonymous direct table update policies for contact verification.
 - The letter composer uses `{{first_name}}` / `{{last_name}}` variable interpolation rendered into live markdown preview with a randomly selected contact.
 - CSV export targets Avery label mail-merge format for `handwrite` and `print` contacts.
-- PDF export renders one letter per page for `print` contacts with variables injected.
-- Digital send batches emails via Resend to `digital` contacts.
+- PDF export renders one letter per page for `handwrite` and `print` contacts with variables injected (reference for handwritten mail; print-ready for at-home printing).
+- Digital send batches emails via Resend to `digital` contacts. Dear Friends does not mail physical letters.
 
 ## Environment Variables
 

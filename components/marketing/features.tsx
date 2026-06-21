@@ -17,7 +17,7 @@ const features = [
     number: '03',
     icon: HeartHandshake,
     title: 'Send however feels right',
-    body: 'Some people get a printed letter, some get a handwritten card, some get an email. You pick for each person and Dear Friends handles the rest.',
+    body: 'Mark each person as write-by-hand, print-at-home, or digital. Export Avery labels and letter PDFs for mail you send yourself — or let Dear Friends email the digital list.',
   },
 ]
 

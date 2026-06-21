@@ -1,4 +1,4 @@
-type DeliveryMethod = 'handwrite' | 'print' | 'digital'
+import { DELIVERY_LABELS, type DeliveryMethod } from '@/lib/delivery-methods'
 
 const styles: Record<DeliveryMethod, string> = {
   digital: 'bg-periwinkle text-white',
@@ -6,18 +6,13 @@ const styles: Record<DeliveryMethod, string> = {
   handwrite: 'bg-sage text-white',
 }
 
-const labels: Record<DeliveryMethod, string> = {
-  digital: 'Digital',
-  print: 'Print',
-  handwrite: 'Handwrite',
-}
-
 export function PillBadge({ method }: { method: string }) {
   const key = method as DeliveryMethod
+  const label = DELIVERY_LABELS[key] ?? method
 
   return (
     <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${styles[key] ?? 'bg-border text-ink'}`}>
-      {labels[key] ?? method}
+      {label}
     </span>
   )
 }

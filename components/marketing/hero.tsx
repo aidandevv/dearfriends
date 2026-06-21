@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 const mockContacts = [
-  { name: 'Maya Chen', mode: 'Print', place: 'Portland, OR' },
-  { name: 'Eli Rivera', mode: 'Handwrite', place: 'Brooklyn, NY' },
+  { name: 'Maya Chen', mode: 'Print at home', place: 'Portland, OR' },
+  { name: 'Eli Rivera', mode: 'Write by hand', place: 'Brooklyn, NY' },
   { name: 'Sana Patel', mode: 'Digital', place: 'Austin, TX' },
 ]
 
@@ -26,7 +26,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-8 text-linen/70">
-            Grab everyone&apos;s address with one link, write something that actually sounds like you, and send it — printed, handwritten, or by email.
+            Collect addresses with one link, write a letter that sounds like you, then mail it yourself — handwritten, printed at home, or emailed for digital contacts.
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">

@@ -19,7 +19,7 @@ const steps = [
   },
   {
     title: 'Choose how each note goes out',
-    description: 'Export print files, build PDFs, or send digital letters when that is the better fit.',
+    description: 'Export Avery labels and letter PDFs for mail you send yourself, or email digital contacts from the app.',
     icon: Send,
     eyebrow: 'Export & Send',
   },

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react'
 import { useRouter } from 'next/navigation'
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo'
 import { feature, mesh } from 'topojson-client'
+import { contactsWithCoordinates } from '@/lib/geocode'
 
 type ContactGeo = {
   lat: number | null
@@ -35,6 +36,11 @@ const DIMENSIONS = {
   feature: { width: 760, height: 460, radius: 180 },
 }
 const US_ATLAS_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
+const BASE_DRAG_DEGREES_PER_PIXEL = 0.3
+
+function dragDegreesPerPixel(zoom: number): number {
+  return BASE_DRAG_DEGREES_PER_PIXEL / Math.max(1, zoom)
+}
 
 /** True if [lng, lat] is on the front hemisphere of the current rotation. */
 function isOnFront(lng: number, lat: number, rot: [number, number, number]): boolean {
@@ -100,16 +106,21 @@ export function GlobePanel({
     count: number
   } | null>(null)
 
+  const mappableContacts = useMemo(
+    () => contactsWithCoordinates(contacts),
+    [contacts],
+  )
+
   const pins = useMemo<Pin[]>(() => {
     const map = new Map<string, Pin>()
-    for (const c of contacts) {
-      if (c.lat == null || c.lng == null) continue
-      const key = `${c.lat.toFixed(4)},${c.lng.toFixed(4)}`
+    for (const c of mappableContacts) {
+      const [lat, lng] = c.coordinates
+      const key = `${lat.toFixed(4)},${lng.toFixed(4)}`
       const ex = map.get(key)
       if (ex) { ex.count++; continue }
       map.set(key, {
-        lat: c.lat,
-        lng: c.lng,
+        lat,
+        lng,
         city: c.city,
         state: c.state,
         country: c.country,
@@ -118,11 +129,11 @@ export function GlobePanel({
       })
     }
     return [...map.values()]
-  }, [contacts])
+  }, [mappableContacts])
 
   const geocodedCount = useMemo(
-    () => contacts.filter(c => c.lat != null).length,
-    [contacts],
+    () => mappableContacts.length,
+    [mappableContacts],
   )
 
   const uid = useId()
@@ -298,13 +309,14 @@ export function GlobePanel({
       const dy = e.clientY - lastPos.current.y
       const now = performance.now()
       const dt = Math.max(16, now - lastMove.current.t)
+      const dragSensitivity = dragDegreesPerPixel(zoomRef.current)
       velocity.current = {
         x: (e.clientX - lastMove.current.x) / dt,
         y: (e.clientY - lastMove.current.y) / dt,
       }
       rot.current = [
-        rot.current[0] + dx * 0.3,
-        Math.max(-80, Math.min(80, rot.current[1] - dy * 0.3)),
+        rot.current[0] + dx * dragSensitivity,
+        Math.max(-80, Math.min(80, rot.current[1] - dy * dragSensitivity)),
         rot.current[2],
       ]
       lastPos.current = { x: e.clientX, y: e.clientY }
@@ -317,8 +329,10 @@ export function GlobePanel({
       dragging.current = false
       globeSvg.releasePointerCapture?.(e.pointerId)
       globeSvg.style.cursor = 'grab'
-      let vx = velocity.current.x * 12
-      let vy = velocity.current.y * 12
+      const coastSensitivity =
+        dragDegreesPerPixel(zoomRef.current) / BASE_DRAG_DEGREES_PER_PIXEL
+      let vx = velocity.current.x * 12 * coastSensitivity
+      let vy = velocity.current.y * 12 * coastSensitivity
 
       if (Math.abs(vx) < 0.02 && Math.abs(vy) < 0.02) {
         scheduleResume()

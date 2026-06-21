@@ -13,6 +13,7 @@ import { GlobePanel } from '@/components/globe-panel'
 import { CalendarWidget } from '@/components/calendar-widget'
 import { getCalendarWidget } from '@/lib/actions/calendar'
 import { PostalLineArt } from '@/components/ui/postal-line-art'
+import { DELIVERY_HINTS, DELIVERY_LABELS } from '@/lib/delivery-methods'
 
 const MONTH_NAMES   = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const DAY_NAMES     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
@@ -42,9 +43,9 @@ export default async function DashboardPage({
   const { filter = 'all' } = await searchParams
 
   const verifiedCount   = contacts.filter(c => Boolean(c.verified_at) && !c.opted_out).length
+  const handwriteCount  = contacts.filter(c => c.delivery_method === 'handwrite').length
   const printCount      = contacts.filter(c => c.delivery_method === 'print').length
   const digitalCount    = contacts.filter(c => c.delivery_method === 'digital').length
-  const handwriteCount  = contacts.filter(c => c.delivery_method === 'handwrite').length
 
   const filteredContacts =
     filter === 'pending'  ? contacts.filter(c => !c.verified_at && !c.opted_out) :
@@ -52,11 +53,11 @@ export default async function DashboardPage({
     contacts
 
   const stats = [
-    { label: 'Total',     value: contacts.length,  hint: 'contacts' },
-    { label: 'Verified',  value: verifiedCount,     hint: 'addresses confirmed' },
-    { label: 'Print',     value: printCount,        hint: 'to mail yourself' },
-    { label: 'Digital',   value: digitalCount,      hint: 'email or PDF' },
-    { label: 'Handwrite', value: handwriteCount,    hint: "we'll mail it" },
+    { label: 'Total',           value: contacts.length,  hint: 'contacts' },
+    { label: 'Verified',        value: verifiedCount,     hint: 'addresses confirmed' },
+    { label: DELIVERY_LABELS.handwrite, value: handwriteCount, hint: DELIVERY_HINTS.handwrite },
+    { label: DELIVERY_LABELS.print,     value: printCount,     hint: DELIVERY_HINTS.print },
+    { label: DELIVERY_LABELS.digital,   value: digitalCount,   hint: DELIVERY_HINTS.digital },
   ]
 
   const now         = new Date()

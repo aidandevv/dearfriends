@@ -6,12 +6,12 @@ import { ContactEditForm } from '@/components/contact-edit-form'
 import { ContactGroupSelect } from '@/components/contact-group-select'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Contact } from '@/lib/database.types'
+import { DELIVERY_LABELS, DELIVERY_METHODS, isDeliveryMethod } from '@/lib/delivery-methods'
 
-const deliveryOptions = [
-  { value: 'handwrite', label: 'Handwrite' },
-  { value: 'print', label: 'Print' },
-  { value: 'digital', label: 'Digital' },
-]
+const deliveryOptions = DELIVERY_METHODS.map(value => ({
+  value,
+  label: DELIVERY_LABELS[value],
+}))
 
 const avatarColors = ['#516183', '#4A6CD4', '#5A7A5A', '#E8927C', '#3A55AC', '#4A5168']
 
@@ -38,6 +38,7 @@ export function ContactTable({
   const birthdayEditable = new Set(birthdayEditableIds)
 
   async function handleDeliveryChange(id: string, value: string) {
+    if (!isDeliveryMethod(value)) return
     setPending(id)
     await updateContact(id, { delivery_method: value })
     setPending(null)
