@@ -181,3 +181,17 @@ beta readiness
 **Follow-ups:** Commit and push the lockfile change so Vercel rebuilds from a package/lockfile pair that satisfies frozen install.
 
 ---
+
+### [CP-DEBUG] | 2026-06-20: Redesign merge-readiness dashboard auth guard
+
+**Summary:** Merge readiness against refreshed `origin/main` passed conflict, frozen-install, unit, build, typecheck, and browser smoke checks, but Playwright exposed a dashboard server error during the unauthenticated redirect path. Added a page-level `/dashboard` auth guard so the route redirects before loading dashboard data.
+
+**Files/Modules Affected:** `app/dashboard/page.tsx`, `docs/dev_journal.md`.
+
+**Key Trade-off:** Kept the fix narrowly scoped to the route that emitted the error instead of broadening auth changes across every dashboard action during a merge-readiness pass.
+
+**Evidence:** `git merge-tree --write-tree origin/main HEAD`, `corepack pnpm install --frozen-lockfile --lockfile-only --ignore-workspace`, `./node_modules/.bin/next build`, `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/playwright test`, and `./node_modules/.bin/vitest run` passed after the guard. The first parallel `tsc` rerun failed only because `next build` was regenerating `.next/types`; rerunning after build passed.
+
+**Follow-ups:** Commit and push the dashboard guard before merging the redesign branch into `main`; leave `.playwright-cli/` untracked local scratch out of the merge.
+
+---

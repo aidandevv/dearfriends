@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ContactTable } from '@/components/contact-table'
 import { DashboardInviteCta } from '@/components/dashboard-invite-cta'
 import { SendVerificationButton } from '@/components/send-verification-button'
@@ -23,6 +24,8 @@ export default async function DashboardPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   const profile = getUserProfile(user)
 
   let shareSlug = profile.shareSlug
