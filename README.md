@@ -73,18 +73,40 @@ The security model assumes:
 
 ```bash
 pnpm dev          # local development
+pnpm lint         # ESLint
 pnpm build        # production build
 pnpm typecheck    # TypeScript check
 pnpm test         # Vitest unit tests
 pnpm test:e2e     # Playwright tests
 ```
 
+## CI/CD
+
+GitHub Actions runs the full release gate on every branch push and pull request:
+
+```bash
+pnpm install --frozen-lockfile --ignore-workspace
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
+
+The Vercel deploy job runs only after those checks pass. Pull requests from the same repository receive preview deployments, `main` deploys to production, and manual runs can opt into production. Configure these repository secrets before enabling deployment:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+If the project is also connected to Vercel's built-in Git integration, disable one of the deploy paths to avoid duplicate deployments.
+
 ## Deployment
 
 The repository includes `vercel.json` for scheduled reminder jobs. Production deploys should run:
 
 ```bash
-pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile --ignore-workspace
 pnpm build
 ```
 
