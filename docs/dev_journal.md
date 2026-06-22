@@ -269,3 +269,39 @@ beta readiness
 **Follow-ups:** Apply the new migration to Supabase and confirm live migration history with `select * from supabase_migrations.schema_migrations order by version;`.
 
 ---
+
+<!-- SESSION: 2026-06-22 18:43 | resend email branding -->
+
+### [CP-REFACTOR] | 2026-06-22: Shared branded shell for Resend emails
+
+**Summary:** Centralized Resend email branding in `lib/resend.ts` with a table-based Dear Friends wrapper, shared button styling, and branded footer treatment. Verification, digital letter, note notification, address refresh, calendar reminder, anniversary reminder, and birthday digest builders now share the same transactional email frame.
+
+**Files/Modules Affected:** `lib/resend.ts`, `lib/resend.test.ts`.
+
+**Key Trade-off:** Wrapped even user-composed digital letters with a minimal "Sent with Dear Friends" footer so every Resend delivery has consistent product provenance, while leaving the letter body content rendered from the existing markdown path.
+
+**Evidence:** `./node_modules/.bin/vitest run lib/resend.test.ts` passed. `./node_modules/.bin/tsc --noEmit` and a full `./node_modules/.bin/vitest run` were attempted but are currently blocked by unrelated dirty-worktree state-validation work: `lib/us-states.ts(62,29)` fails typecheck, and the full suite has fixture drift in `lib/actions/contacts.test.ts` and `lib/actions/verification.test.ts`.
+
+**Follow-ups:** Re-run the full suite after the in-progress state-schema changes are reconciled.
+
+> **[CROSS-LOG]** Product impact logged in `./docs/product_insights.md` - see [PI-TRUST] | 2026-06-22: Branded lifecycle emails reinforce recipient trust.
+
+---
+
+<!-- SESSION: 2026-06-22 18:43 | dashboard globe and calendar cleanup -->
+
+### [CP-MILESTONE] | 2026-06-22: Dashboard globe hover, state validation, and calendar deletion
+
+**Summary:** Tightened three dashboard/address workflows in one pass: globe tooltips now use stable projected-pin hit testing instead of transient per-frame SVG hover targets, U.S. state entry is constrained by shared select options plus server-side normalization, and calendar dates/sources can be deleted while the dashboard widget only surfaces relevant upcoming mail-by nudges.
+
+**Files/Modules Affected:** `components/globe-panel.tsx`, `components/calendar-manager.tsx`, `components/calendar-widget.tsx`, `components/share-form.tsx`, `components/contact-edit-form.tsx`, `app/(public)/verify/[token]/page.tsx`, `lib/actions/calendar.ts`, `lib/schemas.ts`, `lib/us-states.ts`, and focused tests.
+
+**Key Trade-off:** Kept international regions freeform while making domestic U.S. state data strict; calendar source deletion explicitly removes imported events before deleting the source because the current FK would otherwise orphan events.
+
+**Evidence:** `./node_modules/.bin/vitest run lib/schemas.test.ts lib/actions/contacts.test.ts lib/actions/calendar-security.test.ts`, full `./node_modules/.bin/vitest run`, `./node_modules/.bin/tsc --noEmit`, and `./node_modules/.bin/next build` passed.
+
+**Follow-ups:** Consider a small confirmation affordance for destructive calendar deletes if users start managing larger imported calendars.
+
+> **[CROSS-LOG]** Product impact logged in `./docs/product_insights.md` - see [PI-UX-FRICTION] | 2026-06-22: Dashboard utility controls need direct cleanup paths.
+
+---
