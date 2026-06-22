@@ -1,13 +1,16 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { CalendarPlus, ChevronLeft, ChevronRight, Link as LinkIcon, MapPin, Send } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, ChevronRight, Link as LinkIcon, MapPin, Send, Trash2 } from 'lucide-react'
 import {
   createCalendarEvent,
+  deleteCalendarEvent,
+  deleteCalendarSource,
   importCalendarSubscription,
   updateMailingOrigin,
   type CalendarEventView,
 } from '@/lib/actions/calendar'
+import { US_STATES } from '@/lib/us-states'
 
 type ContactOption = {
   id: string
@@ -208,10 +211,10 @@ export function CalendarManager({
           {events.length === 0 && (
             <p className="text-sm text-ink-muted">No dates yet. Add one manually or import a calendar subscription.</p>
           )}
-          {events.slice(0, 6).map(event => (
+          {events.map(event => (
             <article
               key={event.id}
-              className="grid gap-3 rounded-lg border border-border/70 bg-linen/70 px-4 py-4 md:grid-cols-[96px_minmax(0,1fr)_150px]"
+              className="grid gap-3 rounded-lg border border-border/70 bg-linen/70 px-4 py-4 md:grid-cols-[96px_minmax(0,1fr)_150px_auto]"
             >
               <div className="flex flex-col">
                 <span className="font-serif text-2xl text-periwinkle">{formatDate(event.occurrenceDate)}</span>
@@ -230,6 +233,17 @@ export function CalendarManager({
                 </span>
                 <strong className="mt-1 block">{formatDate(event.mailByDate)}</strong>
               </div>
+              <form action={run(deleteCalendarEvent)} className="flex items-start justify-end">
+                <input type="hidden" name="event_id" value={event.id} />
+                <button
+                  disabled={pending}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:border-stamp/40 hover:bg-stamp/10 hover:text-stamp disabled:opacity-50"
+                  aria-label={`Delete ${event.title}`}
+                  title="Delete date"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </form>
             </article>
           ))}
         </div>
@@ -245,7 +259,12 @@ export function CalendarManager({
             </div>
           </div>
           <form action={run(updateMailingOrigin)} className="flex gap-2">
-            <input name="mailing_state" defaultValue={originState ?? ''} maxLength={2} placeholder="CA" className="input min-h-11 uppercase" />
+            <select name="mailing_state" defaultValue={originState ?? ''} className="input min-h-11">
+              <option value="">State</option>
+              {US_STATES.map(state => (
+                <option key={state.code} value={state.code}>{state.code}</option>
+              ))}
+            </select>
             <button disabled={pending} className="btn-primary min-h-11 px-4">Save</button>
           </form>
         </section>
@@ -304,9 +323,22 @@ export function CalendarManager({
             <button disabled={pending} className="btn-outline min-h-11">Import dates</button>
           </form>
           {sources.length > 0 && (
-            <div className="mt-4 border-t border-border/70 pt-3 text-xs text-ink-muted">
-              {sources.slice(0, 3).map(source => (
-                <p key={source.id}>{source.name} · {source.provider}</p>
+            <div className="mt-4 grid gap-2 border-t border-border/70 pt-3 text-xs text-ink-muted">
+              {sources.map(source => (
+                <div key={source.id} className="flex items-center justify-between gap-3">
+                  <p className="min-w-0 truncate">{source.name} · {source.provider}</p>
+                  <form action={run(deleteCalendarSource)}>
+                    <input type="hidden" name="source_id" value={source.id} />
+                    <button
+                      disabled={pending}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:border-stamp/40 hover:bg-stamp/10 hover:text-stamp disabled:opacity-50"
+                      aria-label={`Delete ${source.name} calendar`}
+                      title="Delete calendar"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </form>
+                </div>
               ))}
             </div>
           )}

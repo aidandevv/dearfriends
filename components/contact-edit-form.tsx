@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { updateContactDetails } from '@/lib/actions/contacts'
 import { contactEditSchema, type ContactEditInput } from '@/lib/schemas'
+import { US_STATES } from '@/lib/us-states'
 import type { Contact } from '@/lib/database.types'
 
 const inputClass =
@@ -127,7 +128,16 @@ export function ContactEditForm({
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-xs font-medium text-ink-soft">State / region</span>
-          <input {...register('state')} className={inputClass} />
+          {isInternational ? (
+            <input {...register('state')} className={inputClass} />
+          ) : (
+            <select {...register('state')} className={inputClass}>
+              <option value="">Select state</option>
+              {US_STATES.map(state => (
+                <option key={state.code} value={state.code}>{state.name}</option>
+              ))}
+            </select>
+          )}
           {errors.state && <span className="text-xs text-stamp">{errors.state.message}</span>}
         </label>
 

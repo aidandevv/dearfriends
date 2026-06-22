@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { submitPublicContact } from '@/lib/actions/contacts'
 import { contactSchema, type ContactInput } from '@/lib/schemas'
+import { US_STATES } from '@/lib/us-states'
 import { PostalLineArt } from '@/components/ui/postal-line-art'
 
 function firstName(name: string | null) {
@@ -63,7 +64,7 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
     formState: { errors, isSubmitting },
   } = useForm<ContactInput>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { delivery_method: 'print' },
+    defaultValues: { delivery_method: 'print', state: '' },
   })
 
   async function onSubmit(data: ContactInput) {
@@ -216,7 +217,16 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
                 <input id="city" {...register('city')} className={inputClass} />
               </Field>
               <Field id="state" label={isInternational ? 'Region' : 'State'} error={errors.state?.message}>
-                <input id="state" {...register('state')} className={inputClass} />
+                {isInternational ? (
+                  <input id="state" {...register('state')} className={inputClass} />
+                ) : (
+                  <select id="state" {...register('state')} className={inputClass}>
+                    <option value="">Select</option>
+                    {US_STATES.map(state => (
+                      <option key={state.code} value={state.code}>{state.name}</option>
+                    ))}
+                  </select>
+                )}
               </Field>
               <Field id="zip" label={isInternational ? 'Postal' : 'ZIP'} error={errors.zip?.message}>
                 <input id="zip" {...register('zip')} className={inputClass} />

@@ -13,6 +13,54 @@ function safeHref(url: string) {
   return /^(https?:|mailto:)/i.test(trimmed) ? escapeHtml(trimmed) : '#'
 }
 
+const emailStyles = {
+  body: "margin:0;padding:0;background:#FAF7F1;font-family:Georgia,'Times New Roman',serif",
+  outer: 'background:#FAF7F1;padding:40px 16px',
+  card: 'max-width:560px;background:#FFFFFF;border:1px solid #DDD0BC;border-radius:12px;overflow:hidden',
+  header: 'padding:28px 36px 24px;border-bottom:1px solid #DDD0BC',
+  brand: "margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400;color:#231209;letter-spacing:0.02em",
+  content: 'padding:32px 36px 28px;font-size:15px;line-height:1.7;color:#231209',
+  footer: 'padding:20px 36px 24px;border-top:1px solid #DDD0BC;font-size:12px;color:#7A6352;line-height:1.6',
+  button:
+    'display:inline-block;padding:12px 28px;background:#C05C2E;color:#ffffff;text-decoration:none;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;letter-spacing:0.01em',
+}
+
+function renderEmailButton(href: string, label: string) {
+  return `<a href="${safeHref(href)}" style="${emailStyles.button}">${escapeHtml(label)}</a>`
+}
+
+function renderBrandedEmail(content: string, footer = 'Dear Friends') {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+    <body style="${emailStyles.body}">
+      <table width="100%" cellpadding="0" cellspacing="0" style="${emailStyles.outer}">
+        <tr><td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" style="${emailStyles.card}">
+            <tr>
+              <td style="${emailStyles.header}">
+                <p style="${emailStyles.brand}">Dear Friends</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="${emailStyles.content}">
+                ${content}
+              </td>
+            </tr>
+            <tr>
+              <td style="${emailStyles.footer}">
+                ${footer}
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+  `
+}
+
 function renderInlineMarkdown(text: string) {
   return escapeHtml(text)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => `<a href="${safeHref(href)}">${label}</a>`)
@@ -109,19 +157,18 @@ export function buildVerificationEmail(opts: {
 }): { subject: string; html: string } {
   const escapedFirstName = escapeHtml(opts.firstName)
   const escapedAdminName = opts.adminName ? escapeHtml(opts.adminName) : null
-  const href = safeHref(opts.verifyUrl)
   const senderLine = opts.adminName
-    ? `<p>${escapedAdminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
-    : '<p>Please confirm your mailing address (or update it / opt out) using the link below:</p>'
+    ? `<p style="margin:0 0 12px">${escapedAdminName} is double-checking their mailing list and asked if you could confirm your address.</p>`
+    : '<p style="margin:0 0 12px">Please confirm your mailing address (or update it / opt out) using the link below:</p>'
 
   return {
     subject: opts.adminName ? `${opts.adminName} asked you to verify your address` : 'Please verify your address',
-    html: `
-      <p>Hi ${escapedFirstName},</p>
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi ${escapedFirstName},</p>
       ${senderLine}
-      <p><a href="${href}">Verify / Update / Opt out</a></p>
-      <p>This link is unique to you.</p>
-    `,
+      <p style="margin:20px 0 0">${renderEmailButton(opts.verifyUrl, 'Verify / Update / Opt out')}</p>
+      <p style="margin:24px 0 0;font-size:13px;color:#7A6352">This link is unique to you.</p>
+    `),
   }
 }
 
@@ -131,7 +178,7 @@ export function buildLetterEmail(opts: {
 }): { subject: string; html: string } {
   return {
     subject: opts.subject,
-    html: renderLetterMarkdown(opts.body),
+    html: renderBrandedEmail(renderLetterMarkdown(opts.body), 'Sent with Dear Friends'),
   }
 }
 
@@ -142,11 +189,11 @@ export function buildNoteNotificationEmail(opts: {
 }): { subject: string; html: string } {
   return {
     subject: `${opts.recipientFirstName} left you a note`,
-    html: `
-      <p>Hi${opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''},</p>
-      <p><strong>${escapeHtml(opts.recipientFirstName)}</strong> left you a note after submitting their address:</p>
-      <blockquote style="border-left:3px solid #ccc;padding-left:1em;color:#555">${escapeHtml(opts.note)}</blockquote>
-    `,
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi${opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''},</p>
+      <p style="margin:0 0 16px"><strong>${escapeHtml(opts.recipientFirstName)}</strong> left you a note after submitting their address:</p>
+      <blockquote style="margin:0;border-left:3px solid #C05C2E;padding-left:1em;color:#7A6352">${escapeHtml(opts.note)}</blockquote>
+    `),
   }
 }
 
@@ -160,13 +207,13 @@ export function buildAddressRefreshEmail(opts: {
   const escapedFirstName = escapeHtml(opts.firstName)
   return {
     subject: `${from} wants to confirm your address`,
-    html: `
-      <p>Hi ${escapedFirstName},</p>
-      <p>${escapedFrom} is updating their address book and wants to make sure they have your current address.</p>
-      <p>Mind taking 30 seconds to confirm (or update) it?</p>
-      <p><a href="${opts.refreshUrl}" style="background:#8B4513;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Confirm my address</a></p>
-      <p style="font-size:12px;color:#999">This link is unique to you.</p>
-    `,
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi ${escapedFirstName},</p>
+      <p style="margin:0 0 12px">${escapedFrom} is updating their address book and wants to make sure they have your current address.</p>
+      <p style="margin:0 0 20px">Mind taking 30 seconds to confirm (or update) it?</p>
+      <p style="margin:0">${renderEmailButton(opts.refreshUrl, 'Confirm my address')}</p>
+      <p style="margin:24px 0 0;font-size:13px;color:#7A6352">This link is unique to you.</p>
+    `),
   }
 }
 
@@ -186,14 +233,12 @@ export function buildCalendarReminderEmail(opts: {
 
   return {
     subject: `Mail by ${opts.mailByDate}: ${opts.title}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
-        <p>Hi${escapedName},</p>
-        <p><strong>${escapedTitle}</strong>${escapedContact ? ` for ${escapedContact}` : ''} is coming up on <strong>${opts.occurrenceDate}</strong>.</p>
-        <p>Based on ${escapeHtml(opts.offsetLabel.toLowerCase())}, dearfriends estimates you should mail something by <strong>${opts.mailByDate}</strong>.</p>
-        <p style="font-size:13px;color:#6b7290">Delivery offset: ${opts.offsetDays} days · Event type: ${escapeHtml(opts.eventType)}</p>
-      </div>
-    `,
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi${escapedName},</p>
+      <p style="margin:0 0 12px"><strong>${escapedTitle}</strong>${escapedContact ? ` for ${escapedContact}` : ''} is coming up on <strong>${escapeHtml(opts.occurrenceDate)}</strong>.</p>
+      <p style="margin:0 0 20px">Based on ${escapeHtml(opts.offsetLabel.toLowerCase())}, Dear Friends estimates you should mail something by <strong>${escapeHtml(opts.mailByDate)}</strong>.</p>
+      <p style="margin:0;font-size:13px;color:#7A6352">Delivery offset: ${opts.offsetDays} days &middot; Event type: ${escapeHtml(opts.eventType)}</p>
+    `),
   }
 }
 
@@ -203,18 +248,15 @@ export function buildAnniversaryReminderEmail(opts: {
   composeUrl: string
 }): { subject: string; html: string } {
   const escapedName = opts.adminName ? ` ${escapeHtml(opts.adminName)}` : ''
-  const href = safeHref(opts.composeUrl)
   const yearLabel = opts.yearsSinceFirstSend === 1 ? 'a year' : `${opts.yearsSinceFirstSend} years`
 
   return {
     subject: `Time to write again? It's been ${yearLabel}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
-        <p>Hi${escapedName},</p>
-        <p>You sent your first letters through dearfriends about <strong>${yearLabel} ago</strong>. Want to draft this year's note?</p>
-        <p><a href="${href}" style="background:#4A6CD4;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Open composer</a></p>
-      </div>
-    `,
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi${escapedName},</p>
+      <p style="margin:0 0 20px">You sent your first letters through Dear Friends about <strong>${yearLabel} ago</strong>. Want to draft this year's note?</p>
+      <p style="margin:0">${renderEmailButton(opts.composeUrl, 'Open composer')}</p>
+    `),
   }
 }
 
@@ -229,12 +271,10 @@ export function buildBirthdayDigestEmail(opts: {
 
   return {
     subject: `Upcoming birthdays this week (${opts.birthdays.length})`,
-    html: `
-      <div style="font-family:Arial,sans-serif;color:#1d2442;line-height:1.6">
-        <p>Hi${escapedName},</p>
-        <p>Here are the birthdays coming up in the next week for groups you're tracking:</p>
-        <ul>${items}</ul>
-      </div>
-    `,
+    html: renderBrandedEmail(`
+      <p style="margin:0 0 12px">Hi${escapedName},</p>
+      <p style="margin:0 0 12px">Here are the birthdays coming up in the next week for groups you're tracking:</p>
+      <ul style="margin:0;padding-left:20px">${items}</ul>
+    `),
   }
 }

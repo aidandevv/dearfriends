@@ -98,6 +98,14 @@ export function GlobePanel({
   const [zoom, setZoom] = useState(1)
   const zoomRef = useRef(1)
   const translate = useRef({ x: W / 2, y: H / 2 })
+  const pointerPos = useRef<{ x: number; y: number } | null>(null)
+  const projectedPins = useRef<Array<{
+    key: string
+    x: number
+    y: number
+    label: string
+    count: number
+  }>>([])
 
   const [tooltip, setTooltip] = useState<{
     x: number
@@ -228,6 +236,7 @@ export function GlobePanel({
 
       // Rebuild pins each frame — only visible hemisphere pins
       pinsEl.innerHTML = ''
+      const nextProjectedPins: typeof projectedPins.current = []
       for (const pin of pins) {
         if (!isOnFront(pin.lng, pin.lat, rot.current)) continue
         const xy = proj([pin.lng, pin.lat])
@@ -239,24 +248,55 @@ export function GlobePanel({
         mkCircle(pinsEl, x, y, 8, 'var(--cream)', '0.32')
         mkCircle(pinsEl, x, y, 4.2, 'var(--stamp)', '1')
         mkCircle(pinsEl, x, y, 1.3, 'white', '0.9')
+        nextProjectedPins.push({
+          key: `${pin.lat},${pin.lng}`,
+          x,
+          y,
+          label: pin.isInternational
+            ? `${pin.city}, ${pin.country || 'International'}`
+            : `${pin.city}, ${pin.state}`,
+          count: pin.count,
+        })
+      }
+      projectedPins.current = nextProjectedPins
+      updateTooltipForPointer()
+    }
 
-        // Transparent hit target for hover
-        const hit = mkCircle(pinsEl, x, y, 13, 'transparent', '1')
-        hit.style.cursor = 'pointer'
-        const p = pin
-        hit.addEventListener('mouseenter', () => {
-          setTooltip({
-            x,
-            y,
-            label: p.isInternational
-              ? `${p.city}, ${p.country || 'International'}`
-              : `${p.city}, ${p.state}`,
-            count: p.count,
-          })
-        })
-        hit.addEventListener('mouseleave', () => {
-          setTooltip(null)
-        })
+    function updateTooltipForPointer() {
+      const pos = pointerPos.current
+      if (!pos || dragging.current) {
+        setTooltip(null)
+        return
+      }
+
+      let nearest: typeof projectedPins.current[number] | null = null
+      let nearestDistance = Infinity
+      for (const pin of projectedPins.current) {
+        const distance = Math.hypot(pin.x - pos.x, pin.y - pos.y)
+        if (distance < nearestDistance) {
+          nearestDistance = distance
+          nearest = pin
+        }
+      }
+
+      if (!nearest || nearestDistance > 16) {
+        setTooltip(null)
+        return
+      }
+
+      setTooltip({
+        x: nearest.x,
+        y: nearest.y,
+        label: nearest.label,
+        count: nearest.count,
+      })
+    }
+
+    function pointerToSvgPoint(e: PointerEvent) {
+      const rect = globeSvg.getBoundingClientRect()
+      return {
+        x: ((e.clientX - rect.left) / rect.width) * W,
+        y: ((e.clientY - rect.top) / rect.height) * H,
       }
     }
 
@@ -296,6 +336,8 @@ export function GlobePanel({
       clearResume()
       cancelCoast()
       velocity.current = { x: 0, y: 0 }
+      pointerPos.current = null
+      setTooltip(null)
       const now = performance.now()
       lastPos.current = { x: e.clientX, y: e.clientY }
       lastMove.current = { x: e.clientX, y: e.clientY, t: now }
@@ -322,6 +364,18 @@ export function GlobePanel({
       lastPos.current = { x: e.clientX, y: e.clientY }
       lastMove.current = { x: e.clientX, y: e.clientY, t: now }
       e.preventDefault()
+    }
+
+    function onHoverMove(e: PointerEvent) {
+      if (dragging.current) return
+      pointerPos.current = pointerToSvgPoint(e)
+      updateTooltipForPointer()
+    }
+
+    function onLeave() {
+      pointerPos.current = null
+      setTooltip(null)
+      scheduleResume()
     }
 
     function onUp(e: PointerEvent) {
@@ -366,6 +420,8 @@ export function GlobePanel({
     }
 
     svg.addEventListener('pointerdown', onDown)
+    svg.addEventListener('pointermove', onHoverMove)
+    svg.addEventListener('pointerleave', onLeave)
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
     window.addEventListener('pointercancel', onUp)
@@ -396,6 +452,8 @@ export function GlobePanel({
     return () => {
       alive = false
       svg.removeEventListener('pointerdown', onDown)
+      svg.removeEventListener('pointermove', onHoverMove)
+      svg.removeEventListener('pointerleave', onLeave)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)

@@ -75,7 +75,7 @@ function validContact() {
     email: 'ada@example.com',
     address_line_1: '1 Main',
     city: 'London',
-    state: 'LN',
+    state: 'TX',
     zip: '12345',
     delivery_method: 'digital',
     tags: ['attacker-controlled'],

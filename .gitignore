@@ -10,7 +10,17 @@
 /coverage
 /playwright-report/
 /test-results/
+/.playwright-cli/
 /.playwright-mcp/
+
+# local agent/journal artifacts
+/docs/dev_journal.md
+/docs/product_insights.md
+
+# generated screenshots kept out of the public source tree
+/landing-full.png
+/landing-hero.png
+/letter-section.png
 
 # next.js
 /.next/

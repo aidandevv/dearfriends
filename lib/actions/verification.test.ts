@@ -107,18 +107,18 @@ describe('handleVerifyToken', () => {
   it('strips unexpected fields during address updates', async () => {
     await expect(handleVerifyToken(token, 'update', {
       address_line_1: '2 Main',
-      city: 'Paris',
-      state: 'IDF',
-      zip: '75001',
+      city: 'Austin',
+      state: 'TX',
+      zip: '78701',
       admin_id: 'attacker',
       delivery_method: 'digital',
     } as never)).resolves.toEqual({ success: true })
 
     expect(state.updatePayload).toMatchObject({
       address_line_1: '2 Main',
-      city: 'Paris',
-      state: 'IDF',
-      zip: '75001',
+      city: 'Austin',
+      state: 'TX',
+      zip: '78701',
       verification_token: null,
     })
     expect(state.updatePayload).not.toHaveProperty('admin_id')
