@@ -1,5 +1,5 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "pnpm install --frozen-lockfile --ignore-workspace",
   "crons": [
     {
       "path": "/api/cron/send-verifications",
