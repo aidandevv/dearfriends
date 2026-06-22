@@ -7,6 +7,9 @@ function formatDate(date: string) {
 }
 
 export function CalendarWidget({ events }: { events: CalendarEventView[] }) {
+  const today = new Date().toISOString().slice(0, 10)
+  const relevantEvents = events.filter(event => event.occurrenceDate >= today)
+
   return (
     <section className="surface-panel px-5 py-5">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -17,10 +20,10 @@ export function CalendarWidget({ events }: { events: CalendarEventView[] }) {
         <CalendarDays size={18} className="text-periwinkle" />
       </div>
       <div className="grid gap-2">
-        {events.length === 0 && (
+        {relevantEvents.length === 0 && (
           <p className="text-sm text-ink-muted">Add birthdays and anniversaries to see mailing nudges here.</p>
         )}
-        {events.map(event => (
+        {relevantEvents.map(event => (
           <div key={event.id} className="rounded-lg border border-border/60 bg-linen/70 px-3 py-3">
             <p className="text-sm font-medium text-ink">{event.title}</p>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted">

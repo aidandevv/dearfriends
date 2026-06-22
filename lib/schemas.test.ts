@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { contactSchema, contactEditSchema, letterDraftSchema, slugSchema } from './schemas'
+import { contactSchema, contactEditSchema, letterDraftSchema, mailingOriginSchema, slugSchema } from './schemas'
 
 describe('contactEditSchema', () => {
   const valid = {
@@ -18,8 +18,23 @@ describe('contactEditSchema', () => {
     expect(contactEditSchema.safeParse(valid).success).toBe(true)
   })
 
+  it('uppercases and validates domestic states', () => {
+    const parsed = contactEditSchema.safeParse({ ...valid, state: ' tx ' })
+    expect(parsed.success && parsed.data.state).toBe('TX')
+    expect(contactEditSchema.safeParse({ ...valid, state: 'ZZ' }).success).toBe(false)
+  })
+
   it('requires country for international addresses', () => {
     expect(contactEditSchema.safeParse({ ...valid, is_international: true }).success).toBe(false)
+  })
+
+  it('allows freeform regions for international addresses', () => {
+    expect(contactEditSchema.safeParse({
+      ...valid,
+      state: 'Ontario',
+      is_international: true,
+      country: 'Canada',
+    }).success).toBe(true)
   })
 })
 
@@ -34,6 +49,10 @@ describe('contactSchema', () => {
     expect(contactSchema.safeParse(valid).success).toBe(true)
   })
 
+  it('rejects invalid domestic states', () => {
+    expect(contactSchema.safeParse({ ...valid, state: 'California' }).success).toBe(false)
+  })
+
   it('rejects invalid email', () => {
     expect(contactSchema.safeParse({ ...valid, email: 'bad' }).success).toBe(false)
   })
@@ -44,6 +63,17 @@ describe('contactSchema', () => {
 
   it('rejects invalid delivery_method', () => {
     expect(contactSchema.safeParse({ ...valid, delivery_method: 'fax' }).success).toBe(false)
+  })
+})
+
+describe('mailingOriginSchema', () => {
+  it('normalizes valid state codes', () => {
+    const parsed = mailingOriginSchema.safeParse({ mailing_state: ' ca ' })
+    expect(parsed.success && parsed.data.mailing_state).toBe('CA')
+  })
+
+  it('rejects invalid state codes', () => {
+    expect(mailingOriginSchema.safeParse({ mailing_state: 'ZZ' }).success).toBe(false)
   })
 })
 

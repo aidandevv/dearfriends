@@ -1,4 +1,32 @@
 import { z } from 'zod'
+import { isUsStateCode, normalizeUsStateCode } from '@/lib/us-states'
+
+const stateOrRegionSchema = z.string().trim().min(1).max(80)
+const usStateSchema = z
+  .string()
+  .trim()
+  .transform(normalizeUsStateCode)
+  .refine(isUsStateCode, 'Choose a valid U.S. state.')
+
+function validateContactState(
+  value: { state: string; is_international?: boolean },
+  ctx: z.RefinementCtx,
+) {
+  if (!value.is_international && !isUsStateCode(value.state)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['state'],
+      message: 'Choose a valid U.S. state.',
+    })
+  }
+}
+
+function normalizeContactState<T extends { state: string; is_international?: boolean }>(value: T): T {
+  return {
+    ...value,
+    state: value.is_international ? value.state.trim() : normalizeUsStateCode(value.state),
+  }
+}
 
 export const contactSchema = z.object({
   first_name: z.string().min(1),
@@ -7,13 +35,14 @@ export const contactSchema = z.object({
   address_line_1: z.string().min(1),
   address_line_2: z.string().optional(),
   city: z.string().min(1),
-  state: z.string().min(1),
+  state: stateOrRegionSchema,
   zip: z.string().min(1),
   delivery_method: z.enum(['handwrite', 'print', 'digital']),
   is_international: z.boolean().optional().default(false),
   country: z.string().trim().max(80).optional(),
   tags: z.array(z.string()).optional().default([]),
 }).superRefine((value, ctx) => {
+  validateContactState(value, ctx)
   if (value.is_international && !value.country?.trim()) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -21,7 +50,7 @@ export const contactSchema = z.object({
       message: 'Country is required for international addresses',
     })
   }
-})
+}).transform(normalizeContactState)
 
 export type ContactInput = z.infer<typeof contactSchema>
 
@@ -32,12 +61,13 @@ export const contactEditSchema = z.object({
   address_line_1: z.string().trim().min(1),
   address_line_2: z.string().trim().optional(),
   city: z.string().trim().min(1),
-  state: z.string().trim().min(1),
+  state: stateOrRegionSchema,
   zip: z.string().trim().min(1),
   is_international: z.boolean(),
   country: z.string().trim().max(80).optional(),
   tags: z.string().optional(),
 }).superRefine((value, ctx) => {
+  validateContactState(value, ctx)
   if (value.is_international && !value.country?.trim()) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -45,7 +75,7 @@ export const contactEditSchema = z.object({
       message: 'Country is required for international addresses',
     })
   }
-})
+}).transform(normalizeContactState)
 
 export type ContactEditInput = z.infer<typeof contactEditSchema>
 
@@ -60,7 +90,7 @@ export const verifySchema = z.object({
   address_line_1: z.string().min(1),
   address_line_2: z.string().optional(),
   city: z.string().min(1),
-  state: z.string().min(1),
+  state: usStateSchema,
   zip: z.string().min(1),
 })
 
@@ -87,7 +117,7 @@ export const calendarImportSchema = z.object({
 })
 
 export const mailingOriginSchema = z.object({
-  mailing_state: z.string().trim().length(2).transform(s => s.toUpperCase()),
+  mailing_state: usStateSchema,
 })
 
 export const onboardingSchema = z.object({

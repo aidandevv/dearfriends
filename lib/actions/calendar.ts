@@ -148,9 +148,14 @@ export async function getCalendarData() {
 
 export async function getCalendarWidget() {
   const data = await getCalendarData()
+  const today = toDateOnly(new Date())
+  const relevantEvents = data.events
+    .filter(event => event.occurrenceDate >= today)
+    .sort((a, b) => a.mailByDate.localeCompare(b.mailByDate))
+
   return {
     originState: data.originState,
-    events: data.events.slice(0, 4),
+    events: relevantEvents.slice(0, 4),
   }
 }
 
@@ -204,6 +209,51 @@ export async function createCalendarEvent(formData: FormData) {
   }
 
   const { error } = await supabase.from('calendar_events').insert(payload)
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/calendar')
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+export async function deleteCalendarEvent(formData: FormData) {
+  const eventId = formData.get('event_id')
+  if (typeof eventId !== 'string' || !eventId) return { error: 'Missing date.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { error } = await supabase
+    .from('calendar_events')
+    .delete()
+    .eq('id', eventId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/calendar')
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+export async function deleteCalendarSource(formData: FormData) {
+  const sourceId = formData.get('source_id')
+  if (typeof sourceId !== 'string' || !sourceId) return { error: 'Missing calendar.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { error: eventError } = await supabase
+    .from('calendar_events')
+    .delete()
+    .eq('calendar_source_id', sourceId)
+  if (eventError) return { error: eventError.message }
+
+  const { error } = await supabase
+    .from('calendar_sources')
+    .delete()
+    .eq('id', sourceId)
   if (error) return { error: error.message }
 
   revalidatePath('/dashboard/calendar')

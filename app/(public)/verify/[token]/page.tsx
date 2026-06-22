@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { verifySchema, type VerifyInput } from '@/lib/schemas'
+import { US_STATES } from '@/lib/us-states'
 import { handleVerifyToken } from '@/lib/actions/verification'
 import { Postmark } from '@/components/ui/postmark'
 import { PostalLineArt } from '@/components/ui/postal-line-art'
@@ -125,7 +126,12 @@ export default function VerifyPage({ params }: { params: Promise<{ token: string
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-ink-muted font-medium">State</label>
-                <input {...register('state')} className="input" />
+                <select {...register('state')} className="input">
+                  <option value="">Select</option>
+                  {US_STATES.map(state => (
+                    <option key={state.code} value={state.code}>{state.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-ink-muted font-medium">ZIP</label>
