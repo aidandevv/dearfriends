@@ -216,6 +216,15 @@ body {
     position: relative;
   }
 
+  .dashboard-sidebar-footer {
+    position: fixed;
+    left: 18px;
+    bottom: 24px;
+    width: 184px;
+    max-width: calc(100vw - 36px);
+    z-index: 3;
+  }
+
   .app-page-stack {
     @apply space-y-5 p-6;
   }
@@ -448,6 +457,13 @@ body {
     padding: 10px 8px 2px !important;
   }
 
+  .dashboard-sidebar-footer {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin-top: 12px;
+  }
+
   .dashboard-user-card {
     margin-top: 12px;
     max-width: 100%;
@@ -478,6 +494,13 @@ body {
 }
 
 @media (max-width: 760px) {
+  .calendar-month-grid {
+    display: none !important;
+  }
+
+  .calendar-agenda {
+    display: block !important;
+  }
   .dashboard-stats {
     grid-template-columns: 1fr !important;
   }

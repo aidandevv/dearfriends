@@ -38,12 +38,12 @@ function WagonWheel({ cx, cy, r, opacity = 1 }: { cx: number; cy: number; r: num
   )
 }
 
-function RouteNode({ cx, cy, scale = 1 }: { cx: number; cy: number; scale?: number }) {
+function RouteNode({ cx, cy }: { cx: number; cy: number }) {
   return (
     <g>
-      <circle cx={cx} cy={cy} r={svgNumber(13 * scale)} fill="none" stroke="var(--periwinkle)" strokeWidth={1.35} {...strokeProps} />
-      <circle cx={cx} cy={cy} r={svgNumber(8.6 * scale)} fill="var(--surface-raised)" />
-      <circle cx={cx} cy={cy} r={svgNumber(6.2 * scale)} fill="var(--peach)" />
+      <circle cx={cx} cy={cy} r="13" fill="none" stroke="var(--periwinkle)" strokeWidth={1.35} {...strokeProps} />
+      <circle cx={cx} cy={cy} r="8.6" fill="var(--surface-raised)" />
+      <circle cx={cx} cy={cy} r="6.2" fill="var(--peach)" />
     </g>
   )
 }
@@ -76,12 +76,12 @@ function FullRoute() {
         opacity={0.72}
         {...strokeProps}
       />
-      <line x1="296" y1="382" x2="296" y2="104" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
-      <line x1="682" y1="568" x2="682" y2="722" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
-      <line x1="1010" y1="300" x2="1010" y2="78" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
-      <RouteNode cx={296} cy={382} />
-      <RouteNode cx={682} cy={568} />
-      <RouteNode cx={1010} cy={300} />
+      <line x1="296" y1="104" x2="296" y2="486" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
+      <line x1="682" y1="468" x2="682" y2="722" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
+      <line x1="1010" y1="78" x2="1010" y2="420" stroke="var(--peach)" strokeDasharray="3 8" strokeWidth={1.15} {...strokeProps} />
+      <RouteNode cx={296} cy={384} />
+      <RouteNode cx={682} cy={546.5} />
+      <RouteNode cx={1010} cy={280.4} />
       <WagonWheel cx={86} cy={128} r={43} opacity={0.76} />
       <WagonWheel cx={1140} cy={616} r={38} opacity={0.58} />
       <WagonWheel cx={1078} cy={106} r={31} opacity={0.5} />
@@ -108,8 +108,8 @@ function PanelRoute() {
         opacity={0.75}
         {...strokeProps}
       />
-      <RouteNode cx={218} cy={169} scale={0.85} />
-      <RouteNode cx={520} cy={332} scale={0.85} />
+      <RouteNode cx={218} cy={156.2} />
+      <RouteNode cx={520} cy={329.5} />
       <WagonWheel cx={82} cy={70} r={30} opacity={0.55} />
       <WagonWheel cx={742} cy={420} r={34} opacity={0.48} />
     </>
@@ -135,8 +135,8 @@ function CompactRoute() {
         opacity={0.78}
         {...strokeProps}
       />
-      <RouteNode cx={194} cy={87} scale={0.72} />
-      <RouteNode cx={442} cy={198} scale={0.72} />
+      <RouteNode cx={194} cy={97.1} />
+      <RouteNode cx={442} cy={213.7} />
       <WagonWheel cx={72} cy={270} r={24} opacity={0.55} />
     </>
   )

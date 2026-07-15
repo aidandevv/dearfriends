@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { LetterComposer } from '@/components/letter-composer'
 import { GroupFilter } from '@/components/group-filter'
-import { getDraft, getRandomContact } from '@/lib/actions/letter'
+import { getDraft } from '@/lib/actions/letter'
 import { getGroups, getContactsByGroup } from '@/lib/actions/groups'
 
 export default async function ComposePage({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
@@ -14,9 +14,11 @@ export default async function ComposePage({ searchParams }: { searchParams: Prom
     getContactsByGroup(groupId),
   ])
 
-  const contact = groupContacts.length > 0
-    ? groupContacts[Math.floor(Math.random() * groupContacts.length)]
-    : await getRandomContact()
+  const previewContacts = groupContacts.length > 0
+    ? groupContacts
+        .map(contact => ({ first_name: contact.first_name, last_name: contact.last_name }))
+        .sort((a, b) => `${a.last_name}${a.first_name}`.localeCompare(`${b.last_name}${b.first_name}`))
+    : [{ first_name: 'Jane', last_name: 'Smith' }]
 
   return (
     <div className="app-page-stack">
@@ -35,7 +37,7 @@ export default async function ComposePage({ searchParams }: { searchParams: Prom
         )}
       </section>
 
-      <LetterComposer initialSubject={draft.subject} initialBody={draft.body} previewContact={contact} />
+      <LetterComposer initialSubject={draft.subject} initialBody={draft.body} previewContacts={previewContacts} />
     </div>
   )
 }

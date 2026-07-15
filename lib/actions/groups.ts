@@ -15,6 +15,23 @@ export async function getGroups() {
   return data ?? []
 }
 
+export async function getGroupsWithCounts() {
+  const [groups, memberships] = await Promise.all([
+    getGroups(),
+    (async () => {
+      const supabase = await createClient()
+      const { data, error } = await supabase.from('contact_groups').select('group_id')
+      if (error) throw new Error(error.message)
+      return data ?? []
+    })(),
+  ])
+  const counts = memberships.reduce<Record<string, number>>((acc, membership) => {
+    acc[membership.group_id] = (acc[membership.group_id] ?? 0) + 1
+    return acc
+  }, {})
+  return groups.map(group => ({ ...group, contact_count: counts[group.id] ?? 0 }))
+}
+
 export async function createGroup(name: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -97,6 +114,18 @@ export async function getContactGroups(contactId: string) {
   return data.map(r => r.group_id)
 }
 
+export async function getContactGroupMemberships(): Promise<Record<string, string[]>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('contact_groups')
+    .select('contact_id, group_id')
+  if (error) throw new Error(error.message)
+  return (data ?? []).reduce<Record<string, string[]>>((acc, row) => {
+    acc[row.contact_id] = [...(acc[row.contact_id] ?? []), row.group_id]
+    return acc
+  }, {})
+}
+
 export async function setContactGroups(contactId: string, groupIds: string[]) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -121,10 +150,22 @@ export async function setContactGroups(contactId: string, groupIds: string[]) {
     }
   }
 
-  await supabase.from('contact_groups').delete().eq('contact_id', contactId)
-  if (uniqueGroupIds.length > 0) {
-    const rows = uniqueGroupIds.map(group_id => ({ contact_id: contactId, group_id }))
+  const { data: existingRows, error: existingError } = await supabase
+    .from('contact_groups')
+    .select('group_id')
+    .eq('contact_id', contactId)
+  if (existingError) return { error: existingError.message }
+  const existingIds = new Set((existingRows ?? []).map(row => row.group_id))
+  const toAdd = uniqueGroupIds.filter(groupId => !existingIds.has(groupId))
+  const toRemove = [...existingIds].filter(groupId => !uniqueGroupIds.includes(groupId))
+
+  if (toAdd.length > 0) {
+    const rows = toAdd.map(group_id => ({ contact_id: contactId, group_id }))
     const { error } = await supabase.from('contact_groups').insert(rows)
+    if (error) return { error: error.message }
+  }
+  if (toRemove.length > 0) {
+    const { error } = await supabase.from('contact_groups').delete().eq('contact_id', contactId).in('group_id', toRemove)
     if (error) return { error: error.message }
   }
   revalidatePath('/dashboard')

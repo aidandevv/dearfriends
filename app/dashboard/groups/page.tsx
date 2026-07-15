@@ -1,8 +1,8 @@
-import { getGroups } from '@/lib/actions/groups'
+import { getGroupsWithCounts } from '@/lib/actions/groups'
 import { GroupsManager } from '@/components/groups-manager'
 
 export default async function GroupsPage() {
-  const groups = await getGroups()
+  const groups = await getGroupsWithCounts()
 
   return (
     <div className="app-page-stack">

@@ -18,6 +18,55 @@ function revalidateContactSurfaces() {
   revalidatePath('/dashboard/map')
 }
 
+function isLiveToken(sentAt: string | null | undefined) {
+  const timestamp = sentAt ? new Date(sentAt).getTime() : 0
+  return Boolean(timestamp) && !Number.isNaN(timestamp) && Date.now() - timestamp <= VERIFY_TOKEN_TTL_MS
+}
+
+export type VerificationContext = {
+  valid: true
+  senderName: string | null
+  contact: {
+    first_name: string
+    address_line_1: string
+    address_line_2: string | null
+    city: string
+    state: string
+    zip: string
+    is_international: boolean
+    country: string | null
+  }
+} | { valid: false; error: string }
+
+export async function getVerificationContext(token: string): Promise<VerificationContext> {
+  if (!UUID_RE.test(token)) return { valid: false, error: 'This verification link is invalid or has expired.' }
+  const supabase = await createServiceClient()
+  const { data: contact, error } = await supabase
+    .from('contacts')
+    .select('admin_id, first_name, address_line_1, address_line_2, city, state, zip, is_international, country, verification_sent_at, opted_out')
+    .eq('verification_token', token)
+    .maybeSingle()
+  if (error || !contact || contact.opted_out || !isLiveToken(contact.verification_sent_at)) {
+    return { valid: false, error: 'This verification link is invalid or has expired.' }
+  }
+
+  const { data: adminData } = await supabase.auth.admin.getUserById(contact.admin_id)
+  return {
+    valid: true,
+    senderName: getUserProfile(adminData.user).fullName,
+    contact: {
+      first_name: contact.first_name,
+      address_line_1: contact.address_line_1,
+      address_line_2: contact.address_line_2,
+      city: contact.city,
+      state: contact.state,
+      zip: contact.zip,
+      is_international: contact.is_international,
+      country: contact.country,
+    },
+  }
+}
+
 export async function sendVerificationToAll() {
   const supabase = await createClient()
   const {
@@ -73,9 +122,10 @@ export async function sendVerificationToAll() {
 export async function scheduleVerification(formData: FormData) {
   const parsed = scheduleVerificationSchema.safeParse({
     send_at: formData.get('send_at'),
+    time_zone: formData.get('time_zone'),
   })
 
-  if (!parsed.success) return { error: 'Invalid date.' }
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? 'Invalid date.' }
 
   const supabase = await createClient()
   const {
@@ -91,6 +141,11 @@ export async function scheduleVerification(formData: FormData) {
 
   if (error) return { error: error.message }
 
+  const { error: metadataError } = await supabase.auth.updateUser({
+    data: { ...user.user_metadata, time_zone: parsed.data.time_zone },
+  })
+  if (metadataError) return { success: true, warning: `Scheduled, but could not save your time zone: ${metadataError.message}` }
+
   revalidateContactSurfaces()
   return { success: true }
 }
@@ -98,7 +153,7 @@ export async function scheduleVerification(formData: FormData) {
 export async function handleVerifyToken(
   token: string,
   action: 'confirm' | 'update' | 'optout',
-  updates?: { address_line_1: string; address_line_2?: string; city: string; state: string; zip: string },
+  updates?: { address_line_1: string; address_line_2?: string; city: string; state: string; zip: string; is_international: boolean; country?: string },
 ) {
   if (!UUID_RE.test(token)) return { error: 'This verification link is invalid or has expired.' }
 
@@ -112,8 +167,7 @@ export async function handleVerifyToken(
   if (tokenError) return { error: tokenError.message }
   if (!tokenContact) return { error: 'This verification link is invalid or has expired.' }
 
-  const sentAt = tokenContact.verification_sent_at ? new Date(tokenContact.verification_sent_at).getTime() : 0
-  if (!sentAt || Number.isNaN(sentAt) || Date.now() - sentAt > VERIFY_TOKEN_TTL_MS) {
+  if (!isLiveToken(tokenContact.verification_sent_at)) {
     return { error: 'This verification link is invalid or has expired.' }
   }
 
@@ -148,7 +202,7 @@ export async function handleVerifyToken(
   }
 
   if (action === 'update' && updates) {
-    const parsed = verifySchema.safeParse(updates)
+    const parsed = verifySchema.safeParse({ ...updates, is_international: updates.is_international ?? false })
     if (!parsed.success) return { error: 'Invalid address.' }
 
     const coords = await geocodeAddress(
@@ -156,6 +210,7 @@ export async function handleVerifyToken(
       parsed.data.city,
       parsed.data.state,
       parsed.data.zip,
+      parsed.data.country,
     )
 
     const { data, error } = await supabase

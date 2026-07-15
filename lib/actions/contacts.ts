@@ -9,6 +9,7 @@ import { getResend, buildNoteNotificationEmail, buildAddressRefreshEmail } from 
 import { geocodeAddress } from '@/lib/geocode'
 import { verifyShareCapability } from '@/lib/share-capability'
 import type { Contact } from '@/lib/database.types'
+import type { ActionResult } from '@/lib/action-result'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
@@ -149,12 +150,13 @@ export async function updateContact(id: string, updates: Partial<{
   tags: string[]
   opted_out: boolean
   birthday: string | null
-}>) {
+}>): Promise<ActionResult> {
   const supabase = await createClient()
   const { error } = await supabase.from('contacts').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/map')
+  return { success: true }
 }
 
 export async function updateContactDetails(id: string, formData: unknown) {
@@ -226,12 +228,13 @@ export async function updateContactDetails(id: string, formData: unknown) {
   return { success: true }
 }
 
-export async function deleteContact(id: string) {
+export async function deleteContact(id: string): Promise<ActionResult> {
   const supabase = await createClient()
   const { error } = await supabase.from('contacts').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/map')
+  return { success: true }
 }
 
 export async function sendAddressRefreshNudge(contactId: string) {

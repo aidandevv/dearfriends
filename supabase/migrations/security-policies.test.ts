@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 
 describe('public verification RLS hardening migration', () => {
@@ -21,5 +21,23 @@ describe('cross-tenant relationship hardening migration', () => {
     const migration = readFileSync('supabase/migrations/011_harden_cross_tenant_relationships.sql', 'utf8')
     expect(migration).toContain('enforce_calendar_event_contact_same_admin')
     expect(migration).toContain('and c.admin_id = new.admin_id')
+  })
+})
+
+describe('migration history', () => {
+  it('uses one ordered version per SQL migration', () => {
+    const files = readdirSync('supabase/migrations')
+      .filter(file => /^\d+_.+\.sql$/.test(file))
+      .sort()
+    const versions = files.map(file => Number(file.split('_', 1)[0]))
+
+    expect(versions).toEqual(Array.from({ length: 12 }, (_, index) => index + 1))
+    expect(new Set(versions).size).toBe(versions.length)
+  })
+
+  it('keeps the coordinate migration safe to replay', () => {
+    const migration = readFileSync('supabase/migrations/006_add_lat_lng_to_contacts.sql', 'utf8')
+    expect(migration).toContain('add column if not exists lat')
+    expect(migration).toContain('add column if not exists lng')
   })
 })

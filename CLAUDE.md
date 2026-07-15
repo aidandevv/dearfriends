@@ -1,72 +1,73 @@
-# CLAUDE.md
+# Dear Friends repository guidance
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Dear Friends is a Next.js correspondence workspace for collecting mailing addresses, organizing personal contacts, planning around meaningful dates, and preparing physical or digital letters.
 
-## Project Overview
+## Stack
 
-**NomadMail** — a lightweight hybrid CRM for collecting mailing addresses via a public link, managing contacts, and generating personalized holiday letters/labels.
+- Next.js App Router and strict TypeScript
+- Supabase Auth, PostgreSQL, and Row Level Security
+- Tailwind CSS with repository-owned components and design tokens
+- React Hook Form and Zod
+- Resend for transactional and digital-letter email
+- Playwright and Vitest
+- Vercel hosting and cron
 
-**Primary flow:** Admin generates a share link → recipient submits address → admin drafts a markdown letter with `{{first_name}}` variables → admin exports to PDF/CSV or triggers digital email sends.
-
-## Tech Stack
-
-- **Framework:** Next.js (App Router, TypeScript, strict mode)
-- **Database & Auth:** Supabase (PostgreSQL with Row Level Security)
-- **UI:** Tailwind CSS + shadcn/ui
-- **Forms:** React Hook Form + Zod
-- **Address Autocomplete:** Google Places API
-- **Email:** Resend API
-- **Hosting:** Vercel (Hobby Tier)
-
-## Key Routes
+## Key routes
 
 | Route | Purpose |
-|-------|---------|
-| `/share/[admin_uuid]` | Public address collection form (unauthenticated) |
-| `/dashboard` | Contact management table |
-| `/dashboard/compose` | Markdown letter composer with live preview |
-| `/dashboard/export` | CSV/PDF export and digital send |
+| --- | --- |
+| `/share/[segment]` | Public capability-backed address collection |
+| `/verify/[token]` | Single-use address confirmation, update, or opt-out |
+| `/dashboard` | Contact search, filters, groups, delivery preferences, and invite link |
+| `/dashboard/compose` | Markdown letter composer with deterministic recipient preview |
+| `/dashboard/export` | Audience-aware CSV/PDF export and digital sends |
+| `/dashboard/calendar` | Events, calendar imports, mail-by dates, and reminders |
+| `/dashboard/map` | Interactive and textual contact geography |
+| `/dashboard/settings` | Profile, share slug, reminders, and verification scheduling |
 
-## Database Schema
+## Architecture guardrails
 
-**`contacts` table** — linked to `users.id` via `admin_id`:
-- `id`, `admin_id`, `first_name`, `last_name`, `email`
-- `address_line_1`, `address_line_2` (nullable), `city`, `state`, `zip`
-- `tags` (text[]), `delivery_method` (enum: `handwrite` | `print` | `digital`)
-- `created_at`, `updated_at`
+- Derive tenant ownership from the authenticated session or a verified server capability. Never accept an administrator ID from a public client.
+- Public share pages resolve configured personal or group slugs. Legacy user-ID share URLs are intentionally unsupported.
+- Public contact submission inserts only. Existing contacts change through authenticated administration or a valid verification token.
+- Verification tokens are server-mediated, single-use, and expire after 14 days. Do not add anonymous contact-update policies.
+- Contact-group and calendar-contact relationships must remain within one administrator boundary.
+- Draft, contact, group, and delivery mutations must surface pending, success, and error states. Do not report success before persistence succeeds.
+- Bulk verification and digital sends must present the server-derived audience before execution. Preserve partial-failure information for recovery.
+- Calendar date-only values must use the account timezone rather than the server’s local day boundary.
+- Dear Friends exports physical-mail materials; it does not claim to mail physical letters.
 
-**RLS policy:** All authenticated contact CRUD must enforce `admin_id = auth.uid()`. Public share and verification flows are server-mediated; do not add anonymous direct contact insert/update policies.
+## Database migrations
 
-## Architecture Notes
+- Migrations live in `supabase/migrations` and use one unique, zero-padded numeric version.
+- Published migration versions are immutable. Add the next version instead of reusing or renumbering an applied version.
+- `012_reconcile_schema_history.sql` supersedes a former duplicate `006` reconciliation file and is deliberately safe after migrations `001` through `011`.
+- Security invariants that can be checked statically belong in `supabase/migrations/security-policies.test.ts`.
 
-- Form submissions on `/share/[slug]` go through a signed server capability and never overwrite existing `(admin_id, email)` contacts.
-- Public share pages resolve only configured share slugs; `/share/<user-uuid>` is not supported.
-- Public share form submissions use a short-lived signed server capability and insert new contacts only. Existing contacts must be updated through verification links, not by public share overwrite.
-- Verification links are server-mediated, single-use, and expire after 14 days. Do not grant anonymous direct table update policies for contact verification.
-- The letter composer uses `{{first_name}}` / `{{last_name}}` variable interpolation rendered into live markdown preview with a randomly selected contact.
-- CSV export targets Avery label mail-merge format for `handwrite` and `print` contacts.
-- PDF export renders one letter per page for `handwrite` and `print` contacts with variables injected (reference for handwritten mail; print-ready for at-home printing).
-- Digital send batches emails via Resend to `digital` contacts. Dear Friends does not mail physical letters.
+## Environment
 
-## Environment Variables
+| Variable | Scope |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Public Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only privileged database access |
+| `RESEND_API_KEY` | Server-only email API credential |
+| `RESEND_FROM_EMAIL` | Verified sending identity |
+| `NEXT_PUBLIC_SITE_URL` | Canonical public origin used in generated links |
+| `CRON_SECRET` | Bearer secret for scheduled routes |
+| `GOOGLE_GEOCODING_API_KEY` | Optional server-side geocoding provider |
+| `E2E_USER_EMAIL` / `E2E_USER_PASSWORD` | Optional isolated authenticated browser fixture |
 
-| Variable | Source |
-|----------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase dashboard -> Project Settings -> API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase dashboard -> Project Settings -> API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase dashboard -> Project Settings -> API |
-| `RESEND_API_KEY` | Resend dashboard -> API Keys |
-| `RESEND_FROM_EMAIL` | Verified sender in Resend |
-| `NEXT_PUBLIC_SITE_URL` | Vercel deployment URL (or `http://localhost:3000` locally) |
-| `CRON_SECRET` | Non-empty random secret shared with Vercel cron auth header |
+## Verification commands
 
-Cron endpoints fail closed when `CRON_SECRET` is missing or blank. `GET /api/cron/send-verifications` and `GET /api/cron/send-calendar-reminders` require `Authorization: Bearer ${CRON_SECRET}`.
+Use the repository-local tools when global package-manager shims are unavailable:
 
-## Build Order (per PRD)
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
 
-1. Scaffold (Next.js, Tailwind, shadcn, Supabase client)
-2. Apply SQL schema + RLS policies
-3. Epic 1: Public collection form (`/share/[slug]`)
-4. Epic 2: Admin dashboard (`/dashboard`)
-5. Epic 3: Hybrid composer (`/dashboard/compose`)
-6. Epic 4: Export & dispatch (`/dashboard/export`)
+For installation or lockfile work inside the parent workspace, keep the operation scoped to this project with `pnpm install --frozen-lockfile --ignore-workspace`.

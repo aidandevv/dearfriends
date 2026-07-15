@@ -7,10 +7,8 @@ test.describe('public flows', () => {
   })
 
   test('verification page surfaces invalid token errors', async ({ page }) => {
-    await page.goto('/verify/11111111-1111-4111-8111-111111111111')
-    await expect(page.getByRole('heading', { name: /is your address still correct/i })).toBeVisible()
-
-    await page.getByRole('button', { name: /yes, my address is correct/i }).click()
+    await page.goto('/verify/not-a-valid-token')
+    await expect(page.getByRole('heading', { name: /link is no longer available/i })).toBeVisible()
     await expect(page.getByText(/invalid or has expired/i)).toBeVisible()
     await expect(page.getByRole('heading', { name: /all confirmed/i })).toHaveCount(0)
   })

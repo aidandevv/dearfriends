@@ -198,7 +198,6 @@ export default function LoginPage() {
                     onClick={() => setShowPassword(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -222,7 +221,6 @@ export default function LoginPage() {
                     onClick={() => setShowConfirmPassword(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
                     aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
-                    tabIndex={-1}
                   >
                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>

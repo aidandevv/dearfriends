@@ -43,7 +43,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       >
         <PostalLineArt
           variant="dashboard"
-          className="postal-art-fixed -right-32 top-4 z-0 h-[62vh] w-[78vw]"
+          className="postal-art-fixed inset-x-0 top-4 z-0 h-[62vh] w-screen"
         />
         <PostalLineArt
           variant="compact"
@@ -95,7 +95,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             ))}
           </nav>
 
-          <div style={{ marginTop: 'auto', paddingTop: 14 }}>
+          <div className="dashboard-sidebar-footer">
             <DashboardUserMenu
               initials={initials}
               fullName={profile.fullName}

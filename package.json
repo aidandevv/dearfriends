@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=0 --ignore-pattern next-env.d.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:watch": "vitest",

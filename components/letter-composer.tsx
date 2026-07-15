@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Bold, Heading2, Italic, Link, List, ListOrdered, Quote } from 'lucide-react'
 import { saveDraft } from '@/lib/actions/letter'
@@ -8,21 +8,30 @@ import { interpolate } from '@/lib/utils'
 import { TemplatePicker } from '@/components/template-picker'
 import type { LetterTemplate } from '@/lib/letter-templates'
 import { LETTER_TEMPLATES } from '@/lib/letter-templates'
+import { ActionFeedback } from '@/components/ui/action-feedback'
+import type { ActionState } from '@/lib/action-result'
 
 type Props = {
   initialSubject: string
   initialBody: string
-  previewContact: { first_name: string; last_name: string }
+  previewContacts: { first_name: string; last_name: string }[]
 }
 
-export function LetterComposer({ initialSubject, initialBody, previewContact }: Props) {
+export function LetterComposer({ initialSubject, initialBody, previewContacts }: Props) {
   const [subject, setSubject] = useState(initialSubject)
   const [body, setBody] = useState(initialBody)
-  const [saving, setSaving] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [saveState, setSaveState] = useState<ActionState>('idle')
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>(undefined)
+  const [previewIndex, setPreviewIndex] = useState(0)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bodyRef = useRef<HTMLTextAreaElement | null>(null)
+  const currentDraftRef = useRef({ subject: initialSubject, body: initialBody })
+  const persistedDraftRef = useRef({ subject: initialSubject, body: initialBody })
+  const savingRef = useRef(false)
+  const queuedDraftRef = useRef<{ subject: string; body: string } | null>(null)
+
+  const isDirty = subject !== persistedDraftRef.current.subject || body !== persistedDraftRef.current.body
 
   const selectedTemplate = selectedTemplateId
     ? LETTER_TEMPLATES.find(t => t.id === selectedTemplateId)
@@ -36,25 +45,82 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
     }
     setSelectedTemplateId(template.id)
     setBody(template.defaultBody)
-    triggerSave(subject, template.defaultBody)
   }
 
-  function triggerSave(nextSubject: string, nextBody: string) {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
-      if (!nextSubject.trim()) return
-      setSaving(true)
-      await saveDraft({ subject: nextSubject, body: nextBody })
-      setSaving(false)
-      setSaveStatus('Saved')
-      setTimeout(() => setSaveStatus(null), 2000)
-    }, 1000)
-  }
+  const persistDraft = useCallback(async (requestedDraft = currentDraftRef.current) => {
+    if (!requestedDraft.subject.trim()) {
+      setSaveState('dirty')
+      setSaveMessage('Add a subject to save this draft.')
+      return
+    }
+
+    if (savingRef.current) {
+      queuedDraftRef.current = requestedDraft
+      return
+    }
+
+    savingRef.current = true
+    let draft: { subject: string; body: string } | null = requestedDraft
+    while (draft) {
+      setSaveState('pending')
+      setSaveMessage('Saving…')
+      const result = await saveDraft(draft)
+      if (result.success) {
+        persistedDraftRef.current = draft
+        const current = currentDraftRef.current
+        const stillCurrent = current.subject === draft.subject && current.body === draft.body
+        setSaveState(stillCurrent ? 'saved' : 'dirty')
+        setSaveMessage(stillCurrent ? 'Saved.' : 'Unsaved changes')
+      } else {
+        setSaveState('error')
+        setSaveMessage(`Could not save: ${result.error}`)
+      }
+
+      const queued = queuedDraftRef.current
+      queuedDraftRef.current = null
+      draft = queued && (queued.subject !== draft.subject || queued.body !== draft.body) ? queued : null
+    }
+    savingRef.current = false
+  }, [])
 
   function updateBody(nextBody: string) {
     setBody(nextBody)
-    triggerSave(subject, nextBody)
   }
+
+  useEffect(() => {
+    currentDraftRef.current = { subject, body }
+    if (subject === persistedDraftRef.current.subject && body === persistedDraftRef.current.body) {
+      if (!savingRef.current) {
+        setSaveState('idle')
+        setSaveMessage(null)
+      }
+      return
+    }
+
+    setSaveState('dirty')
+    setSaveMessage(subject.trim() ? 'Unsaved changes' : 'Add a subject to save this draft.')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (subject.trim()) {
+      const draft = { subject, body }
+      debounceRef.current = setTimeout(() => void persistDraft(draft), 1000)
+    }
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [subject, body, persistDraft])
+
+  useEffect(() => {
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      const current = currentDraftRef.current
+      const persisted = persistedDraftRef.current
+      if (current.subject === persisted.subject && current.body === persisted.body) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
+  }, [])
 
   function replaceSelection(formatter: (selection: string) => { text: string; cursorOffset?: number }) {
     const textarea = bodyRef.current
@@ -136,6 +202,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
     },
   ]
 
+  const previewContact = previewContacts[previewIndex] ?? previewContacts[0] ?? { first_name: 'Jane', last_name: 'Smith' }
   const previewSubject = interpolate(subject, previewContact)
   const previewBody = interpolate(body, previewContact)
 
@@ -145,28 +212,39 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-serif text-2xl text-ink">Write your letter</h2>
-            <span className="text-xs text-ink-muted">{saving ? 'Saving…' : saveStatus ?? ''}</span>
+            <div className="flex items-center gap-3">
+              <ActionFeedback state={saveState} message={saveMessage} className="text-xs" />
+              <button
+                type="button"
+                onClick={() => void persistDraft()}
+                disabled={!isDirty || saveState === 'pending' || !subject.trim()}
+                className="btn-outline min-h-9 px-3 text-xs"
+              >
+                {saveState === 'error' ? 'Retry save' : 'Save now'}
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-4">
             <div className="flex flex-col gap-1.5">
+              <label htmlFor="letter-subject" className="text-xs font-medium text-ink-soft">Subject</label>
               <input
+                id="letter-subject"
                 value={subject}
-                onChange={e => {
-                  setSubject(e.target.value)
-                  triggerSave(e.target.value, body)
-                }}
+                onChange={e => setSubject(e.target.value)}
                 placeholder="Subject line, e.g. A note for {{first_name}}"
                 className="input min-h-12"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-ink-soft">Template</span>
               <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/80 bg-surface-raised p-1">
+              <label htmlFor="letter-body" className="text-xs font-medium text-ink-soft">Letter body</label>
+              <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/80 bg-surface-raised p-1" role="toolbar" aria-label="Letter formatting">
                 {formattingButtons.map(button => {
                   const Icon = button.icon
                   return (
@@ -184,6 +262,7 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
                 })}
               </div>
               <textarea
+                id="letter-body"
                 ref={bodyRef}
                 value={body}
                 onChange={e => {
@@ -196,15 +275,21 @@ export function LetterComposer({ initialSubject, initialBody, previewContact }: 
           </div>
 
           <div className="rounded-[1.2rem] border border-border/80 bg-surface-raised px-4 py-4 text-sm text-ink-muted">
-            Use <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-periwinkle">{'{{first_name}}'}</code> and{' '}
-            <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-periwinkle">{'{{last_name}}'}</code> to personalize the subject and body.
+            <p className="mb-2">Insert a merge tag at the cursor:</p>
+            <div className="flex flex-wrap gap-2">
+              {['first_name', 'last_name'].map(tag => <button key={tag} type="button" onClick={() => replaceSelection(() => ({ text: `{{${tag}}}` }))} className="min-h-11 rounded-full border border-border bg-surface px-3 font-mono text-xs text-periwinkle">{`{{${tag}}}`}</button>)}
+            </div>
           </div>
         </div>
       </section>
 
       <section className="surface-panel px-5 py-5">
         <div className="flex items-end justify-between gap-3 border-b border-border/80 pb-4">
-          <div>
+          <div className="min-w-0">
+            <label htmlFor="preview-contact" className="mb-1 block text-xs font-medium text-ink-muted">Preview recipient</label>
+            <select id="preview-contact" value={previewIndex} onChange={event => setPreviewIndex(Number(event.target.value))} className="input min-h-11 max-w-full text-sm">
+              {previewContacts.map((contact, index) => <option key={`${contact.first_name}-${contact.last_name}-${index}`} value={index}>{contact.first_name} {contact.last_name}</option>)}
+            </select>
             <h2 className="font-serif text-3xl text-ink">
               For {previewContact.first_name} {previewContact.last_name}
             </h2>

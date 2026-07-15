@@ -5,7 +5,7 @@ import { DashboardInviteCta } from '@/components/dashboard-invite-cta'
 import { SendVerificationButton } from '@/components/send-verification-button'
 import { ShareLinkCard } from '@/components/share-link-card'
 import { getContacts } from '@/lib/actions/contacts'
-import { getBirthdayEditableContactIds, getGroups } from '@/lib/actions/groups'
+import { getBirthdayEditableContactIds, getContactGroupMemberships, getGroups } from '@/lib/actions/groups'
 import { generateShareSlug } from '@/lib/actions/user'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/user-profile'
@@ -21,36 +21,48 @@ const DAY_NAMES     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Frida
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>
+  searchParams: Promise<{ filter?: string; q?: string; delivery?: string; group?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const profile = getUserProfile(user)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   let shareSlug = profile.shareSlug
   if (user && !shareSlug) {
     try { shareSlug = await generateShareSlug() } catch { /* non-fatal */ }
   }
 
-  const [contacts, groups, calendarWidget, birthdayEditableIds] = await Promise.all([
+  const [contacts, groups, calendarWidget, birthdayEditableIds, groupMemberships] = await Promise.all([
     getContacts(),
     getGroups(),
     getCalendarWidget(),
     getBirthdayEditableContactIds(),
+    getContactGroupMemberships(),
   ])
-  const { filter = 'all' } = await searchParams
+  const { filter = 'all', q = '', delivery = 'all', group = 'all' } = await searchParams
 
   const verifiedCount   = contacts.filter(c => Boolean(c.verified_at) && !c.opted_out).length
   const handwriteCount  = contacts.filter(c => c.delivery_method === 'handwrite').length
   const printCount      = contacts.filter(c => c.delivery_method === 'print').length
   const digitalCount    = contacts.filter(c => c.delivery_method === 'digital').length
 
-  const filteredContacts =
+  const statusFilteredContacts =
     filter === 'pending'  ? contacts.filter(c => !c.verified_at && !c.opted_out) :
     filter === 'verified' ? contacts.filter(c => Boolean(c.verified_at) && !c.opted_out) :
     contacts
+  const query = q.trim().toLowerCase()
+  const filteredContacts = statusFilteredContacts.filter(contact => {
+    const matchesQuery = !query || [contact.first_name, contact.last_name, contact.email, contact.city, contact.state]
+      .filter(Boolean)
+      .some(value => String(value).toLowerCase().includes(query))
+    const matchesDelivery = delivery === 'all' || contact.delivery_method === delivery
+    const matchesGroup = group === 'all' || (groupMemberships[contact.id] ?? []).includes(group)
+    return matchesQuery && matchesDelivery && matchesGroup
+  })
+  const hasActiveFilters = filter !== 'all' || Boolean(query) || delivery !== 'all' || group !== 'all'
 
   const stats = [
     { label: 'Total',           value: contacts.length,  hint: 'contacts' },
@@ -83,6 +95,16 @@ export default async function DashboardPage({
     { key: 'pending',  label: 'Pending' },
     { key: 'verified', label: 'Verified' },
   ]
+
+  function filterHref(nextFilter: string) {
+    const params = new URLSearchParams()
+    if (nextFilter !== 'all') params.set('filter', nextFilter)
+    if (q) params.set('q', q)
+    if (delivery !== 'all') params.set('delivery', delivery)
+    if (group !== 'all') params.set('group', group)
+    const value = params.toString()
+    return value ? `/dashboard?${value}` : '/dashboard'
+  }
 
   return (
     <div className="dashboard-page">
@@ -168,7 +190,7 @@ export default async function DashboardPage({
             }}>
               {longDate}
             </div>
-            <SendVerificationButton />
+            <SendVerificationButton eligibleCount={contacts.filter(contact => !contact.opted_out).length} senderName={profile.fullName} />
           </div>
         </div>
       </section>
@@ -254,7 +276,7 @@ export default async function DashboardPage({
                 {filterChips.map(chip => (
                   <Link
                     key={chip.key}
-                    href={chip.key === 'all' ? '/dashboard' : `/dashboard?filter=${chip.key}`}
+                    href={filterHref(chip.key)}
                     style={{
                       fontSize: 12.5, fontWeight: 500,
                       padding: '6px 12px',
@@ -278,6 +300,17 @@ export default async function DashboardPage({
               </div>
             </div>
 
+            <form action="/dashboard" className="mb-3 grid gap-2 rounded-xl border border-line bg-paper-2 p-3 sm:grid-cols-[minmax(180px,1fr)_auto_auto_auto]">
+              {filter !== 'all' && <input type="hidden" name="filter" value={filter} />}
+              <label className="sr-only" htmlFor="contact-search">Search contacts</label>
+              <input id="contact-search" name="q" defaultValue={q} placeholder="Search name, email, or city" className="input min-h-11" />
+              <label className="sr-only" htmlFor="contact-delivery-filter">Delivery method</label>
+              <select id="contact-delivery-filter" name="delivery" defaultValue={delivery} className="input min-h-11"><option value="all">All delivery methods</option><option value="handwrite">Handwriting</option><option value="print">Print at home</option><option value="digital">Digital</option></select>
+              <label className="sr-only" htmlFor="contact-group-filter">Group</label>
+              <select id="contact-group-filter" name="group" defaultValue={group} className="input min-h-11"><option value="all">All groups</option>{groups.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+              <div className="flex gap-2"><button type="submit" className="btn-primary min-h-11 px-4 text-sm">Filter</button>{hasActiveFilters && <Link href="/dashboard" className="btn-outline inline-flex min-h-11 items-center px-4 text-sm">Clear</Link>}</div>
+            </form>
+
             {/* Table card */}
             <div style={{
               background: 'var(--paper-2)',
@@ -290,6 +323,8 @@ export default async function DashboardPage({
                 contacts={filteredContacts}
                 allGroups={groups}
                 birthdayEditableIds={birthdayEditableIds}
+                groupMemberships={groupMemberships}
+                emptyMessage={contacts.length === 0 ? undefined : 'No contacts match these filters. Try clearing or changing them.'}
               />
 
               {/* Always-present add CTA */}
@@ -322,7 +357,7 @@ export default async function DashboardPage({
                     Share your invite link — they fill it out in a minute.
                   </div>
                 </div>
-                <DashboardInviteCta />
+                <DashboardInviteCta url={shareSlug ? `${siteUrl}/share/${shareSlug}` : null} />
               </div>
             </div>
           </section>

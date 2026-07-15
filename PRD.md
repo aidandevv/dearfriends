@@ -1,87 +1,112 @@
-# Product Requirements Document: NomadMail 
+# Dear Friends — Product Requirements
 
-## 1. Project Overview
-**Description:** A lightweight, open-source hybrid CRM for collecting mailing addresses via a frictionless public link, managing contacts, and generating personalized holiday letters/labels.
-**Target Audience:** Solo utility for the repo owner (e.g., github.com/aidandevv/nomadmail), with architecture supporting future multi-tenant SaaS expansion.
-**Primary Flow:** Admin generates a link -> Recipient submits address -> Admin drafts a markdown letter with `{{first_name}}` variables -> Admin exports to PDF/CSV for printing or triggers digital email sends.
+## Product overview
 
-## 2. Tech Stack Definition
-* **Framework:** Next.js (App Router, TypeScript)
-* **Hosting:** Vercel (Hobby Tier)
-* **Database & Auth:** Supabase (PostgreSQL, Row Level Security enabled)
-* **UI/Styling:** Tailwind CSS + shadcn/ui (minimalist, utilitarian design system)
-* **Forms:** React Hook Form + Zod (for validation)
-* **Address Validation:** Google Places API (or similar lightweight autocomplete)
-* **Email Dispatch:** Resend (Free Tier)
+Dear Friends is a private correspondence workspace for people who want to keep a personal address book, remember meaningful dates, and send physical or digital letters without adopting a sales-oriented CRM.
 
-## 3. Core Epics & Feature Requirements
+The product connects two experiences:
 
-### Epic 1: Public Collection Flow (Unauthenticated)
-**Objective:** A mobile-first, zero-friction form for recipients to provide their information.
-* **Route:** `/share/[admin_uuid]`
-* **UI:** Clean, single-column card layout. (Reference standard Figma UI kits for minimal form design).
-* **Fields Required:** * First Name (String)
-  * Last Name (String)
-  * Email (String, Validated)
-  * Address Line 1 (String, Autocompleted)
-  * Address Line 2 (String, Optional)
-  * City, State, Zip (Strings)
-* **Logic:** Form submission writes directly to the `contacts` table in Supabase. Must handle duplicate emails gracefully (upsert/update existing record for that admin).
+1. A recipient shares or verifies their address through a trusted public link without creating an account.
+2. An authenticated list owner organizes contacts, prepares a reusable letter, and exports or sends it through the appropriate delivery channel.
 
-### Epic 2: Admin Dashboard (Authenticated)
-**Objective:** Centralized contact management.
-* **Route:** `/dashboard`
-* **UI:** Data table view (using shadcn/ui data-table).
-* **Features:**
-  * View, Edit, Delete operations for all contacts.
-  * Filter/Sort by recent updates or delivery preference.
-  * Quick-toggle for "Delivery Method": `Handwrite`, `Print`, `Digital`.
-  * Grouping/Tagging: Assign contacts to categories (e.g., "College", "Internship", "Family").
+## Intended users
 
-### Epic 3: The Hybrid Composer
-**Objective:** Draft and preview the holiday update.
-* **Route:** `/dashboard/compose`
-* **Features:**
-  * Markdown text area for drafting the letter.
-  * Variable Interpolation: Must support `{{first_name}}` and `{{last_name}}` tags.
-  * Live Preview side-by-side: Renders the markdown and injects the variables of a randomly selected contact from the database to verify formatting.
+- People maintaining a personal holiday-card or life-update list.
+- Families, newlyweds, frequent movers, and community organizers collecting current mailing details.
+- Recipients who should be able to share an address quickly and understand who requested it.
 
-### Epic 4: Export & Dispatch
-**Objective:** Get the data out for physical mailing or send digitally.
-* **Route:** `/dashboard/export`
-* **Features:**
-  * **CSV Export:** Download all contacts marked `Handwrite` or `Print` formatted for standard Avery label mail-merge.
-  * **PDF Generation:** Render the composed letter for all `Print` contacts into a single paginated PDF (one letter per page, variables injected).
-  * **Digital Send:** Trigger batch emails via Resend API to all contacts marked `Digital`, injecting their specific variables into the email body.
+## Product principles
 
-## 4. Supabase Database Schema (Draft)
+- **Personal, not transactional.** The product should feel closer to stationery than enterprise CRM software.
+- **Trust must be visible.** Public links, saves, exports, and sends should explain their scope and report failures honestly.
+- **Physical mail stays user-controlled.** Dear Friends prepares labels and letters but does not claim to mail physical items.
+- **Recipient effort stays low.** Public collection and verification require no recipient account.
+- **Privacy is a system boundary.** Tenant isolation and public mutations are enforced server-side, not entrusted to client inputs.
 
-**Table: `users` (Managed by Supabase Auth)**
-* `id` (uuid, PK)
-* `email` (text)
+## Core journeys
 
-**Table: `contacts`**
-* `id` (uuid, PK)
-* `admin_id` (uuid, FK to users.id)
-* `first_name` (text)
-* `last_name` (text)
-* `email` (text)
-* `address_line_1` (text)
-* `address_line_2` (text, nullable)
-* `city` (text)
-* `state` (text)
-* `zip` (text)
-* `tags` (text[])
-* `delivery_method` (enum: 'handwrite', 'print', 'digital')
-* `created_at` (timestamp)
-* `updated_at` (timestamp)
+### 1. Collect an address
 
-**Row Level Security (RLS) Requirements:**
-* `contacts` table MUST enforce RLS where `admin_id = auth.uid()` for all SELECT, UPDATE, DELETE operations.
-* Public insert access allowed ONLY if `admin_id` matches a valid user.
+- The owner shares a personal or group-specific slug.
+- The server resolves the slug and issues a short-lived signed capability.
+- The recipient submits contact and address details through the public form.
+- The server derives ownership from the capability and inserts a new contact.
+- Existing contacts are never silently overwritten from the public collection form.
 
-## 5. Instructions for AI Coding Agent
-1. **Scaffold First:** Initialize the Next.js app, configure Tailwind/shadcn, and set up the Supabase client before building features.
-2. **Schema Execution:** Apply the SQL schema and RLS policies provided above to the Supabase instance.
-3. **Iterative Build:** Build Epic 1 (Public Collection) first to ensure data can flow into the DB, then build Epic 2 (Admin Dashboard) to read it.
-4. **TypeScript Strictness:** Ensure all interfaces for Supabase returns and component props are strictly typed.
+### 2. Maintain the address book
+
+- The owner searches and filters contacts by status, delivery method, and group.
+- Contact edits, birthday changes, group assignment, and deletion report pending, saved, and error states.
+- Groups may track birthdays and expose their own optional share slugs.
+- Mappable contacts appear on the globe and accessible map list.
+
+### 3. Verify recipient details
+
+- The owner previews the eligible audience before sending verification emails.
+- Every recipient receives a single-use token that expires after 14 days.
+- A valid verification page identifies the sender and preloads the current address.
+- The recipient can confirm, update a U.S. or international address, or opt out.
+- Invalid, expired, reused, and opted-out tokens fail closed.
+
+### 4. Compose and deliver correspondence
+
+- The owner writes Markdown with `{{first_name}}` and `{{last_name}}` merge tags.
+- Draft changes are serialized, autosaved, and recoverable after errors.
+- Preview recipients are deterministic and selectable.
+- CSV and PDF exports show the selected audience and disable empty actions.
+- Digital sends require confirmation, report partial failures, and support retrying only failed recipients.
+
+### 5. Plan around meaningful dates
+
+- The owner adds dates or imports Google, Outlook, or ICS subscriptions.
+- Mail-by dates are estimated from destination and mailing origin.
+- Calendar day boundaries use the owner’s saved timezone.
+- Desktop month and mobile agenda views expose the same underlying reminders.
+
+## Functional scope
+
+| Area | Primary routes | Responsibility |
+| --- | --- | --- |
+| Marketing and explanation | `/`, `/about` | Explain the product and lead into authentication |
+| Authentication and setup | `/login`, `/onboarding` | Supabase password or magic-link entry and initial profile |
+| Address collection | `/share/[segment]` | Capability-backed public contact submission |
+| Verification | `/verify/[token]` | Single-use address confirmation, correction, or opt-out |
+| Contact workspace | `/dashboard` | Contact management, filtering, groups, invite link, and summary |
+| Writing | `/dashboard/compose` | Draft persistence, formatting, merge tags, and preview |
+| Delivery | `/dashboard/export` | Audience-aware CSV/PDF export and digital email send |
+| Planning | `/dashboard/calendar` | Events, subscriptions, mail-by dates, and reminders |
+| Geography | `/dashboard/map` | Visual and textual views of mapped contacts |
+| Configuration | `/dashboard/settings` | Profile, share slug, reminders, and verification scheduling |
+
+## Architecture and trust requirements
+
+- Supabase Row Level Security scopes authenticated reads and writes to `auth.uid()`.
+- Public share submissions use signed server capabilities; anonymous direct contact writes are disabled.
+- Verification mutations use service-role access only after UUID format, token existence, expiry, and single-use checks.
+- Cross-table contact/group/calendar relationships must belong to the same administrator.
+- Calendar subscription imports reject private-network and unsafe URLs.
+- CSV exports neutralize spreadsheet-formula payloads.
+- Cron endpoints fail closed unless a non-empty bearer secret is configured.
+- Server-only credentials never use the `NEXT_PUBLIC_` prefix.
+
+## Quality and release requirements
+
+A release candidate must pass:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
+
+Authenticated browser coverage uses an isolated, completed-onboarding test account provided through `E2E_USER_EMAIL` and `E2E_USER_PASSWORD`. Tests may inspect confirmation dialogs but must not execute real bulk email sends.
+
+## Current non-goals
+
+- Printing or mailing physical correspondence on the user’s behalf.
+- Recipient accounts or recipient-facing contact management.
+- Sales pipeline, lead scoring, or commercial CRM workflows.
+- Rich document collaboration or arbitrary HTML email authoring.
+- Claiming full postal-delivery guarantees from estimated mail-by dates.
