@@ -5,7 +5,10 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
+    // The suite exercises server-side actions, migrations, crypto, DNS, and
+    // HTTPS code. Node keeps those built-ins available when Vercel runs the
+    // checks with NODE_ENV=production.
+    environment: 'node',
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', 'e2e/**'],
     globals: true,
     setupFiles: './vitest.setup.ts',
