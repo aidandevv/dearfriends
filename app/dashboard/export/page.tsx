@@ -2,11 +2,12 @@ import { Suspense } from 'react'
 import { ExportPanel } from '@/components/export-panel'
 import { GroupFilter } from '@/components/group-filter'
 import { getGroups } from '@/lib/actions/groups'
+import { getDeliverySummary } from '@/lib/actions/letter'
 
 export default async function ExportPage({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
   const params = await searchParams
   const groupId = params.group ?? null
-  const groups = await getGroups()
+  const [groups, summary] = await Promise.all([getGroups(), getDeliverySummary(groupId)])
 
   return (
     <div className="app-page-stack">
@@ -25,7 +26,7 @@ export default async function ExportPage({ searchParams }: { searchParams: Promi
         )}
       </section>
 
-      <ExportPanel groupId={groupId} />
+      <ExportPanel groupId={groupId} summary={summary} />
     </div>
   )
 }

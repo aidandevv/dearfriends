@@ -87,17 +87,25 @@ export const letterDraftSchema = z.object({
 export type LetterDraftInput = z.infer<typeof letterDraftSchema>
 
 export const verifySchema = z.object({
-  address_line_1: z.string().min(1),
+  address_line_1: z.string().trim().min(1, 'Street address is required.'),
   address_line_2: z.string().optional(),
-  city: z.string().min(1),
-  state: usStateSchema,
-  zip: z.string().min(1),
-})
+  city: z.string().trim().min(1, 'City is required.'),
+  state: stateOrRegionSchema,
+  zip: z.string().trim().min(1, 'Postal code is required.'),
+  is_international: z.boolean(),
+  country: z.string().trim().max(80).optional(),
+}).superRefine((value, ctx) => {
+  validateContactState(value, ctx)
+  if (value.is_international && !value.country?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['country'], message: 'Country is required.' })
+  }
+}).transform(normalizeContactState)
 
 export type VerifyInput = z.infer<typeof verifySchema>
 
 export const scheduleVerificationSchema = z.object({
-  send_at: z.string().min(1),
+  send_at: z.string().datetime({ offset: true }).refine(value => new Date(value).getTime() > Date.now(), 'Choose a future time.'),
+  time_zone: z.string().trim().min(1).max(100),
 })
 
 export const calendarEventSchema = z.object({

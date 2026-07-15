@@ -12,6 +12,7 @@ export type UserProfile = {
   firstSentAt: string | null
   shareSlug: string | null
   shareMessage: string | null
+  timeZone: string | null
 }
 
 function readString(value: unknown): string | null {
@@ -41,5 +42,6 @@ export function getUserProfile(user: Pick<User, 'user_metadata'> | null | undefi
     firstSentAt: readString(metadata.first_sent_at),
     shareSlug: readString(metadata.share_slug),
     shareMessage: readString(metadata.share_message),
+    timeZone: readString(metadata.time_zone),
   }
 }

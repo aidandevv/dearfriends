@@ -6,6 +6,7 @@ import { letterDraftSchema } from '@/lib/schemas'
 import { resend, buildLetterEmail } from '@/lib/resend'
 import { interpolate } from '@/lib/utils'
 import { recordFirstSent } from '@/lib/actions/user'
+import type { ActionResult } from '@/lib/action-result'
 
 export async function getDraft() {
   const supabase = await createClient()
@@ -13,22 +14,22 @@ export async function getDraft() {
   return data ?? { subject: '', body: '' }
 }
 
-export async function saveDraft(formData: { subject: string; body: string }) {
+export async function saveDraft(formData: { subject: string; body: string }): Promise<ActionResult> {
   const parsed = letterDraftSchema.safeParse(formData)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid draft.' }
 
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return { error: 'Not authenticated.' }
+  if (!user) return { success: false, error: 'Not authenticated.' }
 
   const { error } = await supabase
     .from('letter_drafts')
     .upsert({ admin_id: user.id, ...parsed.data }, { onConflict: 'admin_id' })
 
-  if (error) return { error: error.message }
+  if (error) return { success: false, error: error.message }
 
   revalidatePath('/dashboard/compose')
   return { success: true }
@@ -36,29 +37,73 @@ export async function saveDraft(formData: { subject: string; body: string }) {
 
 type DigitalContact = { first_name: string; last_name: string; email: string }
 
-export async function sendDigitalLetters(groupId: string | null = null) {
+type AudienceContact = DigitalContact & {
+  delivery_method: string
+  opted_out: boolean
+}
+
+export type DeliverySummary = {
+  audienceLabel: string
+  total: number
+  handwrite: number
+  print: number
+  digital: number
+  eligibleDigital: number
+  draftSubject: string | null
+  hasDraft: boolean
+}
+
+async function getAudience(groupId: string | null): Promise<{ contacts: AudienceContact[]; label: string }> {
+  const supabase = await createClient()
+  if (!groupId) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('first_name, last_name, email, delivery_method, opted_out')
+    if (error) throw new Error(error.message)
+    return { contacts: data ?? [], label: 'All contacts' }
+  }
+
+  const [{ data: memberships, error }, { data: group }] = await Promise.all([
+    supabase
+      .from('contact_groups')
+      .select('contacts(first_name, last_name, email, delivery_method, opted_out)')
+      .eq('group_id', groupId),
+    supabase.from('groups').select('name').eq('id', groupId).maybeSingle(),
+  ])
+  if (error) throw new Error(error.message)
+  const contacts = (memberships ?? []).flatMap(row => row.contacts ? [row.contacts as unknown as AudienceContact] : [])
+  return { contacts, label: group?.name ?? 'Selected group' }
+}
+
+export async function getDeliverySummary(groupId: string | null = null): Promise<DeliverySummary> {
+  const supabase = await createClient()
+  const [{ contacts, label }, { data: draft }] = await Promise.all([
+    getAudience(groupId),
+    supabase.from('letter_drafts').select('subject, body').maybeSingle(),
+  ])
+  return {
+    audienceLabel: label,
+    total: contacts.length,
+    handwrite: contacts.filter(contact => contact.delivery_method === 'handwrite').length,
+    print: contacts.filter(contact => contact.delivery_method === 'print').length,
+    digital: contacts.filter(contact => contact.delivery_method === 'digital').length,
+    eligibleDigital: contacts.filter(contact => contact.delivery_method === 'digital' && !contact.opted_out && Boolean(contact.email)).length,
+    draftSubject: draft?.subject || null,
+    hasDraft: Boolean(draft?.subject && draft?.body),
+  }
+}
+
+export async function sendDigitalLetters(groupId: string | null = null, onlyEmails: string[] | null = null) {
   const supabase = await createClient()
 
   const { data: draft } = await supabase.from('letter_drafts').select('*').maybeSingle()
   if (!draft?.subject || !draft?.body) return { error: 'No draft saved.' }
 
-  let contacts: DigitalContact[]
-
-  if (groupId) {
-    const { data: cg } = await supabase
-      .from('contact_groups')
-      .select('contacts(first_name, last_name, email, delivery_method, opted_out)')
-      .eq('group_id', groupId)
-    contacts = (cg ?? [])
-      .flatMap(r => (r.contacts ? [r.contacts as unknown as { first_name: string; last_name: string; email: string; delivery_method: string; opted_out: boolean }] : []))
-      .filter(c => c.delivery_method === 'digital' && !c.opted_out)
-  } else {
-    const { data } = await supabase
-      .from('contacts')
-      .select('first_name, last_name, email')
-      .eq('delivery_method', 'digital')
-      .eq('opted_out', false)
-    contacts = data ?? []
+  const audience = await getAudience(groupId)
+  let contacts: DigitalContact[] = audience.contacts.filter(contact => contact.delivery_method === 'digital' && !contact.opted_out)
+  if (onlyEmails?.length) {
+    const retrySet = new Set(onlyEmails)
+    contacts = contacts.filter(contact => retrySet.has(contact.email))
   }
 
   if (!contacts.length) return { error: 'No digital contacts.' }
