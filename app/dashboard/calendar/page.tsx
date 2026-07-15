@@ -19,6 +19,7 @@ export default async function CalendarPage() {
         contacts={data.contacts}
         sources={data.sources}
         originState={data.originState}
+        timeZone={data.timeZone}
       />
     </div>
   )

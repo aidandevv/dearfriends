@@ -27,6 +27,7 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const markerLayerRef = useRef<LayerGroup | null>(null)
+  const contactMarkersRef = useRef<Record<string, L.CircleMarker>>({})
 
   useEffect(() => {
     let isActive = true
@@ -86,6 +87,7 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
     return () => {
       isDisposed = true
       markerLayerRef.current?.clearLayers()
+      contactMarkersRef.current = {}
       markerLayerRef.current = null
       mapRef.current?.remove()
       mapRef.current = null
@@ -106,9 +108,10 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
       if (isDisposed || !mapRef.current || !markerLayerRef.current) return
 
       markerLayerRef.current.clearLayers()
+      contactMarkersRef.current = {}
 
       markers.forEach(marker => {
-        L.circleMarker(marker.coordinates, {
+        const contactMarker = L.circleMarker(marker.coordinates, {
           radius: interactive ? 7 : 5,
           color: '#4A6CD4',
           fillColor: '#4A6CD4',
@@ -119,7 +122,9 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
             direction: 'top',
             offset: [0, -6],
           })
+          .bindPopup(`<strong>${marker.first_name}</strong><br>${[marker.city, marker.state].filter(Boolean).join(', ')}`)
           .addTo(markerLayerRef.current!)
+        contactMarkersRef.current[marker.id] = contactMarker
       })
 
       if (interactive && markers.length > 1) {
@@ -138,6 +143,7 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
   }, [interactive, mapReady, markers])
 
   return (
+    <div className="space-y-3">
     <div className={`relative overflow-hidden rounded-[1.2rem] border border-border/80 bg-sidebar/35 ${heightClassName}`}>
       <div
         ref={containerRef}
@@ -163,6 +169,24 @@ export function ContactMap({ contacts, interactive, heightClassName = 'h-[320px]
           These addresses need map coordinates before they can appear here. New and edited addresses are mapped automatically.
         </div>
       ) : null}
+    </div>
+      {interactive && markers.length > 0 && (
+        <div aria-label="Mapped contacts">
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">Mapped contacts</p>
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {markers.map(marker => (
+              <li key={marker.id}>
+                <button type="button" onClick={() => {
+                  mapRef.current?.setView(marker.coordinates, 7)
+                  contactMarkersRef.current[marker.id]?.openPopup()
+                }} className="flex min-h-11 w-full items-center justify-between rounded-xl border border-border/70 bg-linen/60 px-3 text-left text-sm text-ink transition-colors hover:border-periwinkle/40 hover:bg-periwinkle/5">
+                  <span className="font-medium">{marker.first_name}</span><span className="truncate text-xs text-ink-muted">{[marker.city, marker.state].filter(Boolean).join(', ')}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

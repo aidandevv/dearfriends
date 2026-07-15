@@ -11,6 +11,7 @@ import {
   type CalendarEventView,
 } from '@/lib/actions/calendar'
 import { US_STATES } from '@/lib/us-states'
+import { dateKeyInTimeZone } from '@/lib/calendar-date'
 
 type ContactOption = {
   id: string
@@ -73,16 +74,18 @@ export function CalendarManager({
   contacts,
   sources,
   originState,
+  timeZone,
 }: {
   events: CalendarEventView[]
   contacts: ContactOption[]
   sources: Source[]
   originState: string | null
+  timeZone: string
 }) {
   const [status, setStatus] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()))
-  const todayKey = dateKey(new Date())
+  const todayKey = dateKeyInTimeZone(new Date(), timeZone)
 
   const calendarDays = buildCalendarDays(visibleMonth)
   const displayEvents = events.flatMap<DisplayEvent>(event => [
@@ -127,10 +130,11 @@ export function CalendarManager({
             <h2 className="section-title">Calendar</h2>
           </div>
           <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setVisibleMonth(startOfMonth(new Date()))} className="btn-outline min-h-11 px-3 text-xs">Today</button>
             <button
               type="button"
               onClick={() => setVisibleMonth(month => addMonths(month, -1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
               aria-label="Previous month"
             >
               <ChevronLeft size={16} />
@@ -139,7 +143,7 @@ export function CalendarManager({
             <button
               type="button"
               onClick={() => setVisibleMonth(month => addMonths(month, 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/80 text-ink-muted transition-colors hover:bg-linen hover:text-ink"
               aria-label="Next month"
             >
               <ChevronRight size={16} />
@@ -147,7 +151,7 @@ export function CalendarManager({
           </div>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-border/80 bg-surface-raised">
+        <div className="calendar-month-grid mt-4 overflow-hidden rounded-xl border border-border/80 bg-surface-raised">
           <div className="grid grid-cols-7 border-b border-border/80 bg-linen/70">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div key={day} className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
@@ -198,13 +202,22 @@ export function CalendarManager({
                       </div>
                     ))}
                     {hiddenCount > 0 && (
-                      <div className="px-2 pt-0.5 text-[11px] text-ink-muted">+{hiddenCount} more</div>
+                      <span className="px-2 pt-0.5 text-[11px] text-ink-muted">+{hiddenCount} more</span>
                     )}
                   </div>
                 </div>
               )
             })}
           </div>
+        </div>
+
+        <div className="calendar-agenda mt-4 hidden space-y-2">
+          <p className="text-xs text-ink-muted">Dates are shown in {timeZone.replaceAll('_', ' ')}.</p>
+          {displayEvents.filter(event => event.date.slice(0, 7) === dateKey(visibleMonth).slice(0, 7)).sort((a, b) => a.date.localeCompare(b.date)).map(event => (
+            <article key={`agenda-${event.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-linen/60 px-4 py-3">
+              <div><p className="font-medium text-ink">{event.title}</p><p className="text-xs text-ink-muted">{event.meta}</p></div><time className="shrink-0 font-serif text-lg text-periwinkle">{formatDate(event.date)}</time>
+            </article>
+          ))}
         </div>
 
         <div className="mt-4 grid gap-3">
@@ -259,7 +272,7 @@ export function CalendarManager({
             </div>
           </div>
           <form action={run(updateMailingOrigin)} className="flex gap-2">
-            <select name="mailing_state" defaultValue={originState ?? ''} className="input min-h-11">
+            <label htmlFor="mailing-origin" className="sr-only">Mailing origin state</label><select id="mailing-origin" name="mailing_state" defaultValue={originState ?? ''} className="input min-h-11">
               <option value="">State</option>
               {US_STATES.map(state => (
                 <option key={state.code} value={state.code}>{state.code}</option>
@@ -278,21 +291,21 @@ export function CalendarManager({
             </div>
           </div>
           <form action={run(createCalendarEvent)} className="grid gap-3">
-            <input name="title" placeholder="Mira's birthday" className="input min-h-11" required />
+            <label htmlFor="calendar-title" className="sr-only">Date title</label><input id="calendar-title" name="title" placeholder="Mira's birthday" className="input min-h-11" required />
             <div className="grid grid-cols-2 gap-2">
-              <select name="event_type" className="input min-h-11" defaultValue="birthday">
+              <select name="event_type" aria-label="Date type" className="input min-h-11" defaultValue="birthday">
                 <option value="birthday">Birthday</option>
                 <option value="anniversary">Anniversary</option>
                 <option value="holiday">Holiday</option>
                 <option value="custom">Custom</option>
               </select>
-              <select name="recurrence" className="input min-h-11" defaultValue="yearly">
+              <select name="recurrence" aria-label="Date recurrence" className="input min-h-11" defaultValue="yearly">
                 <option value="yearly">Yearly</option>
                 <option value="none">One time</option>
               </select>
             </div>
-            <input name="event_date" type="date" className="input min-h-11" required />
-            <select name="contact_id" className="input min-h-11" defaultValue="">
+            <input name="event_date" aria-label="Event date" type="date" className="input min-h-11" required />
+            <select name="contact_id" aria-label="Linked contact" className="input min-h-11" defaultValue="">
               <option value="">No linked contact</option>
               {contacts.map(contact => (
                 <option key={contact.id} value={contact.id}>
@@ -313,13 +326,13 @@ export function CalendarManager({
             </div>
           </div>
           <form action={run(importCalendarSubscription)} className="grid gap-3">
-            <select name="provider" className="input min-h-11" defaultValue="google">
+            <select name="provider" aria-label="Calendar provider" className="input min-h-11" defaultValue="google">
               <option value="google">Google Calendar</option>
               <option value="outlook">Outlook</option>
               <option value="ics">ICS URL</option>
             </select>
-            <input name="name" placeholder="Family birthdays" className="input min-h-11" required />
-            <input name="subscription_url" type="url" placeholder="https://..." className="input min-h-11" required />
+            <input name="name" aria-label="Calendar name" placeholder="Family birthdays" className="input min-h-11" required />
+            <input name="subscription_url" aria-label="Calendar subscription URL" type="url" placeholder="https://..." className="input min-h-11" required />
             <button disabled={pending} className="btn-outline min-h-11">Import dates</button>
           </form>
           {sources.length > 0 && (

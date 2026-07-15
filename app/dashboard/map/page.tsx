@@ -18,7 +18,7 @@ export default async function DashboardMapPage() {
         <p className="eyebrow">Where your people live</p>
         <h1 className="dash-title">Friend map</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-muted">
-          A living view of the cities your letters are headed toward. Hover over a dot to see who&apos;s there.
+          A living view of the cities your letters are headed toward. Select a dot or use the contact list below the map.
         </p>
       </section>
 

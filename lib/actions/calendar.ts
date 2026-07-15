@@ -6,6 +6,7 @@ import { calendarEventSchema, calendarImportSchema, mailingOriginSchema } from '
 import { buildCalendarReminderEmail, getResend } from '@/lib/resend'
 import { getUserProfile } from '@/lib/user-profile'
 import { fetchCalendarSubscription } from '@/lib/calendar-subscription'
+import { dateKeyInTimeZone } from '@/lib/calendar-date'
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
@@ -67,7 +68,7 @@ function estimateMailingOffsetDays(contact: ContactForOffset | null, originState
 
 function addDays(date: Date, days: number) {
   const next = new Date(date)
-  next.setDate(next.getDate() + days)
+  next.setUTCDate(next.getUTCDate() + days)
   return next
 }
 
@@ -80,13 +81,13 @@ function parseDateOnly(value: string) {
   return new Date(Date.UTC(year, month - 1, day))
 }
 
-function nextOccurrence(eventDate: string, recurrence: 'none' | 'yearly', now = new Date()) {
+function nextOccurrence(eventDate: string, recurrence: 'none' | 'yearly', todayKey = toDateOnly(new Date())) {
   const base = parseDateOnly(eventDate)
   if (recurrence === 'none') return base
 
-  const candidate = new Date(Date.UTC(now.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate()))
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-  if (candidate < today) candidate.setUTCFullYear(candidate.getUTCFullYear() + 1)
+  const year = Number(todayKey.slice(0, 4))
+  const candidate = new Date(Date.UTC(year, base.getUTCMonth(), base.getUTCDate()))
+  if (toDateOnly(candidate) < todayKey) candidate.setUTCFullYear(candidate.getUTCFullYear() + 1)
   return candidate
 }
 
@@ -95,9 +96,9 @@ function contactFromRow(row: CalendarEventRow): ContactForOffset | null {
   return row.contacts ?? null
 }
 
-function decorateEvent(row: CalendarEventRow, originState?: string | null): CalendarEventView {
+function decorateEvent(row: CalendarEventRow, originState?: string | null, todayKey?: string): CalendarEventView {
   const contact = contactFromRow(row)
-  const occurrence = nextOccurrence(row.event_date, row.recurrence)
+  const occurrence = nextOccurrence(row.event_date, row.recurrence, todayKey)
   const offset = estimateMailingOffsetDays(contact, originState)
   const contactName = contact?.first_name
     ? `${contact.first_name}${contact.last_name ? ` ${contact.last_name}` : ''}`
@@ -134,8 +135,10 @@ export async function getCalendarData() {
   ])
 
   const originState = user.user_metadata?.mailing_state ?? null
+  const timeZone = getUserProfile(user).timeZone ?? 'UTC'
+  const todayKey = dateKeyInTimeZone(new Date(), timeZone)
   const decorated = ((events ?? []) as CalendarEventRow[])
-    .map(event => decorateEvent(event, originState))
+    .map(event => decorateEvent(event, originState, todayKey))
     .sort((a, b) => a.occurrenceDate.localeCompare(b.occurrenceDate))
 
   return {
@@ -143,14 +146,15 @@ export async function getCalendarData() {
     contacts: contacts ?? [],
     sources: sources ?? [],
     originState,
+    timeZone,
+    todayKey,
   }
 }
 
 export async function getCalendarWidget() {
   const data = await getCalendarData()
-  const today = toDateOnly(new Date())
   const relevantEvents = data.events
-    .filter(event => event.occurrenceDate >= today)
+    .filter(event => event.occurrenceDate >= data.todayKey)
     .sort((a, b) => a.mailByDate.localeCompare(b.mailByDate))
 
   return {
@@ -380,8 +384,6 @@ export async function sendDueCalendarReminders() {
   if (!events?.length) return { sent: 0 }
 
   let sent = 0
-  const today = toDateOnly(new Date())
-
   for (const event of events as CalendarEventRow[]) {
     const { data: adminData } = await supabase.auth.admin.getUserById((event as CalendarEventRow & { admin_id: string }).admin_id)
     const admin = adminData.user
@@ -392,7 +394,9 @@ export async function sendDueCalendarReminders() {
       continue
     }
 
-    const decorated = decorateEvent(event, admin.user_metadata?.mailing_state)
+    const timeZone = getUserProfile(admin).timeZone ?? 'UTC'
+    const today = dateKeyInTimeZone(new Date(), timeZone)
+    const decorated = decorateEvent(event, admin.user_metadata?.mailing_state, today)
     if (decorated.mailByDate > today) continue
     if (event.last_reminder_sent_for === decorated.occurrenceDate) continue
 
