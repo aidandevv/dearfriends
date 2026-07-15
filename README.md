@@ -55,6 +55,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | Public app URL used in generated links |
 | `CRON_SECRET` | Bearer token shared with scheduled cron calls |
 | `GOOGLE_GEOCODING_API_KEY` | Optional server-side geocoding key; U.S. addresses can fall back to Census geocoding |
+| `E2E_USER_EMAIL` | Optional seeded test-account email for authenticated Playwright flows |
+| `E2E_USER_PASSWORD` | Optional seeded test-account password for authenticated Playwright flows |
 
 Never expose server-only variables with a `NEXT_PUBLIC_` prefix.
 
@@ -79,6 +81,8 @@ pnpm typecheck    # TypeScript check
 pnpm test         # Vitest unit tests
 pnpm test:e2e     # Playwright tests
 ```
+
+Public Playwright flows always run. Authenticated dashboard, compose, calendar, and map checks run when `E2E_USER_EMAIL` and `E2E_USER_PASSWORD` point to a completed-onboarding test account. Keep that account isolated from production data.
 
 ## CI/CD
 
