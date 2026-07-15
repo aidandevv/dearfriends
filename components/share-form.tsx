@@ -173,7 +173,7 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
 
             <div
               className="grid grid-cols-2 gap-1 rounded-full bg-surface p-1"
-              role="tablist"
+              role="radiogroup"
               aria-label="Address location"
             >
               {[
@@ -183,8 +183,8 @@ export function ShareForm({ shareCapability, senderName, senderBio, shareMessage
                 <button
                   key={tab.label}
                   type="button"
-                  role="tab"
-                  aria-selected={isInternational === tab.value}
+                  role="radio"
+                  aria-checked={isInternational === tab.value}
                   onClick={() => setIsInternational(tab.value)}
                   className={`min-h-10 rounded-full text-sm font-medium transition-all ${
                     isInternational === tab.value

@@ -44,8 +44,12 @@ function dragDegreesPerPixel(zoom: number): number {
 
 /** True if [lng, lat] is on the front hemisphere of the current rotation. */
 function isOnFront(lng: number, lat: number, rot: [number, number, number]): boolean {
-  const cLon = rot[0] * (Math.PI / 180)
-  const cLat = rot[1] * (Math.PI / 180)
+  // d3-geo's rotation moves the globe, so the point at the center of the
+  // viewport is the inverse of the configured rotation. Using `rot` directly
+  // makes this visibility check disagree with the orthographic projection and
+  // culls dots that are still on the visible hemisphere after rotating/zooming.
+  const cLon = -rot[0] * (Math.PI / 180)
+  const cLat = -rot[1] * (Math.PI / 180)
   const pLon = lng * (Math.PI / 180)
   const pLat = lat * (Math.PI / 180)
   return (
