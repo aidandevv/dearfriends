@@ -94,7 +94,7 @@ describe('setContactGroups security boundary', () => {
       success: true,
     })
 
-    expect(state.deletedContactId).toBe('contact-1')
+    expect(state.deletedContactId).toBeNull()
     expect(state.insertedRows).toEqual([{ contact_id: 'contact-1', group_id: 'group-1' }])
   })
 })

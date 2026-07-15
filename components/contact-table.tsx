@@ -1,12 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { deleteContact, updateContact, sendAddressRefreshNudge } from '@/lib/actions/contacts'
 import { ContactEditForm } from '@/components/contact-edit-form'
 import { ContactGroupSelect } from '@/components/contact-group-select'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Contact } from '@/lib/database.types'
 import { DELIVERY_LABELS, DELIVERY_METHODS, isDeliveryMethod } from '@/lib/delivery-methods'
+import { ActionFeedback } from '@/components/ui/action-feedback'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import type { ActionState } from '@/lib/action-result'
 
 const deliveryOptions = DELIVERY_METHODS.map(value => ({
   value,
@@ -27,37 +31,75 @@ export function ContactTable({
   contacts,
   allGroups = [],
   birthdayEditableIds = [],
+  groupMemberships = {},
+  emptyMessage,
 }: {
   contacts: Contact[]
   allGroups?: { id: string; name: string }[]
   birthdayEditableIds?: string[]
+  groupMemberships?: Record<string, string[]>
+  emptyMessage?: string
 }) {
+  const router = useRouter()
+  const [visibleContacts, setVisibleContacts] = useState(contacts)
   const [pending, setPending] = useState<string | null>(null)
   const [nudgePending, setNudgePending] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null)
+  const [feedback, setFeedback] = useState<Record<string, { state: ActionState; message: string }>>({})
   const birthdayEditable = new Set(birthdayEditableIds)
+
+  useEffect(() => setVisibleContacts(contacts), [contacts])
+
+  function setContactFeedback(id: string, state: ActionState, message: string) {
+    setFeedback(current => ({ ...current, [id]: { state, message } }))
+  }
 
   async function handleDeliveryChange(id: string, value: string) {
     if (!isDeliveryMethod(value)) return
     setPending(id)
-    await updateContact(id, { delivery_method: value })
+    setContactFeedback(id, 'pending', 'Saving delivery method…')
+    const result = await updateContact(id, { delivery_method: value })
+    if (result.success) {
+      setVisibleContacts(current => current.map(contact => contact.id === id ? { ...contact, delivery_method: value } : contact))
+      setContactFeedback(id, 'saved', 'Delivery method saved.')
+      router.refresh()
+    } else {
+      setContactFeedback(id, 'error', result.error)
+    }
     setPending(null)
   }
 
   async function handleBirthdayChange(id: string, value: string) {
     setPending(id)
-    await updateContact(id, { birthday: value || null })
+    setContactFeedback(id, 'pending', 'Saving birthday…')
+    const result = await updateContact(id, { birthday: value || null })
+    if (result.success) {
+      setVisibleContacts(current => current.map(contact => contact.id === id ? { ...contact, birthday: value || null } : contact))
+      setContactFeedback(id, 'saved', 'Birthday saved.')
+      router.refresh()
+    } else {
+      setContactFeedback(id, 'error', result.error)
+    }
     setPending(null)
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Delete this contact?')) return
-    setPending(id)
-    await deleteContact(id)
+  async function handleDelete(contact: Contact) {
+    setPending(contact.id)
+    setContactFeedback(contact.id, 'pending', 'Deleting contact…')
+    const result = await deleteContact(contact.id)
+    if (result.success) {
+      setVisibleContacts(current => current.filter(item => item.id !== contact.id))
+      setDeleteTarget(null)
+      router.refresh()
+    } else {
+      setContactFeedback(contact.id, 'error', result.error)
+      setDeleteTarget(null)
+    }
     setPending(null)
   }
 
-  if (contacts.length === 0) {
+  if (visibleContacts.length === 0) {
     return (
       <div style={{ padding: '56px 24px', textAlign: 'center' }}>
         <p style={{
@@ -65,10 +107,10 @@ export function ContactTable({
           fontStyle: 'italic', fontSize: 20, fontWeight: 400,
           color: 'var(--blue-slate)', marginBottom: 6,
         }}>
-          No friends yet
+          {emptyMessage ? 'No matches' : 'No friends yet'}
         </p>
         <p style={{ fontSize: 14, color: 'var(--muted)' }}>
-          Share your invite link to start collecting addresses.
+          {emptyMessage ?? 'Share your invite link to start collecting addresses.'}
         </p>
       </div>
     )
@@ -95,7 +137,7 @@ export function ContactTable({
         ))}
       </div>
 
-      {contacts.map(contact => {
+      {visibleContacts.map(contact => {
         const isVerified = Boolean(contact.verified_at) && !contact.opted_out
         const isOptedOut = contact.opted_out
         const initials = `${contact.first_name[0] ?? ''}${contact.last_name[0] ?? ''}`.toUpperCase()
@@ -173,6 +215,7 @@ export function ContactTable({
             </div>
 
             <select
+              aria-label={`Delivery method for ${contact.first_name} ${contact.last_name}`}
               value={contact.delivery_method}
               onChange={e => handleDeliveryChange(contact.id, e.target.value)}
               disabled={pending === contact.id}
@@ -198,7 +241,12 @@ export function ContactTable({
               ))}
             </select>
 
-            <ContactGroupSelect contactId={contact.id} allGroups={allGroups} />
+            <ContactGroupSelect
+              contactId={contact.id}
+              contactName={`${contact.first_name} ${contact.last_name}`}
+              allGroups={allGroups}
+              initialSelected={groupMemberships[contact.id] ?? []}
+            />
 
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--ink-soft)' }}>
               <span style={{
@@ -217,34 +265,44 @@ export function ContactTable({
                 onClick={() => setEditingId(editingId === contact.id ? null : contact.id)}
                 title="Edit contact"
                 aria-label={`Edit ${contact.first_name} ${contact.last_name}`}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle ${editingId === contact.id ? 'bg-periwinkle/10 text-periwinkle opacity-100' : ''}`}
+                className={`flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle ${editingId === contact.id ? 'bg-periwinkle/10 text-periwinkle opacity-100' : ''}`}
               >
                 <Pencil size={13} />
               </button>
               <button
                 onClick={async () => {
                   setNudgePending(contact.id)
+                  setContactFeedback(contact.id, 'pending', `Sending a refresh request to ${contact.first_name}…`)
                   const result = await sendAddressRefreshNudge(contact.id)
                   setNudgePending(null)
-                  if (result?.error) alert(`Failed: ${result.error}`)
+                  if (result?.error) setContactFeedback(contact.id, 'error', result.error)
+                  else setContactFeedback(contact.id, 'saved', `Refresh request sent to ${contact.first_name}.`)
                 }}
                 disabled={nudgePending === contact.id}
                 title="Send address refresh nudge"
-                aria-label="Send address refresh nudge"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle disabled:opacity-50"
+                aria-label={`Send address refresh nudge to ${contact.first_name} ${contact.last_name}`}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-xs text-ink-muted transition-colors hover:bg-periwinkle/10 hover:text-periwinkle disabled:opacity-50"
               >
                 ↩
               </button>
               <button
-                onClick={() => handleDelete(contact.id)}
+                onClick={() => setDeleteTarget(contact)}
                 disabled={pending === contact.id}
                 aria-label={`Delete ${contact.first_name} ${contact.last_name}`}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:text-stamp hover:bg-stamp/10 disabled:opacity-50 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted hover:text-stamp hover:bg-stamp/10 disabled:opacity-50 transition-colors"
               >
                 <Trash2 size={13} />
               </button>
             </div>
           </div>
+
+          {feedback[contact.id] && (
+            <ActionFeedback
+              state={feedback[contact.id].state}
+              message={feedback[contact.id].message}
+              className="border-b border-line/50 px-6 py-2 text-xs"
+            />
+          )}
 
           {editingId === contact.id && (
             <ContactEditForm
@@ -256,6 +314,16 @@ export function ContactTable({
           </div>
         )
       })}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title={deleteTarget ? `Delete ${deleteTarget.first_name} ${deleteTarget.last_name}?` : 'Delete contact?'}
+        description="This removes the contact and their group assignments. It cannot be undone."
+        confirmLabel="Delete contact"
+        destructive
+        pending={Boolean(deleteTarget && pending === deleteTarget.id)}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget ? handleDelete(deleteTarget) : undefined}
+      />
     </div>
   )
 }
