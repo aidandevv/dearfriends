@@ -12,6 +12,7 @@
     "test:e2e": "playwright test",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "check:deploy": "npm run lint && npm run typecheck && npm run test && npm run build",
     "backfill:geocodes": "node scripts/backfill-geocodes.mjs"
   },
   "dependencies": {
