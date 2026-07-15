@@ -1,5 +1,8 @@
--- Reconcile environments that were created from an older snapshot/schema dump.
--- This migration is safe to run on databases where some/all changes already exist.
+-- Reconcile environments created from older snapshots without reusing an
+-- already-published migration version. This file replaces the former duplicate
+-- 006_reconcile_schema_with_prod.sql migration. Every operation is safe to run
+-- after migrations 001-011 and safe to repeat across partially reconciled
+-- environments.
 
 -- 1) Ensure contacts.note exists (used by note-back feature).
 alter table public.contacts
