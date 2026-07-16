@@ -52,7 +52,12 @@ export const contactSchema = z.object({
   }
 }).transform(normalizeContactState)
 
-export type ContactInput = z.infer<typeof contactSchema>
+// React Hook Form works with the values entered by the browser, before Zod
+// applies defaults and transforms them. Keep this type on the schema input
+// side so resolver upgrades cannot treat defaulted fields as required form
+// values.
+export type ContactInput = z.input<typeof contactSchema>
+export type ContactOutput = z.output<typeof contactSchema>
 
 export const contactEditSchema = z.object({
   first_name: z.string().trim().min(1),

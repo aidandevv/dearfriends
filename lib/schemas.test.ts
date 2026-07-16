@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { contactSchema, contactEditSchema, letterDraftSchema, mailingOriginSchema, slugSchema } from './schemas'
+import { contactSchema, contactEditSchema, letterDraftSchema, mailingOriginSchema, slugSchema, type ContactInput } from './schemas'
 
 describe('contactEditSchema', () => {
   const valid = {
@@ -43,10 +43,18 @@ describe('contactSchema', () => {
     first_name: 'Ada', last_name: 'L', email: 'a@b.com',
     address_line_1: '1 Main', city: 'NY', state: 'NY', zip: '10001',
     delivery_method: 'print',
-  }
+  } satisfies ContactInput
 
   it('accepts valid contact', () => {
     expect(contactSchema.safeParse(valid).success).toBe(true)
+  })
+
+  it('accepts form values before schema defaults are applied', () => {
+    const formValues: ContactInput = valid
+    expect(contactSchema.parse(formValues)).toMatchObject({
+      is_international: false,
+      tags: [],
+    })
   })
 
   it('rejects invalid domestic states', () => {
