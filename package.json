@@ -46,7 +46,7 @@
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
     "@vitejs/plugin-react": "^6.0.3",
-    "eslint": "^8.57.1",
+    "eslint": "^9.0.0",
     "eslint-config-next": "16.2.10",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
