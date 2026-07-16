@@ -16,7 +16,7 @@
     "backfill:geocodes": "node scripts/backfill-geocodes.mjs"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.0",
+    "@hookform/resolvers": "^5.4.0",
     "@react-pdf/renderer": "^3.4.4",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
