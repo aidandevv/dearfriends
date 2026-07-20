@@ -19,7 +19,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@react-pdf/renderer": "^3.4.4",
     "@supabase/ssr": "^0.5.1",
-    "@supabase/supabase-js": "^2.45.4",
+    "@supabase/supabase-js": "^2.110.7",
     "d3-geo": "^3.1.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.577.0",
