@@ -56,7 +56,7 @@ export function LandingNav() {
         <div className="flex items-center gap-2 sm:gap-5">
           <Link
             href="/login"
-            className="hidden text-[14px] font-medium text-ink-soft transition-colors hover:text-periwinkle sm:block"
+            className="text-[13px] font-medium text-ink-soft transition-colors hover:text-periwinkle sm:text-[14px]"
           >
             Sign in
           </Link>
