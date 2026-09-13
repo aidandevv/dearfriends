@@ -20,7 +20,7 @@
     "db:stop": "node scripts/supabase.mjs stop",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "check:deploy": "eslint . --max-warnings=0 --ignore-pattern next-env.d.ts && tsc --noEmit && vitest run && next build",
+    "check:deploy": "eslint . --max-warnings=0 --ignore-pattern next-env.d.ts && tsc --noEmit && NODE_ENV=test vitest run && next build",
     "backfill:geocodes": "node scripts/backfill-geocodes.mjs"
   },
   "dependencies": {
