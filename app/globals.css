@@ -11,14 +11,14 @@
   --paper-2: #EEF1F6;
   --paper-3: #E4E8F0;
   --paper-deep: #D7DCE8;
-  --periwinkle: #4A6CD4;
+  --periwinkle: #4562C0;
   --periwinkle-deep: #3A55AC;
   --peach: #E8927C;
   --blue-ink: #3358ba;
   --blue-mid: #3e5da0;
   --ink: #232940;
   --ink-soft: #4A5168;
-  --ink-muted: #8A91A6;
+  --ink-muted: #626B82;
   --border: #DFE3EC;
   --line: #DFE3EC;
   --line-soft: #E9ECF3;
@@ -29,7 +29,7 @@
   --blue-slate: #516183;
   --stamp: #b8453b;
   --stamp-soft: #d97757;
-  --muted: #8A91A6;
+  --muted: #626B82;
   --font-caveat: var(--font-ppwriter), cursive;
 }
 

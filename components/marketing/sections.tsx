@@ -130,7 +130,7 @@ export function Hero() {
           <VignetteCard>
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-8 items-center justify-center rounded-[4px] bg-peach shadow-sm">
-                <span className="flex h-7 w-6 items-center justify-center rounded-[2px] border border-dashed border-white/80 font-serif text-[10px] italic text-white">df</span>
+                <span className="flex h-7 w-6 items-center justify-center rounded-[2px] border border-dashed border-ink/40 font-serif text-[10px] italic text-ink">df</span>
               </span>
               <div className="text-left">
                 <p className="text-[14px] font-medium text-ink">You mail the card</p>
