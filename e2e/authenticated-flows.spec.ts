@@ -17,13 +17,16 @@ test.describe('@authenticated authenticated user flows', () => {
   test('dashboard supports contact filtering and guarded verification send', async ({ page }) => {
     await page.goto('/dashboard')
     await expect(page.getByRole('heading', { name: /your friends/i })).toBeVisible()
-    await expect(page.getByLabel(/search contacts/i)).toBeVisible()
+    const search = page.getByLabel(/search contacts/i)
+    await search.fill('E2E Contact')
+    await page.getByRole('button', { name: /^filter$/i }).click()
+    await expect(page.getByText('E2E Contact', { exact: true })).toBeVisible()
+
     const sendButton = page.getByRole('button', { name: /send verification emails/i })
-    if (await sendButton.isEnabled()) {
-      await sendButton.click()
-      await expect(page.getByRole('dialog')).toContainText(/eligible contact|unique address-confirmation/i)
-      await page.getByRole('button', { name: /cancel/i }).click()
-    }
+    await expect(sendButton).toBeEnabled()
+    await sendButton.click()
+    await expect(page.getByRole('dialog')).toContainText(/eligible contact|unique address-confirmation/i)
+    await page.getByRole('button', { name: /cancel/i }).click()
   })
 
   test('composer exposes deterministic recipient preview and save feedback', async ({ page }) => {

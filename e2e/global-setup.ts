@@ -44,6 +44,19 @@ export default async function globalSetup() {
   })
   if (createError || !created.user) throw createError ?? new Error('Could not create local E2E user.')
 
+  const { error: contactError } = await admin.from('contacts').insert({
+    admin_id: created.user.id,
+    first_name: 'E2E',
+    last_name: 'Contact',
+    email: 'e2e.contact@local.test',
+    address_line_1: '123 Test Way',
+    city: 'Portland',
+    state: 'OR',
+    zip: '97201',
+    delivery_method: 'digital',
+  })
+  if (contactError) throw contactError
+
   return async () => {
     const { error } = await admin.auth.admin.deleteUser(created.user.id)
     if (error) throw error
