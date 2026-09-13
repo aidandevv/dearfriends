@@ -1,0 +1,16 @@
+import { useCurrentFrame, useVideoConfig } from 'remotion'
+import { colors } from '../../design'
+import { AppWindow, ChromeNav, DashboardMain, DesktopBackground, PromoHeadline, enter } from './ui'
+
+const people = [['H', 'Hana Okafor', 'Brooklyn, NY', 'birthday soon'], ['S', 'Sam Beaumont', 'Portland, OR', 'write back'], ['D', 'Dad', 'Tucson, AZ', 'family']]
+
+export const DesktopPeopleScene: React.FC = () => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+  return <DesktopBackground>
+    <div style={{ alignItems: 'center', display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
+      <div style={{ textAlign: 'center', ...enter(frame, fps, 2) }}><PromoHeadline>Your people. <em style={{ color: colors.periwinkle }}>All in one place.</em></PromoHeadline><p style={{ color: colors.soft, fontSize: 20, lineHeight: 1.45, margin: '16px auto 28px', maxWidth: 610 }}>Keep the details that make reaching out easy—without another feed.</p></div>
+      <AppWindow camera="in" style={{ height: 570, maxWidth: 1500, width: '100%', ...enter(frame, fps, 15) }}><div style={{ display: 'flex', height: '100%' }}><ChromeNav active="Contacts" /><DashboardMain><div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}><div><div style={{ alignItems: 'center', color: '#516183', display: 'flex', fontSize: 11, fontWeight: 600, gap: 8, letterSpacing: '0.18em', textTransform: 'uppercase' }}><span style={{ backgroundColor: 'currentColor', height: 1, width: 18 }} />August</div><div style={{ fontFamily: 'PP Writer, Georgia, serif', fontSize: 52, marginTop: 8 }}>Your <em style={{ color: colors.periwinkle }}>friends</em></div></div><button style={{ backgroundColor: colors.periwinkle, border: 0, borderRadius: 999, boxShadow: '0 2px 0 0 #1e2b66, 0 6px 20px -6px rgba(74,108,212,0.55)', color: colors.white, fontSize: 14, fontWeight: 500, padding: '12px 18px', ...enter(frame, fps, 28) }}>Send verification</button></div><section style={{ backgroundColor: colors.white, border: `1px solid ${colors.line}`, borderRadius: 16, boxShadow: '0 20px 50px -30px rgba(35,41,64,0.2), 0 1px 0 rgba(255,255,255,0.72) inset', marginTop: 26, overflow: 'hidden' }}>{people.map(([initial, name, location, badge], index) => <div key={name} style={{ alignItems: 'center', borderBottom: index === people.length - 1 ? 'none' : `1px solid ${colors.line}`, display: 'flex', gap: 15, padding: '16px 20px', ...enter(frame, fps, 30 + index * 10) }}><span style={{ alignItems: 'center', backgroundColor: index === 1 ? colors.peach : colors.periwinkle, borderRadius: 99, color: colors.white, display: 'flex', fontFamily: 'PP Writer, Georgia, serif', height: 42, justifyContent: 'center', width: 42 }}>{initial}</span><div style={{ flex: 1 }}><strong style={{ fontSize: 16, fontWeight: 500 }}>{name}</strong><span style={{ color: colors.muted, display: 'block', fontSize: 13, marginTop: 3 }}>{location}</span></div><span style={{ backgroundColor: 'rgba(74,108,212,0.1)', borderRadius: 999, color: colors.periwinkle, fontSize: 11, fontWeight: 600, padding: '7px 10px' }}>{badge}</span></div>)}</section></DashboardMain></div></AppWindow>
+    </div>
+  </DesktopBackground>
+}
