@@ -24,7 +24,7 @@ const config: Config = {
         "blue-mid": "#3e5da0",
         ink: "#232940",
         "ink-soft": "#4A5168",
-        "ink-muted": "#8A91A6",
+        "ink-muted": "#626B82",
         border: "#DFE3EC",
         line: "#DFE3EC",
         sage: "#5A7A5A",
