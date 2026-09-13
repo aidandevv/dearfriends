@@ -2,7 +2,7 @@
 
 Dear Friends is a small Next.js app for keeping a personal mailing-address book, collecting addresses through private share links, remembering important dates, and preparing letters or labels for mail you send yourself.
 
-[Live application](https://dearfriends.vercel.app) · [Product requirements](PRD.md) · [Security policy](SECURITY.md)
+[Live application](https://dearfriends.vercel.app) · [Product requirements](PRD.md) · [Security policy](SECURITY.md) · [Testing guide](TESTING.md)
 
 The app is built for a quiet, single-user correspondence workflow:
 
@@ -90,8 +90,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | Public app URL used in generated links |
 | `CRON_SECRET` | Bearer token shared with scheduled cron calls |
 | `GOOGLE_GEOCODING_API_KEY` | Optional server-side geocoding key; U.S. addresses can fall back to Census geocoding |
-| `E2E_USER_EMAIL` | Optional seeded test-account email for authenticated Playwright flows |
-| `E2E_USER_PASSWORD` | Optional seeded test-account password for authenticated Playwright flows |
+| `E2E_USER_EMAIL` | Optional manually managed test-account email for authenticated Playwright flows |
+| `E2E_USER_PASSWORD` | Optional manually managed test-account password for authenticated Playwright flows |
 
 Never expose server-only variables with a `NEXT_PUBLIC_` prefix.
 
@@ -116,27 +116,35 @@ pnpm lint         # ESLint
 pnpm build        # production build
 pnpm typecheck    # TypeScript check
 pnpm test         # Vitest unit tests
-pnpm test:e2e     # Playwright tests
+pnpm test:coverage # coverage reports and high-risk coverage gate
+pnpm test:e2e:public # public Playwright flows
+pnpm test:a11y    # automated WCAG A/AA browser checks
+pnpm db:start     # start disposable local Supabase (Docker required)
+pnpm test:db      # pgTAP RLS and database-integrity checks
+pnpm test:e2e:auth # local-Supabase authenticated Playwright flows
 ```
 
-Public Playwright flows always run. Authenticated dashboard, compose, calendar, and map checks run when `E2E_USER_EMAIL` and `E2E_USER_PASSWORD` point to a completed-onboarding test account. Keep that account isolated from production data.
+The tests that access the database use a disposable local Supabase stack, never a production project. Authenticated browser tests provision and delete their own local account; no browser suite sends real email. See [TESTING.md](TESTING.md) for the full local setup and test policy.
 
-At the current checkpoint, the repository passes strict ESLint, TypeScript, 96 Vitest unit/security tests, a production Next.js build, and the always-on public Playwright flows. Credential-gated tests inspect authenticated confirmation paths without executing real bulk sends.
+The quality gate records coverage instead of publishing a hard-coded test count. This keeps the repository’s evidence accurate as tests evolve.
 
 ## CI/CD
 
-GitHub Actions runs the full release gate on every branch push and pull request:
+GitHub Actions runs four required release gates on every branch push and pull request:
 
 ```bash
 pnpm install --frozen-lockfile --ignore-workspace
 pnpm lint
 pnpm typecheck
-pnpm test
+pnpm test:coverage
 pnpm build
-pnpm test:e2e
+pnpm test:e2e:public
+pnpm test:a11y
+pnpm db:start && pnpm test:db
+pnpm db:start && pnpm test:e2e:auth
 ```
 
-The Vercel deploy job runs only after those checks pass. Pull requests from the same repository receive preview deployments, `main` deploys to production, and manual runs can opt into production. Configure these repository secrets before enabling deployment:
+The Vercel deploy job runs only after quality, browser/accessibility, database-policy, and authenticated-browser checks pass. Pull requests from the same repository receive preview deployments, `main` deploys to production, and manual runs can opt into production. CodeQL runs separately on pull requests, `main`, and weekly. Configure these repository secrets before enabling deployment:
 
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`

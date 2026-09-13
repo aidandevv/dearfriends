@@ -9,10 +9,18 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0 --ignore-pattern next-env.d.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:component": "vitest run components",
     "test:e2e": "playwright test",
+    "test:e2e:public": "playwright test --grep-invert '@authenticated|@a11y'",
+    "test:e2e:auth": "node scripts/with-local-supabase.mjs playwright test --grep @authenticated",
+    "test:a11y": "playwright test e2e/accessibility.spec.ts",
+    "test:db": "node scripts/supabase.mjs test db --local",
+    "db:start": "node scripts/supabase.mjs start",
+    "db:stop": "node scripts/supabase.mjs stop",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "check:deploy": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "check:deploy": "eslint . --max-warnings=0 --ignore-pattern next-env.d.ts && tsc --noEmit && vitest run && next build",
     "backfill:geocodes": "node scripts/backfill-geocodes.mjs"
   },
   "dependencies": {
@@ -36,8 +44,10 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@axe-core/playwright": "^4.11.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/d3-geo": "^3.1.0",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20.17.6",
@@ -52,7 +62,9 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.5",
+    "@vitest/coverage-v8": "^2.1.5",
+    "supabase": "^2.67.0"
   },
   "pnpm": {
     "overrides": {

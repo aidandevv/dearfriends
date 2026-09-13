@@ -13,7 +13,27 @@
 /.playwright-cli/
 /.playwright-mcp/
 
+# Supabase local runtime state
+/supabase/.temp/
+/supabase/.branches/
+/.pnpm-store/
+
 # local agent/journal artifacts
+/CLAUDE.md
+/CLAUDE.local.md
+/.claude/
+/AGENTS.md
+/AGENTS.override.md
+/.agents/
+/CODEX.md
+/.codex/
+/.cursor/
+/.gemini/
+/GEMINI.md
+/.aider/
+/.aider.conf.yml
+/.github/copilot-instructions.md
+/.github/instructions/
 /docs/dev_journal.md
 /docs/product_insights.md
 

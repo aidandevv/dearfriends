@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 const email = process.env.E2E_USER_EMAIL
 const password = process.env.E2E_USER_PASSWORD
 
-test.describe('authenticated user flows', () => {
+test.describe('@authenticated authenticated user flows', () => {
   test.skip(!email || !password, 'Set E2E_USER_EMAIL and E2E_USER_PASSWORD for the seeded test account.')
 
   test.beforeEach(async ({ page }) => {

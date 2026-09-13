@@ -18,7 +18,6 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 env:
   CI: true
@@ -54,13 +53,28 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-workspace
+        run: pnpm --ignore-workspace install --frozen-lockfile
 
-      - name: Run deployment checks
-        run: pnpm run check:deploy
+      - name: Lint
+        run: pnpm --ignore-workspace run lint
 
-  e2e:
-    name: Browser smoke tests
+      - name: Type check
+        run: pnpm --ignore-workspace run typecheck
+
+      - name: Run unit and component tests with coverage
+        run: pnpm --ignore-workspace run test:coverage
+
+      - name: Upload coverage and unit-test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  browser:
+    name: Browser and accessibility
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: quality
@@ -89,39 +103,128 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-workspace
+        run: pnpm --ignore-workspace install --frozen-lockfile
 
       - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --ignore-workspace exec playwright install --with-deps chromium
 
-      - name: Build app for Playwright
-        run: pnpm build
+      - name: Build app for browser tests
+        run: pnpm --ignore-workspace run build
 
-      - name: Run Playwright
-        run: pnpm test:e2e
+      - name: Run public browser flows
+        run: pnpm --ignore-workspace run test:e2e:public
 
-      - name: Upload Playwright report
-        if: failure()
+      - name: Run accessibility checks
+        run: pnpm --ignore-workspace run test:a11y
+
+      - name: Upload browser reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: browser-reports
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 14
+
+  database:
+    name: Database policy tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: quality
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm --ignore-workspace install --frozen-lockfile
+
+      - name: Start local Supabase
+        run: pnpm --ignore-workspace run db:start
+
+      - name: Run migration and RLS policy tests
+        run: pnpm --ignore-workspace run test:db
+
+  authenticated-browser:
+    name: Authenticated browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: database
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm --ignore-workspace install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm --ignore-workspace exec playwright install --with-deps chromium
+
+      - name: Start local Supabase
+        run: pnpm --ignore-workspace run db:start
+
+      - name: Build app with local Supabase credentials
+        run: node scripts/with-local-supabase.mjs pnpm --ignore-workspace run build
+
+      - name: Run authenticated browser flows
+        run: pnpm --ignore-workspace run test:e2e:auth
+
+      - name: Upload authenticated browser reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authenticated-browser-reports
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
   deploy:
     name: Vercel deploy
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
     needs:
       - quality
-      - e2e
+      - browser
+      - database
+      - authenticated-browser
     if: |
       always() &&
       needs.quality.result == 'success' &&
-      needs.e2e.result == 'success' &&
+      needs.browser.result == 'success' &&
+      needs.database.result == 'success' &&
+      needs.authenticated-browser.result == 'success' &&
       (
         github.event_name == 'workflow_dispatch' ||
         (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -152,7 +255,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-workspace
+        run: pnpm --ignore-workspace install --frozen-lockfile
 
       - name: Check Vercel credentials
         if: env.HAS_VERCEL_SECRETS != 'true'

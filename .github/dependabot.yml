@@ -16,6 +16,10 @@ updates:
       test-tooling:
         patterns:
           - "@playwright/test"
+          - "@axe-core/playwright"
+          - "@testing-library/*"
+          - "@vitest/*"
+          - supabase
           - vitest
           - "@vitejs/*"
 
